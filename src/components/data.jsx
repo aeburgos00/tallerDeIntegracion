@@ -6,12 +6,12 @@ import SubidaArchivosIcon from '@mui/icons-material/InsertDriveFile';
 import ConfiguracionIcon from '@mui/icons-material/Settings';
 
 const menu = [
-{icono: DashboardIcon, descripcion: "Dashboard"},
-{icono: EnviosIcon, descripcion: "Envío de Paquetes"},
-{icono: TransportistaIcon, descripcion: "Transportistas"},
-{icono: LiquidacionIcon, descripcion: "Liquidaciones"},
-{icono: SubidaArchivosIcon, descripcion: "Subida de Archivos"},
-{icono: ConfiguracionIcon, descripcion: "Configuración"}
+{id:0, icono: DashboardIcon, descripcion: "Dashboard"},
+{id:1, icono: EnviosIcon, descripcion: "Envío de Paquetes"},
+{id:2, icono: TransportistaIcon, descripcion: "Transportistas"},
+{id:3, icono: LiquidacionIcon, descripcion: "Liquidaciones"},
+{id:4, icono: SubidaArchivosIcon, descripcion: "Subida de Archivos"},
+{id:5, icono: ConfiguracionIcon, descripcion: "Configuración"}
 ];
 
 export default menu;

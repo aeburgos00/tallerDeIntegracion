@@ -112,7 +112,7 @@ export default function Sidebar({
        {menu.map((e,index) => {
           const Icono = e.icono;
           return (
-         <ListItem >
+         <ListItem key={e.id} disablePadding>
           <ListItemButton sx={{borderRadius:3}}
             selected={selectedIndex === index}
             onClick={(event) => handleListItemClick(event, index)}
