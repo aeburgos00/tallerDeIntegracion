@@ -5,11 +5,25 @@ import {
 } from "@mui/material";
 
 export default function SummaryCard({
+  //CONTENIDO
   titulo,
   cantidad,
   descripcion,
+
+  //VISUAL
   icono,
-  color
+  color = "#27272a",
+
+  //TAMAÑOS
+  //width: 360,
+  width = "100%",
+  height = 112,
+
+  // CUSTOM STYLES
+  sx = {},
+  iconContainerSx = {},
+  iconSx = {},
+  contentSx = {}
 }) {
 
   const Icono = icono;
@@ -24,37 +38,40 @@ export default function SummaryCard({
         display: "flex",
         alignItems: "center",
         gap: 3,
-       // width: "calc(25% - 16px)",
-        width: 384,
-        height: 112,
+       width,
+       height,
+       ...sx
       }}
     >
       {/* ICONO */}
       <Box
         sx={{
-          width: 64,
-          height: 64,
+          width: height/2,
+          height: height/2,
           borderRadius: 3,
           backgroundColor: `${color}15`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          flexShrink: 0
+          flexShrink: 0,
+           ...iconContainerSx
         }}
       >
         <Icono
           sx={{
             color: color,
-            fontSize: 32
+            fontSize: height/4,
+            ...iconSx
           }}
         />
       </Box>
 
-      {/* TEXTO */}
+      {/* CONTENIDO */}
       <Box sx={{
         display: "flex",
         flexDirection: "column",
-        height: 64
+        justifyContent:"center",
+        ...contentSx
       }}>
         <Box>
             <Typography
@@ -69,7 +86,7 @@ export default function SummaryCard({
 
             <Typography
             sx={{
-                fontSize: 42,
+                fontSize: 32,
                 fontWeight: 700,
                 lineHeight: 1.1,
                 color: "#111827"
@@ -78,6 +95,7 @@ export default function SummaryCard({
             {cantidad}
             </Typography>
         </Box>
+
         <Typography
           sx={{
             fontSize: 14,
@@ -87,6 +105,7 @@ export default function SummaryCard({
         >
           {descripcion}
         </Typography>
+
       </Box>
     </Paper>
   );

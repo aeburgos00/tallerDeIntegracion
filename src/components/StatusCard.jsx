@@ -11,13 +11,13 @@ import {
   ResponsiveContainer
 } from "recharts";
 
-import cards from "./dataCardsResumen";
-
+import data from "./dataCardsResumen";
+const { cardsHeader } = data;
 
 export default function StatusCard() {
 
-    const total = cards.filter(c => c.titulo === "Total envíos")[0].cantidad;
-    const subTotales = cards.filter(d => d.titulo !== "Total envíos").map(c => ({name: c.titulo, value: c.cantidad, color: c.colorTorta}));
+    const total = cardsHeader.filter(c => c.titulo === "Total envíos")[0].cantidad;
+    const subTotales = cardsHeader.filter(d => d.titulo !== "Total envíos").map(c => ({name: c.titulo, value: c.cantidad, color: c.colorTorta}));
 
   return (
     <Paper
@@ -26,7 +26,8 @@ export default function StatusCard() {
         p: 3,
         borderRadius: 4,
         border: "1px solid #e5e7eb",
-        width: 360
+        width: 360,
+        height: 292,
       }}
     >
       {/* TITULO */}
