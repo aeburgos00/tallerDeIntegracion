@@ -5,36 +5,61 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 
 import SummaryCard from "../components/SummaryCard";
-//import {cardsHeader, cardsFooter} = data from "../components/dataCardsResumen";
 import data from "../components/dataCardsResumen";
 const { cardsHeader, cardsFooter } = data;
 
-//import { cardsHeader } from '../components/dataCardsResumen';
 
 import StatusCard from "../components/StatusCard";
-//import TableTransportistasResumen from '../components/TableTransportistasResumen';
-import EnviosPorFleteroCard from '../components/EnviosPorFleteroCard';
+import TableResumenCard from '../components/TableResumenCard';
+
+import TableTransportistasResumen from "../components/TableTransportistasResumen";
+
+import TableEnviosResumen from "../components/TableEnviosResumen";
 
 export default function DashboardLayout() {
   const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box 
+    sx={{ 
+      display: "flex", 
+  //    flexDirection: "column",
+ //     gap: 2,
+ //     p: 2,
+    }}>
    
       <Sidebar 
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex} />
 
-      <Box sx={{ flexGrow: 1, backgroundColor: "#F0EEE8", minHeight: "100vh" }}>
+      <Box 
+      sx={{ 
+        flexGrow: 1, 
+        minWidth: 0,
+        backgroundColor: "#F0EEE8", 
+        minHeight: "100vh" 
+      }}>
         <Navbar 
           selectedIndex={selectedIndex} />
 
+        <Box
+          sx={{
+            p: 1.5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2
+          }}
+        >
+         {/* KPI Totales Envios */}
          <Box
           sx={{
-            display: "flex",
-            gap: 2,
-            flexWrap: "wrap",
-            p: 2
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+              lg: "repeat(4, 1fr)"
+            },
+            gap: 2
           }}
           >
           {cardsHeader
@@ -46,39 +71,49 @@ export default function DashboardLayout() {
               cantidad={card.cantidad}
               descripcion={card.descripcion}
               icono={card.icono}
-              color={card.color}        
-              sx={{
-                width: {
-                  xs: "100%",
-                  sm: "48%",
-                  md: "24%"
-                }
-              }}
+              color={card.color}
               height={112}
             />
           ))}
           </Box>
           
+          {/* GRAFICO + TABLA DE TRANSPORTISTAS */}
           <Box 
-          sx={{
-            p:2,
-            display: "flex",
-            gap: 2,          }}
+          sx={{   
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: "1fr 2fr"
+            },
+            gap: 2     
+          }}
           >
             <StatusCard/>
-            <EnviosPorFleteroCard />
+            <TableResumenCard titulo="Envíos por transportista" footer="Ver todos los transportistas" >
+               <TableTransportistasResumen/>
+            </TableResumenCard>
           </Box>
 
-          <Box sx={{p:2}}>
-            <EnviosPorFleteroCard width={360*4+3*16}/>
+          {/* TABLA DE ENVÍOS RECIENTES */}
+          <Box 
+          sx={{
+            width: "100%",
+          }}>
+            <TableResumenCard titulo="Envíos recientes" footer="Ver todos los envíos">
+              <TableEnviosResumen/>
+            </TableResumenCard>
           </Box>
           
+          {/* KPI Totales Liquidaciones */}
           <Box
           sx={{
-            display: "flex",
-            gap: 2,
-            flexWrap: "wrap",
-            p: 2
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+              lg: "repeat(4, 1fr)"
+            },
+            gap: 2
           }}
           >
           {cardsFooter
@@ -89,19 +124,12 @@ export default function DashboardLayout() {
               cantidad={card.cantidad}
               descripcion={card.descripcion}
               icono={card.icono}
-              color={card.color}        
-              sx={{
-                width: {
-                  xs: "100%",
-                  sm: "48%",
-                  md: "24%"
-                }
-              }}
+              color={card.color}
               height={112}
             />
           ))}
           </Box>
-
+        </Box>
       </Box>
 
     </Box>

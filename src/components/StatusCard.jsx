@@ -17,7 +17,14 @@ const { cardsHeader } = data;
 export default function StatusCard() {
 
     const total = cardsHeader.filter(c => c.titulo === "Total envíos")[0].cantidad;
-    const subTotales = cardsHeader.filter(d => d.titulo !== "Total envíos").map(c => ({name: c.titulo, value: c.cantidad, color: c.colorTorta}));
+
+    const subTotales = 
+    cardsHeader.filter(d => d.titulo !== "Total envíos")
+    .map(
+      c => (
+        {name: c.titulo, value: c.cantidad, color: c.colorTorta}
+      )
+    );
 
   return (
     <Paper
@@ -26,33 +33,32 @@ export default function StatusCard() {
         p: 3,
         borderRadius: 4,
         border: "1px solid #e5e7eb",
-        width: 360,
-        height: 292,
+        width: "100%",
+        minWidth: 0,
       }}
     >
       {/* TITULO */}
-      <Box sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}>
-        <Typography
+      <Typography
             sx={{
             fontSize: 20,
             fontWeight: 600,
-            mb: 2
+            mb: 3,
+            textAlign: "center",
             }}
         >
             Estado de envíos
-        </Typography>
-      </Box>
-      
+      </Typography>
+
+      {/* CONTENIDO */}
       <Box
         sx={{
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            md: "180px 1fr"
+          },
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2
+          gap: 3
         }}
       >
         {/* GRAFICO */}
@@ -60,7 +66,8 @@ export default function StatusCard() {
           sx={{
             width: 180,
             height: 180,
-            position: "relative"
+            position: "relative",
+            mx: "auto"
           }}
         >
           <ResponsiveContainer>
@@ -108,7 +115,7 @@ export default function StatusCard() {
 
             <Typography
               sx={{
-                fontSize: 32,
+                fontSize: 30,
                 fontWeight: 700
               }}
             >
@@ -122,7 +129,8 @@ export default function StatusCard() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 1.5
+            gap: 1.5,
+            minWidth: 0
           }}
         >
           {subTotales.map((item) => (
@@ -133,14 +141,15 @@ export default function StatusCard() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: 2,
-                minWidth: 130
               }}
             >
+              {/* ETIQUETA */}
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1
+                  gap: 1,
+                  minWidth: 0
                 }}
               >
                 <Box
@@ -148,14 +157,18 @@ export default function StatusCard() {
                     width: 10,
                     height: 10,
                     borderRadius: "50%",
-                    backgroundColor: item.color
+                    backgroundColor: item.color,
+                    flexShrink: 0
                   }}
                 />
 
                 <Typography
                   sx={{
                     fontSize: 14,
-                    color: "#4b5563"
+                    color: "#4b5563",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
                   }}
                 >
                   {item.name}
@@ -165,7 +178,8 @@ export default function StatusCard() {
               <Typography
                 sx={{
                   fontSize: 14,
-                  fontWeight: 600
+                  fontWeight: 600,
+                  flexShrink: 0
                 }}
               >
                 {item.value}

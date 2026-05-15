@@ -1,7 +1,5 @@
 import {
   Box,
-  AppBar,
-  Toolbar,
   Typography
 } from "@mui/material";
 
@@ -12,37 +10,43 @@ import menu from "./data"
 export default function Navbar({ selectedIndex }) {
   const itemSeleccionado = menu[selectedIndex];
   return (
-    <AppBar 
-      position="static"
-      elevation={0}
+    <Box 
+      //position="static"
+      //elevation={0}
       sx={{
+        height: 64,
         backgroundColor: "#ffffff",
         color: "#111827",
-        borderBottom: "1px solid #e5e7eb"
+        borderBottom: "1px solid #e5e7eb",
+        px: 3,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        minWidth: 0
       }}>
-      <Toolbar 
-      sx={{
-          minHeight: "64px",
-          display: "flex",
-          justifyContent: "space-between"
-        }}
-      >
+
       {/* IZQUIERDA */}
       <Box
       sx={{
           display: "flex",
           alignItems: "center",
-          gap: 1
+          gap: 1,
+          minWidth: 0
       }}
       >
         <MenuIcon  sx={{
           color: "#6b7280",
-          fontSize: 22
-        }}/>
+          fontSize: 22,
+          flexShrink: 0
+        }}
+        />
         <Typography
           sx={{
               fontSize: 16,
-              fontWeight: 600            
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis"          
           }}
         >
           {itemSeleccionado?.descripcion}
@@ -54,14 +58,14 @@ export default function Navbar({ selectedIndex }) {
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 1.5
+          gap: 1.5,
+          flexShrink: 0
         }}
       >
         {/* FECHA */}
         <DateFilters />
       </Box>
   
-      </Toolbar>
-    </AppBar>
+    </Box>
   );
 }

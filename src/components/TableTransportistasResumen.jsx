@@ -1,5 +1,4 @@
 import { 
-  //  Paper, 
     TableContainer,
     Table, 
     TableHead, 
@@ -13,7 +12,7 @@ import {
 
 const data = [
     {
-        fletero: "Fletero1",
+        transportista: "Transportista1",
         envios: 312,
         transito: 160,
         entregados: 142,
@@ -22,7 +21,7 @@ const data = [
         color: "#639922"
     },
     {
-        fletero: "Fletero2",
+        transportista: "Transportista2",
         envios: 100,
         transito: 20,
         entregados: 70,
@@ -31,7 +30,7 @@ const data = [
         color: "#639922"
     },
     {
-        fletero: "Fletero3",
+        transportista: "Transportista3",
         envios: 100,
         transito: 20,
         entregados: 70,
@@ -41,7 +40,7 @@ const data = [
         
     },
     {
-        fletero: "Fletero4",
+        transportista: "Transportista4",
         envios: 100,
         transito: 20,
         entregados: 70,
@@ -56,28 +55,37 @@ export default function TableTransportistasResumen() {
     <TableContainer 
     sx={{
         borderRadius: 3,
-        maxHeight: 180,
+        width: "100%",
+        overflowX: "auto",
     }}>
-        <Table size="small" >
+        <Table size="small"
+         sx={{
+          minWidth: 650
+        }}>
             <TableHead 
             sx={{
                 backgroundColor:"#F0EEE8",
             }}>
                 <TableRow>
-                    <TableCell align="center">Fletero</TableCell>
+                    <TableCell align="center">Transportista</TableCell>
                     <TableCell align="center">Envíos</TableCell>
                     <TableCell align="center">En tránsito</TableCell>
-                    <TableCell align="center">Entregados</TableCell><TableCell align="center">Pendientes</TableCell>
+                    <TableCell align="center">Entregados</TableCell>
+                    <TableCell align="center">Pendientes</TableCell>
                     <TableCell align="center">% Cumplimiento</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody sx={{backgroundColor:"#fff"}}>
+
+          <TableBody 
+          sx={{
+            backgroundColor:"#fff"
+            }}>
             {data.map((item) => (
                  <TableRow
-                key={item.fletero}
+                key={item.transportista}
                 hover
                 >
-                    <TableCell >{item.fletero}</TableCell>
+                    <TableCell >{item.transportista}</TableCell>
                     <TableCell align="center">{item.envios}</TableCell>
                     <TableCell align="center">{item.transito}</TableCell>
                     <TableCell align="center">{item.entregados}</TableCell>
@@ -88,7 +96,8 @@ export default function TableTransportistasResumen() {
                         sx={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 1.5
+                        gap: 1,
+                        minWidth: 140,
                         }}
                         >
                         <LinearProgress
@@ -96,22 +105,22 @@ export default function TableTransportistasResumen() {
                         value={parseFloat(item.cumplimiento)}
                         bac
                         sx={{
-                            height: 8,//8
-                            borderRadius: 5,
                             flexGrow: 1,
-                            backgroundColor: "#E0E0E0",
+                            height: 6,
+                            borderRadius: 999,
+                            backgroundColor: "#E5E7EB",
 
                             "& .MuiLinearProgress-bar": {
-                            borderRadius: 5,
+                            borderRadius: 999,
                             backgroundColor: item.color,
                             }
                         }}
                         />
                         <Typography
                         sx={{
-                            minWidth: 45,
-                            fontSize: 14,
-                            fontWeight: 500
+                            fontSize: 13,
+                            fontWeight: 500,
+                            whiteSpace: "nowrap",
                         }}
                         >
                         {item.cumplimiento}%

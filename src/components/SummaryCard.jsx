@@ -9,17 +9,10 @@ export default function SummaryCard({
   titulo,
   cantidad,
   descripcion,
-
   //VISUAL
   icono,
   color = "#27272a",
-
-  //TAMAÑOS
-  //width: 360,
-  width = "100%",
-  height = 112,
-
-  // CUSTOM STYLES
+  //PERSONALIZACIÓN
   sx = {},
   iconContainerSx = {},
   iconSx = {},
@@ -37,17 +30,17 @@ export default function SummaryCard({
         border: "1px solid #e5e7eb",
         display: "flex",
         alignItems: "center",
-        gap: 3,
-       width,
-       height,
+        gap: 2,
+       width: "100%",
+       minWidth: 0,
        ...sx
       }}
     >
       {/* ICONO */}
       <Box
         sx={{
-          width: height/2,
-          height: height/2,
+          width: 56,
+          height: 56,
           borderRadius: 3,
           backgroundColor: `${color}15`,
           display: "flex",
@@ -60,7 +53,7 @@ export default function SummaryCard({
         <Icono
           sx={{
             color: color,
-            fontSize: height/4,
+            fontSize: 28,
             ...iconSx
           }}
         />
@@ -71,41 +64,58 @@ export default function SummaryCard({
         display: "flex",
         flexDirection: "column",
         justifyContent:"center",
+        minWidth: 0,
+        flexGrow: 1,
         ...contentSx
       }}>
-        <Box>
-            <Typography
-            sx={{
-                fontSize: 16,
-                color: "#6b7280",
-                lineHeight: 1.2
-            }}
-            >
-            {titulo}
-            </Typography>
-
-            <Typography
-            sx={{
-                fontSize: 32,
-                fontWeight: 700,
-                lineHeight: 1.1,
-                color: "#111827"
-            }}
-            >
-            {cantidad}
-            </Typography>
-        </Box>
-
+        {/* TÍTULO */}
         <Typography
-          sx={{
-            fontSize: 14,
-            color: "#6b7280",
-            lineHeight: 1.2
-          }}
+        sx={{
+          fontSize: 14,
+          color: "#6b7280",
+          lineHeight: 1.2,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis"
+        }}
         >
-          {descripcion}
+          {titulo}
         </Typography>
 
+        {/* CANTIDAD */}
+        <Typography
+        sx={{
+          fontSize: {
+            xs: 24,
+            md: 32
+          },
+          fontWeight: 700,
+          lineHeight: 1.1,
+          color: "#111827",
+          whiteSpace: "nowrap"
+        }}
+        >
+          {cantidad}
+        </Typography>
+
+        {/* DESCRIPCIÓN */}
+         {descripcion && (
+
+          <Typography
+            sx={{
+              fontSize: 13,
+              color: "#6b7280",
+              lineHeight: 1.2,
+              mt: 0.5,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap"
+            }}
+          >
+            {descripcion}
+          </Typography>
+          )}
+          
       </Box>
     </Paper>
   );
