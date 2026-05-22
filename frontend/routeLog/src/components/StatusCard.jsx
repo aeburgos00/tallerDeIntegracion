@@ -1,7 +1,8 @@
 import {
   Paper,
   Typography,
-  Box
+  Box,
+  Skeleton
 } from "@mui/material";
 
 import {
@@ -12,22 +13,65 @@ import {
 } from "recharts";
 
 import data from "./dataCardsResumen";
-const { cardsHeader } = data;
+const { cardsHeader: cardsHeaderConfig } = data;
+
+import { useEffect, useState } from 'react'
+
+import {obtenerEnviosTotales} from '../services/api.js'
+
 
 export default function StatusCard() {
 
-    const total = cardsHeader.filter(c => c.titulo === "Total envíos")[0].cantidad;
+    const [loading, setLoading] = useState(true);
+    
+    const [enviosTotales, setEnviosTotales] = useState({});
+      useEffect(() => {
+          const obtenerDatos = async () => {
+              try {
+                  setLoading(true)
+  
+                  const result = await obtenerEnviosTotales();
+                  setEnviosTotales(result.data[0])
+
+
+
+              } catch (error) {
+                  console.error(error)
+              } finally {
+                  setLoading(false)
+              }
+          }
+          obtenerDatos()
+      }, [])
+
+    const cardsHeader = cardsHeaderConfig.map(card => ({
+    ...card,
+    cantidad: Number(enviosTotales[card.id]) || 0
+  }))
+
+    const total = cardsHeader.filter(c => c.id === "total")[0].cantidad;
 
     const subTotales = 
-    cardsHeader.filter(d => d.titulo !== "Total envíos")
+    cardsHeader.filter(d => d.id !== "total")
     .map(
       c => (
         {name: c.titulo, value: c.cantidad, color: c.colorTorta}
       )
-    );
+    )
+    .sort( (a, b) => b.value - a.value )
+    ;
 
   return (
-    <Paper
+      loading?
+        <Skeleton
+          variant="rounded"
+          height={112}
+          borderRadius= {4}
+          width= {"100%"}
+          height={"100%"}
+        />          
+      :
+      <Paper
       elevation={0}
       sx={{
         p: 3,
@@ -190,5 +234,6 @@ export default function StatusCard() {
 
       </Box>
     </Paper>
+   
   );
 }

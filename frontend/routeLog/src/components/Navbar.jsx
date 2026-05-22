@@ -3,16 +3,17 @@ import {
   Typography
 } from "@mui/material";
 
+import { useLocation } from "react-router-dom";
+
 import DateFilters from "./DateFilters"
 import MenuIcon from '@mui/icons-material/Menu';
 import menu from "./data"
 
-export default function Navbar({ selectedIndex }) {
-  const itemSeleccionado = menu[selectedIndex];
+export default function Navbar() {
+  const location = useLocation();
+  const itemSeleccionado = menu.find((e) => e.ruta === location.pathname);
   return (
     <Box 
-      //position="static"
-      //elevation={0}
       sx={{
         height: 64,
         backgroundColor: "#ffffff",

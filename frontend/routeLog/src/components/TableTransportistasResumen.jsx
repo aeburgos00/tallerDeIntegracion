@@ -7,51 +7,36 @@ import {
     TableBody,
     Box,
     LinearProgress,
-    Typography
+    Typography,
+    Skeleton
 } from '@mui/material'
 
-const data = [
-    {
-        transportista: "Transportista1",
-        envios: 312,
-        transito: 160,
-        entregados: 142,
-        pendientes: 10,
-        cumplimiento: 95.2,
-        color: "#639922"
-    },
-    {
-        transportista: "Transportista2",
-        envios: 100,
-        transito: 20,
-        entregados: 70,
-        pendientes: 10,
-        cumplimiento: 90,
-        color: "#639922"
-    },
-    {
-        transportista: "Transportista3",
-        envios: 100,
-        transito: 20,
-        entregados: 70,
-        pendientes: 10,
-        cumplimiento: 72,
-        color: "#EF9F27"
-        
-    },
-    {
-        transportista: "Transportista4",
-        envios: 100,
-        transito: 20,
-        entregados: 70,
-        pendientes: 10,
-        cumplimiento: 17,
-        color: "#D23B3B"
-    },
-]
+import { useEffect, useState } from 'react'
+
+import {obtenerEnviosPorTransportista} from '../services/api.js'
 
 export default function TableTransportistasResumen() {
-  return (
+    
+    const [loading, setLoading] = useState(true)
+
+    const [data, setData] = useState([]);
+    useEffect(() => {
+        const obtenerDatos = async () => {
+            try {
+                setLoading(true)
+
+                const result = await obtenerEnviosPorTransportista();
+                setData(result.data)
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        obtenerDatos()
+    }, [])
+
+    return (
     <TableContainer 
     sx={{
         borderRadius: 3,
@@ -67,12 +52,13 @@ export default function TableTransportistasResumen() {
                 backgroundColor:"#F0EEE8",
             }}>
                 <TableRow>
-                    <TableCell align="center">Transportista</TableCell>
-                    <TableCell align="center">Envíos</TableCell>
-                    <TableCell align="center">En tránsito</TableCell>
-                    <TableCell align="center">Entregados</TableCell>
-                    <TableCell align="center">Pendientes</TableCell>
-                    <TableCell align="center">% Cumplimiento</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Transportista</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Envíos Totales</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Pendientes</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Entregados</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Fallidos</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>No Realizados</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>% Cumplimiento</TableCell>
             </TableRow>
           </TableHead>
 
@@ -80,16 +66,31 @@ export default function TableTransportistasResumen() {
           sx={{
             backgroundColor:"#fff"
             }}>
-            {data.map((item) => (
+            {
+            loading? 
+            Array.from(new Array(4)).map((_, index) => (
+                <TableRow key={index}>
+                  {Array.from(new Array(7)).map((_, cellIndex) => (
+                    <TableCell key={cellIndex}>
+                      <Skeleton
+                        variant="text"
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            :
+            data.map((item) => (
                  <TableRow
                 key={item.transportista}
                 hover
                 >
-                    <TableCell >{item.transportista}</TableCell>
-                    <TableCell align="center">{item.envios}</TableCell>
-                    <TableCell align="center">{item.transito}</TableCell>
-                    <TableCell align="center">{item.entregados}</TableCell>
-                    <TableCell align="center">{item.pendientes}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}} >{item.Transportista}</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>{item.EnviosTotales}</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>{item.EnviosPendientes}</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>{item.EnviosEntregados}</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>{item.EnviosFallidos}</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>{item.EnviosNoRealizados}</TableCell>
                     {/* CUMPLIMIENTO */}
                     <TableCell align="center">
                         <Box
@@ -102,8 +103,7 @@ export default function TableTransportistasResumen() {
                         >
                         <LinearProgress
                         variant='determinate'
-                        value={parseFloat(item.cumplimiento)}
-                        bac
+                        value={parseFloat(item.Cumplimiento)}
                         sx={{
                             flexGrow: 1,
                             height: 6,
@@ -112,7 +112,9 @@ export default function TableTransportistasResumen() {
 
                             "& .MuiLinearProgress-bar": {
                             borderRadius: 999,
-                            backgroundColor: item.color,
+                            backgroundColor: 
+                                item.Cumplimiento > 70 ? "#639922" : 
+                                    item.Cumplimiento > 35 ? "#EF9F27" : "#D23B3B"  
                             }
                         }}
                         />
@@ -123,12 +125,13 @@ export default function TableTransportistasResumen() {
                             whiteSpace: "nowrap",
                         }}
                         >
-                        {item.cumplimiento}%
+                        {item.Cumplimiento}%
                         </Typography>
                     </Box>
                 </TableCell>
               </TableRow>
-            ))}
+            ))
+            }            
           </TableBody>
         </Table>
     </TableContainer>

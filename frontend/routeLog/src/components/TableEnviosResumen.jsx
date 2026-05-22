@@ -1,5 +1,4 @@
 import { 
-  //  Paper, 
     TableContainer,
     Table, 
     TableHead, 
@@ -7,53 +6,47 @@ import {
     TableCell, 
     TableBody,
     Chip,
+    Skeleton
 } from '@mui/material'
 
-const data = [
-    {
-        idEnvio: "ENV-2021-0001",
-        fechaEnvio: "15/05/2026",
-        cliente: "Cliente A",
-        direccion: "Calle 123, Localidad",
-        transportista: "Transportista1",
-        estado: "En tránsito",
-        color: "#3b82f6",
-        ultimaActualizacion: "16/05/2026 09:30"
-    },
-    {
-        idEnvio: "ENV-2021-0002",
-        fechaEnvio: "15/05/2026",
-        cliente: "Cliente B",
-        direccion: "Calle 123, Localidad",
-        transportista: "Transportista1",
-        estado: "Entregado",
-        color: "#639922",
-        ultimaActualizacion: "16/05/2026 10:30"
-    },
-    {
-        idEnvio: "ENV-2021-0003",
-        fechaEnvio: "15/05/2026",
-        cliente: "Cliente C",
-        direccion: "Calle 123, Localidad",
-        transportista: "Transportista1",
-        estado: "Visita fallida",
-        color: "#ef4444",
-        ultimaActualizacion: "16/05/2026 11:30"
-    },
-    {
-        idEnvio: "ENV-2021-0004",
-        fechaEnvio: "15/05/2026",
-        cliente: "Cliente D",
-        direccion: "Calle 123, Localidad",
-        transportista: "Transportista1",
-        estado: "Pendiente",
-        color: "#f59e0b",
-        ultimaActualizacion: "16/05/2026 12:30"
-    },
-]
+const colors = {
+    Pendiente: "#3b82f6",
+    Entregado: "#639922",
+    "Visita Fallida": "#ef4444",
+    "No Visitado": "#f59e0b"
+}
+
+import { useEffect, useState } from 'react'
+import {obtenerEnviosRecientes} from '../services/api.js'
+
 
 export default function TableEnviosResumen() {
-  return (
+    
+    const [loading, setLoading] = useState(true)
+
+    const [data, setData] = useState([]);
+    useEffect(() => {
+        const obtenerDatos = async () => {
+            try {
+                setLoading(true)
+
+                const result = await obtenerEnviosRecientes();
+                setData(result.data)
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        obtenerDatos()
+    }, [])
+
+    const envios = data.map(e => ({
+        ...e,
+        color: colors[e.estado] || "#0e0e0e"
+    }))
+
+    return (
     <TableContainer 
     sx={{
         borderRadius: 3,
@@ -69,13 +62,13 @@ export default function TableEnviosResumen() {
                 backgroundColor:"#F0EEE8",
             }}>
                 <TableRow>
-                    <TableCell align="center">ID envío</TableCell>
-                    <TableCell align="center">Fecha Envío</TableCell>
-                    <TableCell align="center">Cliente</TableCell>
-                    <TableCell align="center">Dirección</TableCell>
-                    <TableCell align="center">Transportista</TableCell>
-                    <TableCell align="center">Estado</TableCell>
-                    <TableCell align="center">Última Actualización</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>ID envío</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Envío</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Cliente</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Dirección</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Transportista</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Tarifa</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Estado</TableCell>
             </TableRow>
           </TableHead>
 
@@ -83,22 +76,38 @@ export default function TableEnviosResumen() {
           sx={{
             backgroundColor:"#fff"
             }}>
-            {data.map((item) => (
+            
+           {
+            loading? 
+            Array.from(new Array(4)).map((_, index) => (
+                <TableRow key={index}>
+                  {Array.from(new Array(7)).map((_, cellIndex) => (
+                    <TableCell key={cellIndex}>
+                      <Skeleton
+                        variant="text"
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            :
+            envios.map((item) => (
                  <TableRow
                 key={item.idEnvio}
                 hover
                 >
-                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.idEnvio}</TableCell>
-                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.fechaEnvio}</TableCell>
-                    <TableCell>{item.cliente}</TableCell>
+                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.id_envio}</TableCell>
+                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.fecha_envio}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}}>{item.cliente}</TableCell>
                     <TableCell sx={{
                             maxWidth: 220,
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap"
                                 }} >{item.direccion}</TableCell>
-                    <TableCell >{item.transportista}</TableCell>
-                    <TableCell align="center">
+                    <TableCell sx={{textWrap:'nowrap'}}>{item.transportista}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}}>${item.tarifa}</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>
                         <Chip size="small"
                             label={item.estado}
                             sx={{
@@ -110,9 +119,9 @@ export default function TableEnviosResumen() {
                             }}
                         />
                     </TableCell>
-                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.ultimaActualizacion}</TableCell>
             </TableRow>
-            ))}
+            ))
+            }
             </TableBody>          
         </Table>
     </TableContainer>

@@ -12,22 +12,17 @@ import {
   ListItemAvatar
 } from "@mui/material";
 
+import {Link} from "react-router-dom"
+
 import menu from "./data"
 
-import logo from "./../../public/LogoSinTexto.svg"
+import logo from "./../assets/LogoSinTexto.svg"
 
 const drawerWidth = 280;
 
-export default function Sidebar({
-                selectedIndex,
-                setSelectedIndex
-}) 
+export default function Sidebar() 
   {
   
-  const handleListItemClick = (event, index) => {
-      setSelectedIndex(index);
-    };
-
   return (
     
     <Drawer
@@ -50,8 +45,6 @@ export default function Sidebar({
       sx={{  
         display: "flex",
         alignItems: "center",
-        //gap:1,
-        //p: 2
         gap: 1.5,
         px: 2,
         py: 1.5
@@ -65,8 +58,7 @@ export default function Sidebar({
               sx={{
                 width: 56,
                 height: 56,
-  //              objectFit: "contain",
-                objectFit: "cover",
+                objectFit: "contain",
                 flexShrink: 0
               }}
             />
@@ -108,7 +100,7 @@ export default function Sidebar({
           overflowY: "auto"
       }}
       >
-       {menu.map((e,index) => {
+       {menu.map((e) => {
           const Icono = e.icono;
           
           return (
@@ -120,8 +112,8 @@ export default function Sidebar({
         }}
         >
           <ListItemButton
-            selected={selectedIndex === index}
-            onClick={(event) => handleListItemClick(event, index)}
+            component={Link}
+            to={e.ruta}
             sx={{
               borderRadius:3,
               minHeight: 44,

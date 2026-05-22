@@ -4,10 +4,13 @@ import {
     Link
 } from "@mui/material";
 
+import { Link as RouterLink } from 'react-router-dom'
+
 function TableResumenCard( {
     //CONTENIDO
     titulo = "",
     footer,
+    url,
     children, //serian las tablas resumen
     //PERSONALIZACION
     sx = {},
@@ -50,7 +53,9 @@ function TableResumenCard( {
 
         {/* FOOTER */}
         <Link 
-        href="#" 
+        component={RouterLink}
+        to={url || "#"}
+        //href="#" 
         underline="hover" 
         sx={{ 
             mt: 2,
