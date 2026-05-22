@@ -14,7 +14,30 @@ const theme = createTheme({
       red: '#ef4444',
       purple: '#713dfe',
     }
+  },
+
+  typography: {
+
+    fontFamily: `
+      Inter,
+      Roboto,
+      Arial,
+      sans-serif
+    `,
+
+    h1: {
+      fontWeight: 700
+    },
+
+    h2: {
+      fontWeight: 700
+    },
+
+    body1: {
+      fontSize: 14
+    }
   }
+
 })
 
 export default theme

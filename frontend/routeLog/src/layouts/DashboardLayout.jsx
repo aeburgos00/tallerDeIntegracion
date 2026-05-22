@@ -17,7 +17,7 @@ export default function DashboardLayout() {
         sx={{
           flexGrow: 1,
           backgroundColor: '#F0EEE8',
-          height:"100vh"
+          minHeight:"100vh"
         }}
       >
         <Navbar />
