@@ -16,7 +16,8 @@ export default function DashboardLayout() {
       <Box
         sx={{
           flexGrow: 1,
-          backgroundColor: '#F0EEE8'
+          backgroundColor: '#F0EEE8',
+          height:"100vh"
         }}
       >
         <Navbar />
