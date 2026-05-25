@@ -4,7 +4,6 @@ export const obtenerEnviosPorTransportista = async () => {
   const response = await fetch(
     `${API_URL}/envios-por-transportista`
   )
-
   return response.json()
 }
 

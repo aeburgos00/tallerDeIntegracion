@@ -64,7 +64,7 @@ export default function Dashboard() {
   const cardsFooter = cardsFooterData.map(card => ({
     ...card,
     cantidad: card.id !== "transportistas_activos"?
-              "$" + liqTotales[card.id] || "0"
+              "$" + Number(liqTotales[card.id] || "0").toLocaleString('es-AR')
               :
               Number(liqTotales[card.id]) || 0
               ,

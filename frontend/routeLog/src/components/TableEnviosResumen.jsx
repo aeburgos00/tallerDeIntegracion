@@ -106,7 +106,7 @@ export default function TableEnviosResumen() {
                             whiteSpace: "nowrap"
                                 }} >{item.direccion}</TableCell>
                     <TableCell sx={{textWrap:'nowrap'}}>{item.transportista}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>${item.tarifa}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.tarifa || 0).toLocaleString('es-AR')} </TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>
                         <Chip size="small"
                             label={item.estado}
