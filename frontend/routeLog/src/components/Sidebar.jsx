@@ -8,9 +8,12 @@ import {
   Box,
   Typography,
   Divider,
-  Avatar,
-  ListItemAvatar
 } from "@mui/material";
+
+import { useNavigate } from 'react-router-dom'
+
+import LogoutIcon from '@mui/icons-material/Logout'
+import IconButton from '@mui/material/IconButton'
 
 import {Link} from "react-router-dom"
 
@@ -18,11 +21,22 @@ import menu from "./data"
 
 import logo from "./../assets/LogoSinTexto.svg"
 
+import  useAuth  from '../hooks/useAuth'
+
 const drawerWidth = 280;
 
 export default function Sidebar() 
   {
-  
+
+    const navigate = useNavigate()
+
+    const { user, logout } = useAuth()
+
+    const handleLogout = () => {
+      logout()
+      navigate('/login')
+    }
+
   return (
     
     <Drawer
@@ -153,30 +167,88 @@ export default function Sidebar()
       <Divider />
       
       {/* USUARIO */}
-       <Box 
-       sx={{
-        p: 1.5
-      }}>
-          <ListItem 
-          disablePadding
+      <Box
+        sx={{
+          mt: "auto",
+          p: 2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 1,
+        }}
+      >
+        <Box sx={{
+          display:"flex",
+          gap:1.5
+        }}
+        >
+          {/* Avatar */}
+          <Box
+            sx={{
+              width: 42,
+              height: 42,
+              borderRadius: "50%",
+              backgroundColor: "#3b82f6",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 700,
+              fontSize: 20,
+              flexShrink: 0,
+            }}
           >
-            <ListItemAvatar>
-              <Avatar alt="Usuario" src="/static/images/avatar/1.jpg"/>
-            </ListItemAvatar>
+            {user?.nombre?.charAt(0)}
+          </Box>
 
-            <ListItemText
-              primary="NombreUsuario"
-              secondary="DescripcionUsuario"
-              primaryTypographyProps={{
+          {/* Info */}
+          <Box
+            sx={{
+              overflow: "hidden"
+            }}
+          >
+            <Typography
+              sx={{
+                fontWeight: 700,
                 fontSize: 14,
-                fontWeight: 500
+                color: "#111827",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
-              secondaryTypographyProps={{
-                fontSize: 12
+            >
+              {user?.nombre || "Usuario"}
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: 12,
+                color: "#6b7280",
               }}
-            />
-      </ListItem>
+            >
+              {user?.rol || "Sin rol"}
+            </Typography>
+          </Box>
+        
+        </Box>
+
+        {/* Logout */}
+        <IconButton
+          onClick={handleLogout}
+          sx={{
+            color: "#6b7280",
+            transition: "0.2s",
+            "&:hover": {
+              backgroundColor: "#fee2e2",
+              color: "#ef4444"
+            }
+          }}
+        >
+          <LogoutIcon />
+        </IconButton>
+
       </Box>
+
     </Drawer>
   );
 }

@@ -1,24 +1,51 @@
 import {
   Box,
   Button,
+  Skeleton,
 } from "@mui/material"
 
 import TableResumenCard from "../../components/TableResumenCard.jsx"
 import SummaryCard from "../../components/SummaryCard"
 
-import AbcIcon from '@mui/icons-material/Abc';
+import { useEffect, useState } from 'react'
 
-const kpi = [
-    {"titulo":"KP1"},
-    {"titulo":"KP2"},
-    {"titulo":"KP3"},
-    {"titulo":"KP4"}]
+import cardsLocalidades from "../../components/dataKPILocalidades.jsx"
+
+import { obtenerLocalidadesTotales } from "../../services/api.js"
 
 
 export default function Localidades() {
 
+  const [loadingKPI, setLoadingKPI] = useState(true)
+  
+  const [localidades, setLocalidades] = useState([])
+
+  useEffect(() => {
+    const obtenerDatos = async () => {
+      try {
+        setLoadingKPI(true)
+  
+        const result = await obtenerLocalidadesTotales()
+        setLocalidades(result.data[0])
+  
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setLoadingKPI(false)
+      }
+    }
+    obtenerDatos()
+  }, [])
+
+  const loc = cardsLocalidades.map(e => ({
+      ...e,
+      cantidad: e.id !== "costo_promedio"?
+      Number(localidades[e.id]) || 0
+      :
+      "$" + (Number(localidades[e.id]) || 0)
+  }))
+
   return (
-    //Contenedor total
     <Box
     sx={{
       display:"flex",
@@ -26,23 +53,39 @@ export default function Localidades() {
       gap: 2
     }}
     >
-      {/* KPI x4 */}
+      {/* KPI Header */}
       <Box 
       sx={{
         display:"grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
+        gridTemplateColumns: {
+          xs: "1fr",
+          sm: "1fr 1fr",
+          lg: "repeat(4, 1fr)"
+        },
         gap:2
       }}
       >
         {
-        kpi.map((e) => (
-          <SummaryCard 
-          titulo= {e.titulo}
-          cantidad={"0"}
-          descripcion={""}
-          icono={AbcIcon}
-          />
-        ))
+          loadingKPI?
+           Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton
+                key={index}
+                variant="rounded"
+                height={112}
+              />
+            ))
+          :
+          loc.map((e, index) => (
+            <SummaryCard 
+            key={index}
+            titulo= {e.titulo}
+            cantidad={e.cantidad}
+            descripcion={e.descripcion || ""}
+            icono={e.icono}
+            color={e.color}
+            height={112}
+            />
+          ))
         }
         
       </Box>

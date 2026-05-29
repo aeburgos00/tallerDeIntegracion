@@ -1,22 +1,25 @@
 import { Navigate } from 'react-router-dom'
+import  useAuth  from '../hooks/useAuth'
 
 export default function ProtectedRoute({
-  children,
-  rol
+  children
 }) {
 
-  const usuario = JSON.parse(
-    localStorage.getItem('usuario')
-  )
+   const {
+    token,
+    loading
+  } = useAuth()
 
   // NO logueado
-  if (!usuario) {
-    return <Navigate to="/login" />
+  if(loading) {
+    return null
   }
 
   // rol incorrecto
-  if (rol && usuario.rol !== rol) {
-    return <Navigate to="/login" />
+  if(!token) {
+    return (
+      <Navigate to="/login" />
+    )
   }
 
   // puede entrar

@@ -8,6 +8,8 @@ import {
 import ArchivoIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 
+import FlechaIcon from '@mui/icons-material/ArrowCircleUpRounded';
+
 import { useDropzone } from 'react-dropzone'
 import { useState } from 'react'
 
@@ -72,8 +74,6 @@ export default function SubidaDeArchivos() {
       <Box 
       sx={{
         background:"#fff",
-        //borderRadius:2,
-        //height:600,
         borderRadius: 3,
         display: "flex",
         flexDirection: "column",
@@ -216,12 +216,13 @@ export default function SubidaDeArchivos() {
             variant="contained"
             disabled={!archivo}
             onClick={subirArchivo}
+            startIcon={<FlechaIcon />}
             sx={{
                 background:colores.primario,
                 borderRadius:2,
                 textTransform: "none"
             }}
-            >↑ Subir archivo </Button>
+            >Subir archivo </Button>
           </Box>
 
       </Box>

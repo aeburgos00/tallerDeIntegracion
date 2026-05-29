@@ -15,17 +15,28 @@ import { useEffect, useState } from 'react'
 
 import {obtenerEnviosPorTransportista} from '../services/api.js'
 
+import useDateFilter from '../hooks/useDateFilter.js'
+
 export default function TableTransportistasResumen() {
     
+    const {
+        fechaDesde,
+        fechaHasta
+    } = useDateFilter()
+
     const [loading, setLoading] = useState(true)
 
     const [data, setData] = useState([]);
+
     useEffect(() => {
         const obtenerDatos = async () => {
             try {
                 setLoading(true)
 
-                const result = await obtenerEnviosPorTransportista();
+                const result = await obtenerEnviosPorTransportista(
+                    fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
+                    fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
+                );
                 setData(result.data)
             } catch (error) {
                 console.error(error)
@@ -34,7 +45,7 @@ export default function TableTransportistasResumen() {
             }
         }
         obtenerDatos()
-    }, [])
+    }, [fechaDesde,fechaHasta])
 
     return (
     <TableContainer 

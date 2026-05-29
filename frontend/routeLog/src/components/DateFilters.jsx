@@ -1,15 +1,19 @@
-import * as React from "react";
-
-import { Box} from "@mui/material";
+import { Box } from "@mui/material";
 
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
+import useDateFilter from '../hooks/useDateFilter'
+
 export default function DateFilters() {
 
-  const [fechaDesde, setFechaDesde] = React.useState(null);
-  const [fechaHasta, setFechaHasta] = React.useState(null);
+  const {
+    fechaDesde,
+    fechaHasta,
+    setFechaDesde,
+    setFechaHasta
+  } = useDateFilter()
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -22,7 +26,7 @@ export default function DateFilters() {
         <DatePicker
           label="Desde"
           value={fechaDesde}
-          onChange={(newValue) => setFechaDesde(newValue)}
+          onChange={setFechaDesde}
           slotProps={{
             textField: {
               size: "small"
@@ -34,7 +38,7 @@ export default function DateFilters() {
         <DatePicker
           label="Hasta"
           value={fechaHasta}
-          onChange={(newValue) => setFechaHasta(newValue)}
+          onChange={setFechaHasta}
           slotProps={{
             textField: {
               size: "small"

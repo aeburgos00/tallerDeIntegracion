@@ -12,28 +12,35 @@ import {
   ResponsiveContainer
 } from "recharts";
 
-import data from "./dataCardsResumen";
-const { cardsHeader: cardsHeaderConfig } = data;
+import cardsEnviosConfig from "./dataKPIEnvios.jsx";
 
 import { useEffect, useState } from 'react'
 
 import {obtenerEnviosTotales} from '../services/api.js'
 
+import  useDateFilter from '../hooks/useDateFilter.js'
 
 export default function StatusCard() {
 
     const [loading, setLoading] = useState(true);
     
     const [enviosTotales, setEnviosTotales] = useState({});
+
+      const {
+        fechaDesde,
+        fechaHasta
+      } = useDateFilter()
+
       useEffect(() => {
           const obtenerDatos = async () => {
               try {
                   setLoading(true)
   
-                  const result = await obtenerEnviosTotales();
+                  const result = await obtenerEnviosTotales(
+                    fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
+                    fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
+                  );
                   setEnviosTotales(result.data[0])
-
-
 
               } catch (error) {
                   console.error(error)
@@ -42,17 +49,17 @@ export default function StatusCard() {
               }
           }
           obtenerDatos()
-      }, [])
+      }, [fechaDesde,fechaHasta])
 
-    const cardsHeader = cardsHeaderConfig.map(card => ({
+    const cardsEnvios = cardsEnviosConfig.map(card => ({
     ...card,
     cantidad: Number(enviosTotales[card.id]) || 0
   }))
 
-    const total = cardsHeader.filter(c => c.id === "total")[0].cantidad;
+    const total = cardsEnvios.filter(c => c.id === "total")[0].cantidad;
 
     const subTotales = 
-    cardsHeader.filter(d => d.id !== "total")
+    cardsEnvios.filter(d => d.id !== "total")
     .map(
       c => (
         {name: c.titulo, value: c.cantidad, color: c.colorTorta}

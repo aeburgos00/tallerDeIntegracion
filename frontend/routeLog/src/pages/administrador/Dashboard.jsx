@@ -4,9 +4,8 @@ import {
 } from "@mui/material";
 
 import SummaryCard from "../../components/SummaryCard.jsx";
-import data from "../../components/dataCardsResumen";
-const { cardsHeader: cardsHeaderData, 
-        cardsFooter: cardsFooterData } = data;
+import cardsEnvios from "../../components/dataKPIEnvios.jsx";
+import cardsLiquidaciones from "../../components/dataKPILiquidaciones.jsx";
 
 import StatusCard from "../../components/StatusCard";
 import TableResumenCard from '../../components/TableResumenCard';
@@ -14,6 +13,8 @@ import TableTransportistasResumen from "../../components/TableTransportistasResu
 import TableEnviosResumen from "../../components/TableEnviosResumen";
 
 import { useEffect, useState } from 'react'
+
+import useDateFilter from '../../hooks/useDateFilter.js'
 
 import {obtenerEnviosTotales, obtenerLiquidacionesTotales} from '../../services/api.js'
 
@@ -25,6 +26,11 @@ export default function Dashboard() {
   const [enviosTotales, setEnviosTotales] = useState({});
   const [liqTotales, setLiqTotales] = useState({})
 
+  const {
+    fechaDesde,
+    fechaHasta
+  } = useDateFilter()
+
   useEffect(() => {
     const obtenerDatos = async () => {
       try {
@@ -32,8 +38,14 @@ export default function Dashboard() {
         setLoadingLiqTotales(true)
 
         const [enviosResult, liqResult] = await Promise.all([
-          obtenerEnviosTotales(),
-          obtenerLiquidacionesTotales()
+          obtenerEnviosTotales(
+            fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
+            fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
+          ),
+          obtenerLiquidacionesTotales(
+            fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
+            fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
+          )
         ])
   
         setEnviosTotales(enviosResult.data[0])
@@ -47,9 +59,9 @@ export default function Dashboard() {
       }
     }
     obtenerDatos()
-  }, [])
+  }, [fechaDesde, fechaHasta])
 
-  const cardsHeader = cardsHeaderData.map(card => ({
+  const cardsHeader = cardsEnvios.map(card => ({
     ...card,
     cantidad: Number(enviosTotales[card.id]) || 0,
     descripcion: card.id === "total"? 
@@ -61,14 +73,14 @@ export default function Dashboard() {
                     : ""
   }))
 
-  const cardsFooter = cardsFooterData.map(card => ({
+  const cardsFooter = cardsLiquidaciones.map(card => ({
     ...card,
-    cantidad: card.id !== "transportistas_activos"?
+    cantidad: card.id !== "pct_paquetes_liquidados"?
               "$" + Number(liqTotales[card.id] || "0").toLocaleString('es-AR')
               :
-              Number(liqTotales[card.id]) || 0
+              Number(liqTotales[card.id] || 0) + "%"
               ,
-    descripcion: card.id === "valor_total" || card.id === "transportistas_activos"? 
+    descripcion: card.id === "valor_total" || card.id === "pct_paquetes_liquidados"? 
                   "": 
                   enviosTotales.total > 0 ? 
                     `${Math.round(

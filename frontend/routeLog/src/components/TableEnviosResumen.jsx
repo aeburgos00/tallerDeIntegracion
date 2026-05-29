@@ -18,10 +18,15 @@ const colors = {
 
 import { useEffect, useState } from 'react'
 import {obtenerEnviosRecientes} from '../services/api.js'
-
+import useDateFilter from '../hooks/useDateFilter.js'
 
 export default function TableEnviosResumen() {
     
+    const {
+        fechaDesde,
+        fechaHasta
+    } = useDateFilter()
+
     const [loading, setLoading] = useState(true)
 
     const [data, setData] = useState([]);
@@ -30,7 +35,10 @@ export default function TableEnviosResumen() {
             try {
                 setLoading(true)
 
-                const result = await obtenerEnviosRecientes();
+                const result = await obtenerEnviosRecientes(
+                    fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
+                    fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
+                );
                 setData(result.data)
             } catch (error) {
                 console.error(error)
@@ -39,7 +47,7 @@ export default function TableEnviosResumen() {
             }
         }
         obtenerDatos()
-    }, [])
+    }, [fechaDesde,fechaHasta])
 
     const envios = data.map(e => ({
         ...e,
