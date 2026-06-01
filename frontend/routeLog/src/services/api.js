@@ -2,19 +2,19 @@ const API_URL = import.meta.env.VITE_API_URL
 
 export const loginRequest = async (usuario, password) => {
   const response = await fetch(
-      `${API_URL}/auth/login`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type':'application/json'
-        },
-        body: JSON.stringify({
-          usuario,
-          password
-        })
-      }
-    )
-    return response.json()
+    `${API_URL}/auth/login`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        usuario,
+        password
+      })
+    }
+  )
+  return response.json()
 }
 
 export const obtenerEnviosPorTransportista = async (
@@ -42,7 +42,7 @@ export const obtenerEnviosRecientes = async (
   fecha_hasta
 ) => {
   const response = await fetch(
-     `${API_URL}/envios-recientes?desde=${fecha_desde}&hasta=${fecha_hasta}`
+    `${API_URL}/envios-recientes?desde=${fecha_desde}&hasta=${fecha_hasta}`
   )
   return response.json()
 }
@@ -64,6 +64,8 @@ export const obtenerLocalidadesTotales = async () => {
   return response.json()
 }
 
-
-
-
+export const obtenerTransportistas = async () => {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/transportistas`)
+  const data = await response.json()
+  return data
+}

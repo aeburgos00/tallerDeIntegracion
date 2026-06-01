@@ -17,17 +17,17 @@ import { obtenerLocalidadesTotales } from "../../services/api.js"
 export default function Localidades() {
 
   const [loadingKPI, setLoadingKPI] = useState(true)
-  
+
   const [localidades, setLocalidades] = useState([])
 
   useEffect(() => {
     const obtenerDatos = async () => {
       try {
         setLoadingKPI(true)
-  
+
         const result = await obtenerLocalidadesTotales()
         setLocalidades(result.data[0])
-  
+
       } catch (error) {
         console.error(error)
       } finally {
@@ -38,8 +38,8 @@ export default function Localidades() {
   }, [])
 
   const loc = cardsLocalidades.map(e => ({
-      ...e,
-      cantidad: e.id !== "costo_promedio"?
+    ...e,
+    cantidad: e.id !== "costo_promedio" ?
       Number(localidades[e.id]) || 0
       :
       "$" + (Number(localidades[e.id]) || 0)
@@ -47,71 +47,71 @@ export default function Localidades() {
 
   return (
     <Box
-    sx={{
-      display:"flex",
-      flexDirection:"column",
-      gap: 2
-    }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 2
+      }}
     >
       {/* KPI Header */}
-      <Box 
-      sx={{
-        display:"grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "1fr 1fr",
-          lg: "repeat(4, 1fr)"
-        },
-        gap:2
-      }}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "1fr 1fr",
+            lg: "repeat(4, 1fr)"
+          },
+          gap: 2
+        }}
       >
         {
-          loadingKPI?
-           Array.from({ length: 4 }).map((_, index) => (
+          loadingKPI ?
+            Array.from({ length: 4 }).map((_, index) => (
               <Skeleton
                 key={index}
                 variant="rounded"
                 height={112}
               />
             ))
-          :
-          loc.map((e, index) => (
-            <SummaryCard 
-            key={index}
-            titulo= {e.titulo}
-            cantidad={e.cantidad}
-            descripcion={e.descripcion || ""}
-            icono={e.icono}
-            color={e.color}
-            height={112}
-            />
-          ))
+            :
+            loc.map((e, index) => (
+              <SummaryCard
+                key={index}
+                titulo={e.titulo}
+                cantidad={e.cantidad}
+                descripcion={e.descripcion || ""}
+                icono={e.icono}
+                color={e.color}
+                height={112}
+              />
+            ))
         }
-        
+
       </Box>
 
       {/* Filtros */}
-      <Box sx={{background:"#ff2233"}}>
-      <h2>
-        Filtros
-      </h2>
+      <Box sx={{ background: "#ff2233" }}>
+        <h2>
+          Filtros
+        </h2>
       </Box>
 
 
       {/* Mostrado... + SVC + ABM */}
       <Box sx={{
-        display:"grid",
+        display: "grid",
         gridTemplateColumns: "8fr 2fr 2fr",
-        gap:2
+        gap: 2
       }}
       >
         <h3>Mostrando 111</h3>
         {/* BOTONES */}
         <Box
-        sx={{
-          display:"flex",
-          gap:2
-        }}
+          sx={{
+            display: "flex",
+            gap: 2
+          }}
         >
           <Button>Exportar SVC</Button>
           <Button>Nuevo Localidad</Button>
@@ -124,17 +124,17 @@ export default function Localidades() {
         <TableResumenCard></TableResumenCard>
         {/* Filtros y paginacion */}
         <Box sx={{
-          display:"grid",
+          display: "grid",
           gridTemplateColumns: "8fr 4fr",
-          gap:2
+          gap: 2
         }}
         >
           <h3>Filas x pag</h3>
           <Box
-          sx={{
-            display:"flex",
-            gap:4,
-          }}
+            sx={{
+              display: "flex",
+              gap: 4,
+            }}
           >
             <p>Pagina 1 de 3</p>
             <p> ant </p>

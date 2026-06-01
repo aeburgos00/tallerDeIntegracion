@@ -1,4 +1,4 @@
-import {Routes, Route, Navigate} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from './ProctectedRoute.jsx'
 
@@ -16,8 +16,8 @@ import Configuracion from "../pages/administrador/Configuracion";
 export default function AppRoutes() {
     return (
         <Routes>
-            
-             {/* Ruta inicial */}
+
+            {/* Ruta inicial */}
             <Route
                 path="/"
                 element={<Navigate to="/login" />}
@@ -28,14 +28,14 @@ export default function AppRoutes() {
 
             {/* Administrador */}
             <Route path="/" element={
-                <ProtectedRoute rol="ADMINISTRADOR">
-                    <DashboardLayout />
-                </ProtectedRoute>
+                //<ProtectedRoute rol="ADMINISTRADOR">
+                <DashboardLayout />
+                //</ProtectedRoute>
             }>
                 <Route index element={<Dashboard />} />
                 <Route path="/Envios" element={<Envios />} />
                 <Route path="/Transportistas" element={<Transportistas />} />
-                <Route path="/Localidades" element={<Localidades/>} />
+                <Route path="/Localidades" element={<Localidades />} />
                 <Route path="/Liquidaciones" element={<Liquidaciones />} />
                 <Route path="/Archivos" element={<SubidaArchivos />} />
                 <Route path="/Configuracion" element={<Configuracion />} />
