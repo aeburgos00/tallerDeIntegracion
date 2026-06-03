@@ -7,7 +7,8 @@ import Login from '../pages/Login'
 import DashboardLayout from "../layouts/DashboardLayout";
 import Dashboard from "../pages/administrador/Dashboard";
 import Envios from "../pages/administrador/EnvioDePaquetes";
-import Transportistas from "../pages/administrador/Transportistas";
+/*import Transportistas from "../pages/administrador/Transportistas";*/
+import Transportistas from "../pages/administrador/TransportistasV2";
 import Localidades from "../pages/administrador/Localidades"
 import Liquidaciones from "../pages/administrador/Liquidaciones";
 import SubidaArchivos from "../pages/administrador/SubidaDeArchivos";

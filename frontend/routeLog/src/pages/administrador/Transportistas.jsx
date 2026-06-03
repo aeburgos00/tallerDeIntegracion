@@ -62,18 +62,19 @@ export default function Transportistas() {
       </Box>
 
       {/* Filtros */}
-      <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+      {/*<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
         <TransportistasTotales
           value={transportistaFiltro}
           onChange={(e) => setTransportistaFiltro(e.target.value)}
         />
-      </Box>
+      </Box>*/}
 
       {/* Mostrado + CSV + ABM */}
       <Box sx={{ display: "grid", gridTemplateColumns: "8fr 2fr 2fr", gap: 2 }}>
         <h3>Mostrando 111</h3>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <Button>Exportar CSV</Button>
+          <Button>Exportar CSV</Button>.
+          {/* Boton nuevo */}
           <Button variant="contained" onClick={handleAbrir}>
             Nuevo Transportista
           </Button>
