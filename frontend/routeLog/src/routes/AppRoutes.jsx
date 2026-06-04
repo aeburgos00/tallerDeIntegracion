@@ -9,7 +9,8 @@ import Dashboard from "../pages/administrador/Dashboard";
 import Envios from "../pages/administrador/EnvioDePaquetes";
 /*import Transportistas from "../pages/administrador/Transportistas";*/
 import Transportistas from "../pages/administrador/TransportistasV2";
-import Localidades from "../pages/administrador/Localidades"
+/*import Localidades from "../pages/administrador/Localidades";*/
+import Localidades from "../pages/administrador/LocalidadeV2";
 import Liquidaciones from "../pages/administrador/Liquidaciones";
 import SubidaArchivos from "../pages/administrador/SubidaDeArchivos";
 import Configuracion from "../pages/administrador/Configuracion";
