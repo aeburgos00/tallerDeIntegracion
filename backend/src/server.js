@@ -9,6 +9,7 @@ import enviosTotales from './routes/enviosTotales.route.js'
 import enviosRecientes from './routes/enviosRecientes.route.js'
 import liquidacionesTotales from './routes/liquidacionesTotales.route.js'
 import localidadesTotales from './routes/localidadesTotales.route.js'
+import liquidacionesPorTransportista from './routes/liquidacionesPorTransportista.route.js'
 
 
 const PORT = process.env.PORT || 3000
@@ -39,7 +40,7 @@ app.use('/envios-totales', enviosTotales)
 app.use('/envios-recientes',enviosRecientes)
 app.use('/liquidaciones-totales',liquidacionesTotales)
 app.use('/localidades-totales',localidadesTotales)
-
+app.use('/liquidaciones-por-transportista', liquidacionesPorTransportista)
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`)

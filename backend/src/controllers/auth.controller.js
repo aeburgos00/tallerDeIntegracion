@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt'
 
 import pool from "../config/db.js"
 
+
+
 export const login = async (req, res) => {
 
   try {
@@ -11,8 +13,6 @@ export const login = async (req, res) => {
       usuario,
       password
     } = req.body
-
-    console.log(req.body)
 
     // Busco al usuario
     const result = await pool.query(

@@ -64,6 +64,18 @@ export const obtenerLocalidadesTotales = async () => {
   return response.json()
 }
 
+export const obtenerTransportistas = async () => {
+  const response = await fetch(
+    `${API_URL}/transportistas`
+  )
+  return response.json()
+}
 
 
+export const obtenerLiquidacionesPorTransportista = async (desde, hasta) => {
+  const response = await fetch(
+    `${API_URL}/liquidaciones-por-transportista?desde=${desde}&hasta=${hasta}`
+  )
+  return response.json()
+}
 
