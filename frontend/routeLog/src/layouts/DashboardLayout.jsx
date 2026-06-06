@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-
 import { Box } from "@mui/material";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -24,6 +23,7 @@ export default function DashboardLayout() {
         <Box
           sx={{
             p: 1.5,
+            mt: "64px"
           }}
         >
           <Outlet />

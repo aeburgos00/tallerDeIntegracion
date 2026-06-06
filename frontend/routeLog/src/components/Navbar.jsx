@@ -7,11 +7,11 @@ import { useLocation } from "react-router-dom";
 
 import DateFilters from "./DateFilters"
 import MenuIcon from '@mui/icons-material/Menu';
-import menu from "./data"
+import {menuAdministrador} from "./data"
 
 export default function Navbar() {
   const location = useLocation();
-  const itemSeleccionado = menu.find((e) => e.ruta === location.pathname);
+  const itemSeleccionado = menuAdministrador.find((e) => e.ruta === location.pathname);
   return (
     <Box 
       sx={{
@@ -23,8 +23,13 @@ export default function Navbar() {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        minWidth: 0
-      }}>
+        minWidth: 0,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+      }}
+    >
 
       {/* IZQUIERDA */}
       <Box
