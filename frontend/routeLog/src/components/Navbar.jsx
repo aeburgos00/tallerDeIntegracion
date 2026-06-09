@@ -19,12 +19,15 @@ export default function Navbar() {
         backgroundColor: "#ffffff",
         color: "#111827",
         borderBottom: "1px solid #e5e7eb",
-        px: 3,
+        px: {
+          xs: 1,
+          md: 3
+        },
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         minWidth: 0,
-        position: "fixed",
+        position: "sticky",
         top: 0,
         left: 0,
         width: "100%",
@@ -52,7 +55,7 @@ export default function Navbar() {
               fontWeight: 600,
               whiteSpace: "nowrap",
               overflow: "hidden",
-              textOverflow: "ellipsis"          
+              textOverflow: "ellipsis"
           }}
         >
           {itemSeleccionado?.descripcion}
@@ -62,7 +65,10 @@ export default function Navbar() {
       {/* DERECHA */}
       <Box
         sx={{
-          display: "flex",
+          display: {
+            xs: "none",
+            md: "flex"
+          },
           alignItems: "center",
           gap: 1.5,
           flexShrink: 0

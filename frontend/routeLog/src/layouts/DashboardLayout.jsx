@@ -23,7 +23,6 @@ export default function DashboardLayout() {
         <Box
           sx={{
             p: 1.5,
-            mt: "64px"
           }}
         >
           <Outlet />

@@ -9,7 +9,8 @@ import enviosTotales from './routes/enviosTotales.route.js'
 import enviosRecientes from './routes/enviosRecientes.route.js'
 import liquidacionesTotales from './routes/liquidacionesTotales.route.js'
 import localidadesTotales from './routes/localidadesTotales.route.js'
-
+import localidades from './routes/localidades.route.js'
+import envios from "./routes/envios.route.js"
 
 const PORT = process.env.PORT || 3000
 
@@ -33,6 +34,8 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes)
 
 app.use('/transportistas', transportistasRoutes)
+app.use('/localidades', localidades)
+app.use('/envios', envios)
 
 app.use('/envios-por-transportista',enviosPorTransportistasRoutes)
 app.use('/envios-totales', enviosTotales)

@@ -64,6 +64,23 @@ export const obtenerLocalidadesTotales = async () => {
   return response.json()
 }
 
+export const obtenerLocalidades = async () => {
+  const response = await fetch(
+    `${API_URL}/localidades`
+  )
+  return response.json()
+}
+
+export const obtenerEnvios = async (
+  fecha_desde,
+  fecha_hasta
+) => {
+  const response = await fetch(
+    `${API_URL}/envios?desde=${fecha_desde}&hasta=${fecha_hasta}`
+  )
+  return response.json()
+}
+
 
 
 
