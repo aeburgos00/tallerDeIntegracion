@@ -6,10 +6,8 @@ import {
 import FiltroIcon from '@mui/icons-material/FilterAltRounded';
 
 const colores = {
-  primario: "#3b82f6",
-  textos: "#111827",
-  textosSec: "#9ca3af",
-  background: "#E6F1FB",
+  azul: "#3b82f6",
+  gris: "#9ca3af",
 }
 
 export default function FiltrosGenerico({
@@ -51,8 +49,8 @@ export default function FiltrosGenerico({
             variant="outlined"
             onClick={onClear}
             sx={{
-            borderColor:colores.textosSec,
-            color:colores.primario,
+            borderColor:colores.gris,
+            color:colores.azul,
             borderRadius:2,
             textTransform:"none",
             }}>
@@ -64,7 +62,7 @@ export default function FiltrosGenerico({
             onClick={onFilter}
             startIcon={<FiltroIcon />}
             sx={{
-            background:colores.primario,
+            background:colores.azul,
             borderRadius:2,
             textTransform: "none"
             }}>

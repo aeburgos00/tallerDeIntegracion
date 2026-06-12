@@ -25,6 +25,8 @@ import { obtenerEnviosTotales } from '../../services/api.js'
 
 import useDateFilter from '../../hooks/useDateFilter.js'
 
+import ABMEnvios from "../../components/abm/ABMEnvios.jsx";
+
 export default function EnvioDePaquetes() {
   const [loadingKPI, setLoadingKPI] = useState(true)
   
@@ -40,6 +42,8 @@ export default function EnvioDePaquetes() {
     tarifa:"",
     liquidacion:""
   });
+
+  const [openABM, setOpenABM] = useState(false);
 
   const handleFilter = () => {
     console.log(filtros);
@@ -195,7 +199,7 @@ export default function EnvioDePaquetes() {
 
           <Button 
           variant="contained"
-          //onClick={}
+          onClick={() => setOpenABM(true)}
           startIcon={<NuevoIcon />}
           size="small"
           sx={{
@@ -207,8 +211,15 @@ export default function EnvioDePaquetes() {
             height:36,
             fontSize:13
           }}>
-            Nuevo Localidad
+            Nuevo Envío
           </Button>
+
+           <ABMEnvios
+              title={"Nuevo Envío de Paquete"}
+              open={openABM}
+              onClose={() => setOpenABM(false)}
+            />
+
         </Box>
       </Box>
 
@@ -229,3 +240,4 @@ export default function EnvioDePaquetes() {
     </Box>
   )
 }
+
