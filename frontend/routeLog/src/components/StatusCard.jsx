@@ -12,7 +12,7 @@ import {
   ResponsiveContainer
 } from "recharts";
 
-import cardsEnviosConfig from "./dataKPIEnvios.jsx";
+import cardsEnviosConfig from "./datos/dataKPIEnvios.jsx";
 
 import { useEffect, useState } from 'react'
 

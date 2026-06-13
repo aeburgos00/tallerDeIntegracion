@@ -8,17 +8,17 @@ import {
 import DescargaIcon from '@mui/icons-material/ArrowDownward';
 import NuevoIcon from '@mui/icons-material/Add';
 
+import { useEffect, useState } from 'react'
+
 import TablaPaginacionContenedor from "../../components/TablaPaginacionContenedor.jsx";
-import TablaLocalidades from "../../components/TablaLocalidades.jsx";
+import TablaLocalidades from "../../components/tablasContenedor/TablaLocalidades.jsx";
 
 import SummaryCard from "../../components/SummaryCard"
 
 import FiltrosGenerico from "../../components/FiltrosGenerico.jsx"
-import FiltroLocalidades from "../../components/FiltroLocalidades.jsx"
+import FiltroLocalidades from "../../components/filtros/FiltroLocalidades.jsx"
 
-import { useEffect, useState } from 'react'
-
-import cardsLocalidades from "../../components/dataKPILocalidades.jsx"
+import cardsLocalidades from "../../components/datos/dataKPILocalidades.jsx"
 
 import { obtenerLocalidadesTotales } from "../../services/api.js"
 

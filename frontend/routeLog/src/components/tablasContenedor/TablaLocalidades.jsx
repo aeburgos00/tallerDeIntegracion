@@ -13,31 +13,21 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useEffect, useState } from 'react'
-import {obtenerEnvios} from '../services/api.js'
+import {obtenerLocalidades} from '../../services/api.js'
 
-import useDateFilter from "../hooks/useDateFilter.js";
-
-export default function TablaEnvios ({
-  filasPorPagina = 0
+export default function TablaLocalidades ({
+    filasPorPagina = 0
 }) {
 
-  const {
-    fechaDesde,
-    fechaHasta
-  } = useDateFilter()
-
   const [loading, setLoading] = useState(true)
-  
-  const [envios, setEnvios] = useState({});
+
+  const [localidades, setLocalidades] = useState([]);
   useEffect(() => {
     const obtenerDatos = async () => {
         try {
-          setLoading(true)
-          const result = await obtenerEnvios(
-            fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
-            fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
-          );
-          setEnvios(result.data)
+            setLoading(true)
+            const result = await obtenerLocalidades();
+            setLocalidades(result.data)
         } catch (error) {
             console.error(error)
         } finally {
@@ -45,7 +35,7 @@ export default function TablaEnvios ({
         }
     }
   obtenerDatos()
-  },[fechaDesde,fechaHasta])
+  },[])
 
   return (
     <TableContainer 
@@ -63,15 +53,13 @@ export default function TablaEnvios ({
                 backgroundColor:"#F0EEE8",
             }}>
                 <TableRow>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Cod. Envío</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Envío</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Cliente</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Dirección</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Localidad</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Transportista</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Código Postal</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Provincia</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Costo Envío</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Alta</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Baja</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Estado</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Tarifa</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Liquidación</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Acciones</TableCell>
                 </TableRow>
             </TableHead>
@@ -84,7 +72,7 @@ export default function TablaEnvios ({
             loading? 
             Array.from(new Array(filasPorPagina)).map((_, index) => (
                 <TableRow key={index}>
-                  {Array.from(new Array(10)).map((_, cellIndex) => (
+                  {Array.from(new Array(8)).map((_, cellIndex) => (
                     <TableCell key={cellIndex}>
                       <Skeleton
                         variant="text"
@@ -94,20 +82,18 @@ export default function TablaEnvios ({
                 </TableRow>
               ))
             :
-            envios.map((item) => (
+            localidades.map((item) => (
                  <TableRow
-                key={item.id_envio}
+                key={item.id_loc}
                 hover
                 >
-                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.id_envio}</TableCell>
-                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.fecha_envio}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.cliente}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.direccion}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.localidad}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.transportista}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.estado}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.tarifa || 0).toLocaleString('es-AR')} </TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.liquidacion || 0).toLocaleString('es-AR')} </TableCell>                    
+                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.nombre}</TableCell>
+                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.codigo_postal}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}}>{item.provincia}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.costo_envio || 0).toLocaleString('es-AR')} </TableCell>
+                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.fecha_alta}</TableCell>
+                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.fecha_baja || "-"}</TableCell>
+                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.estado}</TableCell>
                     <TableCell align="center">
                         <IconButton
                         color="primary"
@@ -131,3 +117,4 @@ export default function TablaEnvios ({
     </TableContainer>
   )
 }
+

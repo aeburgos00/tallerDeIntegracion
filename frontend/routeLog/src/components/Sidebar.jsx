@@ -15,7 +15,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import LogoutIcon from '@mui/icons-material/Logout'
 import IconButton from '@mui/material/IconButton'
 
-import {menuAdministrador} from "./data"
+import {menuAdministrador} from "./datos/data"
 
 import logo from "./../assets/LogoSinTexto.svg"
 

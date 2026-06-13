@@ -8,24 +8,24 @@ import {
 import DescargaIcon from '@mui/icons-material/ArrowDownward';
 import NuevoIcon from '@mui/icons-material/Add';
 
+import { useEffect, useState } from 'react'
+
 import TablaPaginacionContenedor from "../../components/TablaPaginacionContenedor.jsx";
-import TablaEnvios from "../../components/TablaEnvios.jsx";
+import TablaEnvios from "../../components/tablasContenedor/TablaEnvios.jsx";
 
 import SummaryCard from "../../components/SummaryCard"
 
 import FiltrosGenerico from "../../components/FiltrosGenerico.jsx"
-import FiltroEnvios from "../../components/FiltroEnvios.jsx"
+import FiltroEnvios from "../../components/filtros/FiltroEnvios.jsx"
 
+import cardsEnvios from "../../components/datos/dataKPIEnvios.jsx";
 
-import cardsEnvios from "../../components/dataKPIEnvios.jsx";
-
-import { useEffect, useState } from 'react'
-
-import { obtenerEnviosTotales } from '../../services/api.js'
+import { obtenerEnviosTotales, exportarEnviosCSV } from '../../services/api.js'
 
 import useDateFilter from '../../hooks/useDateFilter.js'
 
 import ABMEnvios from "../../components/abm/ABMEnvios.jsx";
+
 
 export default function EnvioDePaquetes() {
   const [loadingKPI, setLoadingKPI] = useState(true)
@@ -44,6 +44,17 @@ export default function EnvioDePaquetes() {
   });
 
   const [openABM, setOpenABM] = useState(false);
+  const [envioSeleccionado, setEnvioSeleccionado] = useState(null)
+
+  const handleNuevo = () => {
+    setEnvioSeleccionado(null);
+    setOpenABM(true)
+  }
+
+  const handleEditar = (envio) => {
+    setEnvioSeleccionado(envio)
+    setOpenABM(true)
+  }
 
   const handleFilter = () => {
     console.log(filtros);
@@ -66,6 +77,17 @@ export default function EnvioDePaquetes() {
     fechaDesde,
     fechaHasta
   } = useDateFilter()
+
+  const handleExportar = async () => {
+    try {
+      await exportarEnviosCSV(
+        fechaDesde.format("YYYY-MM-DD"),
+        fechaHasta.format("YYYY-MM-DD")
+      )
+    } catch(error) {
+      console.error(error)
+    }
+}
 
   useEffect(() => {
     const obtenerDatos = async () => {
@@ -180,7 +202,7 @@ export default function EnvioDePaquetes() {
         >
           <Button
           variant="outlined"
-          //onClick={}
+          onClick={handleExportar}
           startIcon={<DescargaIcon />}
           size="small"
           sx={{
@@ -199,7 +221,7 @@ export default function EnvioDePaquetes() {
 
           <Button 
           variant="contained"
-          onClick={() => setOpenABM(true)}
+          onClick={handleNuevo}
           startIcon={<NuevoIcon />}
           size="small"
           sx={{
@@ -215,9 +237,9 @@ export default function EnvioDePaquetes() {
           </Button>
 
            <ABMEnvios
-              title={"Nuevo Envío de Paquete"}
               open={openABM}
               onClose={() => setOpenABM(false)}
+              idEnvio={envioSeleccionado}
             />
 
         </Box>
@@ -233,7 +255,7 @@ export default function EnvioDePaquetes() {
         "0 1px 2px rgba(0,0,0,0.04)"
       }}>
         <TablaPaginacionContenedor>
-          <TablaEnvios/>
+          <TablaEnvios onEdit={handleEditar}/>
         </TablaPaginacionContenedor>
       </Box>
 

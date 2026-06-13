@@ -50,7 +50,7 @@ export default function TablaPaginacionContenedor ({
 
             <Select
                 size="small"
-                value={filasPorPagina}
+                value={filasPorPagina || 10 }
                 onChange={(e) =>
                     onFilasPorPaginaChange(e.target.value)
                 }

@@ -7,7 +7,7 @@ import React from "react";
 
 import { Link } from "react-router-dom";
 
-import { menuTransportista } from "./data"
+import { menuTransportista } from "./datos/data"
 
 const NavbarMobile = () => {
   const [value, setValue] = React.useState(0);

@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 
 import DateFilters from "./DateFilters"
 import MenuIcon from '@mui/icons-material/Menu';
-import {menuAdministrador} from "./data"
+import {menuAdministrador} from "./datos/data"
 
 export default function Navbar() {
   const location = useLocation();
