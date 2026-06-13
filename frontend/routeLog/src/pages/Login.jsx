@@ -70,6 +70,9 @@ export default function Login() {
       if (result.user.rol === "ADMINISTRADOR") {
         navigate("/")
       }
+      else if (result.user.rol === "TRANSPORTISTA") {
+        navigate("/transportista")
+      }
       else {
         navigate('/login')
       }

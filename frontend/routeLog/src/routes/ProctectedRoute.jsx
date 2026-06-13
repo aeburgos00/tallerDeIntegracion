@@ -2,11 +2,13 @@ import { Navigate } from 'react-router-dom'
 import  useAuth  from '../hooks/useAuth'
 
 export default function ProtectedRoute({
-  children
+  children,
+  rol
 }) {
 
    const {
     token,
+    user,
     loading
   } = useAuth()
 
@@ -15,10 +17,16 @@ export default function ProtectedRoute({
     return null
   }
 
-  // rol incorrecto
+  // token incorrecto
   if(!token) {
     return (
-      <Navigate to="/login" />
+      <Navigate to="/login" replace />
+    )
+  }
+  // rol incorrecto
+  if(rol && user?.rol !== rol) {
+    return (
+      <Navigate to="/login" replace />
     )
   }
 

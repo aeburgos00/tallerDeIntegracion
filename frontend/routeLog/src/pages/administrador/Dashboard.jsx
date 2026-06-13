@@ -3,16 +3,16 @@ import {
   Skeleton
 } from "@mui/material";
 
-import SummaryCard from "../../components/SummaryCard.jsx";
-import cardsEnvios from "../../components/dataKPIEnvios.jsx";
-import cardsLiquidaciones from "../../components/dataKPILiquidaciones.jsx";
-
-import StatusCard from "../../components/StatusCard";
-import TableResumenCard from '../../components/TableResumenCard';
-import TableTransportistasResumen from "../../components/TableTransportistasResumen";
-import TableEnviosResumen from "../../components/TableEnviosResumen";
-
 import { useEffect, useState } from 'react'
+
+import cardsEnvios from "../../components/datos/dataKPIEnvios.jsx";
+import cardsLiquidaciones from "../../components/datos/dataKPILiquidaciones.jsx";
+
+import SummaryCard from "../../components/SummaryCard.jsx";
+import StatusCard from "../../components/StatusCard";
+import TableResumenCard from '../../components/TableResumenCard.jsx';
+import TableTransportistasResumen from "../../components/tablasResumenes/TableTransportistasResumen.jsx";
+import TableEnviosResumen from "../../components/tablasResumenes/TableEnviosResumen";
 
 import useDateFilter from '../../hooks/useDateFilter.js'
 

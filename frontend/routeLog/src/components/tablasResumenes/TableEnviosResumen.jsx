@@ -17,8 +17,8 @@ const colors = {
 }
 
 import { useEffect, useState } from 'react'
-import {obtenerEnviosRecientes} from '../services/api.js'
-import useDateFilter from '../hooks/useDateFilter.js'
+import {obtenerEnviosRecientes} from '../../services/api.js'
+import useDateFilter from '../../hooks/useDateFilter.js'
 
 export default function TableEnviosResumen() {
     
