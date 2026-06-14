@@ -16,7 +16,7 @@ import {
     Chip,
 } from "@mui/material"
 
-import SummaryCard from "../../components/SummaryCard"
+import SummaryCard from "../../components/SummaryCard.jsx"
 
 import { useEffect, useState } from 'react'
 

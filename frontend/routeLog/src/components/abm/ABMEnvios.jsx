@@ -20,9 +20,9 @@ import "dayjs/locale/es";
 dayjs.extend(customParseFormat)
 
 import {
-  obtenerLocalidadesActivas, 
-  obtenerTransportistasActivos, 
-  obtenerEnvioPorId 
+  obtenerLocalidadesActivas,
+  obtenerTransportistasActivos,
+  obtenerEnvioPorId
 } from "../../services/api";
 
 
@@ -54,13 +54,13 @@ export default function ABMEnvios({
   const [transportistas, setTransportistas] = useState([])
 
   useEffect(() => {
-  const cargarCombos = async () => {
+    const cargarCombos = async () => {
       try {
         const localidadesResp = await obtenerLocalidadesActivas()
         const transportistasResp = await obtenerTransportistasActivos()
         setLocalidades(localidadesResp.data)
         setTransportistas(transportistasResp.data)
-      } catch(error) {
+      } catch (error) {
         console.error(error)
       }
     }
@@ -80,47 +80,47 @@ export default function ABMEnvios({
     direccion: "",
     id_localidad: null,
     id_transportista: null,
-    fecha_envio:null,
-    tarifa:""
+    fecha_envio: null,
+    tarifa: ""
   })
 
   useEffect(() => {
 
-    if(!idEnvio){
+    if (!idEnvio) {
       setFormulario({
-      cliente: "",
-      direccion: "",
-      id_localidad: null,
-      id_transportista: null,
-      fecha_envio: null,
-      tarifa: ""
-    });
+        cliente: "",
+        direccion: "",
+        id_localidad: null,
+        id_transportista: null,
+        fecha_envio: null,
+        tarifa: ""
+      });
       return
-    } 
-    
+    }
+
     const cargarEnvio = async () => {
-      try{    
+      try {
         const response = await obtenerEnvioPorId(idEnvio)
         const envio = response.data
 
         console.log(envio)
 
         setFormulario({
-            cliente: envio.cliente || "",
-            direccion: envio.direccion || "",
-            id_localidad: envio.id_localidad || "",
-            id_transportista: envio.id_transportista || "",
-            fecha_envio: envio.fecha_envio
+          cliente: envio.cliente || "",
+          direccion: envio.direccion || "",
+          id_localidad: envio.id_localidad || "",
+          id_transportista: envio.id_transportista || "",
+          fecha_envio: envio.fecha_envio
             ? dayjs(envio.fecha_envio, "DD/MM/YYYY")
             : null,
-            tarifa: envio.tarifa || ""
+          tarifa: envio.tarifa || ""
         })
-      } catch(error) {
+      } catch (error) {
         console.error(error)
       }
     }
     cargarEnvio()
-}, [idEnvio])
+  }, [idEnvio])
 
   return (
     <FormularioABM
@@ -137,32 +137,32 @@ export default function ABMEnvios({
         <Grid container spacing={2}>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField 
-            fullWidth 
-            required 
-            label="Cliente"
-            value={formulario.cliente}
-            onChange={handleChange("cliente")}
+            <TextField
+              fullWidth
+              required
+              label="Cliente"
+              value={formulario.cliente}
+              onChange={handleChange("cliente")}
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField 
-            fullWidth 
-            required 
-            label="Dirección" 
-            value={formulario.direccion}
-            onChange={handleChange("direccion")}
+            <TextField
+              fullWidth
+              required
+              label="Dirección"
+              value={formulario.direccion}
+              onChange={handleChange("direccion")}
             />
           </Grid>
-          
+
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField 
-            fullWidth 
-            required
-            select
-            label="Localidad" 
-            value={formulario.id_localidad}
-            onChange={handleChange("id_localidad")}
+            <TextField
+              fullWidth
+              required
+              select
+              label="Localidad"
+              value={formulario.id_localidad}
+              onChange={handleChange("id_localidad")}
             >
               {localidades.map((localidad) => (
                 <MenuItem
@@ -175,13 +175,13 @@ export default function ABMEnvios({
             </TextField>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField 
-            fullWidth 
-            required
-            select
-            label="Transportista" 
-            value={formulario.id_transportista}
-            onChange={handleChange("id_transportista")}
+            <TextField
+              fullWidth
+              required
+              select
+              label="Transportista"
+              value={formulario.id_transportista}
+              onChange={handleChange("id_transportista")}
             >
               {transportistas.map((transportista) => (
                 <MenuItem
@@ -197,40 +197,40 @@ export default function ABMEnvios({
           <Grid size={{ xs: 12, md: 6 }}>
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
               <DatePicker
-              required
-              label="Fecha Envío *"
-              format="DD/MM/YYYY"
-              sx={{width: '100%'}}
-              value={formulario.fecha_envio}   
-              onChange={(newValue) =>
-                setFormulario({
-                  ...formulario,
-                  fecha_envio: newValue
-                })
-              }
-            />
+                required
+                label="Fecha Envío *"
+                format="DD/MM/YYYY"
+                sx={{ width: '100%' }}
+                value={formulario.fecha_envio}
+                onChange={(newValue) =>
+                  setFormulario({
+                    ...formulario,
+                    fecha_envio: newValue
+                  })
+                }
+              />
             </LocalizationProvider>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField 
-            disabled 
-            fullWidth
-            variant="filled"
-            slotProps={{
-              input: {
-                readOnly: true,
-                startAdornment: <InputAdornment position="start">$</InputAdornment>,
-              },
-            }}
-            label="Tarifa"
-            value={formulario.tarifa}
+            <TextField
+              disabled
+              fullWidth
+              variant="filled"
+              slotProps={{
+                input: {
+                  readOnly: true,
+                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                },
+              }}
+              label="Tarifa"
+              value={formulario.tarifa}
             />
           </Grid>
-          
+
 
         </Grid>
       </Box>
-      
+
     </FormularioABM>
   )
 }

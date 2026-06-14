@@ -95,18 +95,14 @@ export const obtenerEnviosRecientes = async (
   fecha_hasta
 ) => {
   const response = await fetch(
-<<<<<<< HEAD
     `${API_URL}/envios-recientes?desde=${fecha_desde}&hasta=${fecha_hasta}`
-=======
-     `${API_URL}/envios/recientes?desde=${fecha_desde}&hasta=${fecha_hasta}`
->>>>>>> origin/dev-agustin
   )
   return response.json()
 }
 
 export const obtenerEnvioPorId = async (
   id
-) =>{
+) => {
   const response = await fetch(
     `${API_URL}/envios/${id}`
   )
@@ -120,26 +116,76 @@ export const exportarEnviosCSV = async (
 
   const response = await fetch(
     `${API_URL}/envios/exportar-csv?desde=${fechaDesde}&hasta=${fechaHasta}`,
-    {method:'GET'}
+    { method: 'GET' }
   )
   const hoy = new Date();
   const blob = await response.blob()
   const url = window.URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = 'envios_'+ hoy.toLocaleDateString('es-AR') +'.csv'
+  link.download = 'envios_' + hoy.toLocaleDateString('es-AR') + '.csv'
   document.body.appendChild(link)
   link.click()
   link.remove()
   window.URL.revokeObjectURL(url)
 }
 
-<<<<<<< HEAD
 export const obtenerTransportistas = async () => {
   const response = await fetch(`${import.meta.env.VITE_API_URL}/transportistas`)
   const data = await response.json()
   return data
 }
-=======
 
->>>>>>> origin/dev-agustin
+//Localidades - ABM
+
+/*
+
+export const obtenerLocalidadPorId = async (id) => {
+  const response = await fetch(
+    `${API_URL}/localidades/${id}`
+  )
+  return response.json()
+}
+
+export const crearLocalidad = async (localidad) => {
+  const response = await fetch(
+    `${API_URL}/localidades`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(localidad)
+    }
+  )
+  return response.json()
+}
+
+export const modificarLocalidad = async (
+  id,
+  localidad
+) => {
+  const response = await fetch(
+    `${API_URL}/localidades/${id}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(localidad)
+    }
+  )
+  return response.json()
+}
+
+export const eliminarLocalidad = async (id) => {
+  const response = await fetch(
+    `${API_URL}/localidades/${id}`,
+    {
+      method: 'DELETE'
+    }
+  )
+  return response.json()
+}
+
+*/

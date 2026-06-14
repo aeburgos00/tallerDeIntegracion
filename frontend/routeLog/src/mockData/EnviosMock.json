@@ -1,0 +1,12 @@
+[
+    {
+        "id": 1,
+        "nombre": "San Justo",
+        "codigo_postal": "1754"
+    },
+    {
+        "id": 2,
+        "nombre": "Ramos Mejía",
+        "codigo_postal": "1704"
+    }
+]

@@ -8,7 +8,9 @@ import {
 import DescargaIcon from '@mui/icons-material/ArrowDownward';
 import NuevoIcon from '@mui/icons-material/Add';
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+
+import TableResumenCard from "../../../src/components/TableResumenCard.jsx";
 
 import TablaPaginacionContenedor from "../../components/TablaPaginacionContenedor.jsx";
 import TablaLocalidades from "../../components/tablasContenedor/TablaLocalidades.jsx";
@@ -20,14 +22,16 @@ import FiltroLocalidades from "../../components/filtros/FiltroLocalidades.jsx"
 
 import cardsLocalidades from "../../components/datos/dataKPILocalidades.jsx"
 
-import { obtenerLocalidadesTotales } from "../../services/api.js"
+import ABMLocalidades from "../../components/abm/ABMLocalidades.jsx";
 
+// MOCK
+import localidadesMock from "../../mockData/LocalidadesMock.json"
 
 export default function Localidades() {
 
-  const [loadingKPI, setLoadingKPI] = useState(true)
+  const [loadingKPI, setLoadingKPI] = useState(false)
 
-  const [localidades, setLocalidades] = useState([])
+  const [localidades, setLocalidades] = useState(localidadesMock)
 
   const [filtros, setFiltros] = useState({
     localidad: "",
@@ -49,6 +53,9 @@ export default function Localidades() {
     });
   };
 
+  const [openABM, setOpenABM] = useState(false);
+
+  /*
   useEffect(() => {
     const obtenerDatos = async () => {
       try {
@@ -63,32 +70,26 @@ export default function Localidades() {
         setLoadingKPI(false)
       }
     }
+
     obtenerDatos()
   }, [])
+  */
 
   const loc = cardsLocalidades.map(e => ({
     ...e,
-    cantidad: e.id !== "costo_promedio" ?
-      Number(localidades[e.id]) || 0
-      :
-      "$" + (Number(localidades[e.id]) || 0).toLocaleString('es-AR')
+    cantidad:
+      e.id !== "costo_promedio"
+        ? Number(localidades[e.id]) || 0
+        : "$" + (Number(localidades[e.id]) || 0).toLocaleString('es-AR')
   }))
 
   return (
     <Box
-<<<<<<< HEAD
       sx={{
         display: "flex",
         flexDirection: "column",
         gap: 2
       }}
-=======
-    sx={{
-      display:"flex",
-      flexDirection:"column",
-      gap: 1.5
-    }}
->>>>>>> origin/dev-agustin
     >
       {/* KPI Header */}
       <Box
@@ -103,16 +104,15 @@ export default function Localidades() {
         }}
       >
         {
-          loadingKPI ?
-            Array.from({ length: 4 }).map((_, index) => (
+          loadingKPI
+            ? Array.from({ length: 4 }).map((_, index) => (
               <Skeleton
                 key={index}
                 variant="rounded"
                 height={112}
               />
             ))
-            :
-            loc.map((e, index) => (
+            : loc.map((e, index) => (
               <SummaryCard
                 key={index}
                 titulo={e.titulo}
@@ -124,140 +124,114 @@ export default function Localidades() {
               />
             ))
         }
-
       </Box>
 
       {/* Filtros */}
-<<<<<<< HEAD
-      <Box sx={{ background: "#ff2233" }}>
-        <h2>
-          Filtros
-        </h2>
-      </Box>
-=======
-      <FiltrosGenerico 
-      onFilter={handleFilter} 
-      onClear={handleClear}
-      >
-        <FiltroLocalidades 
-        filtros={filtros} 
-        setFiltros={setFiltros} 
-        />
-      </FiltrosGenerico>
->>>>>>> origin/dev-agustin
-
-      {/* Mostrado... + CSV + ABM */}
       <Box sx={{
-<<<<<<< HEAD
-        display: "grid",
-        gridTemplateColumns: "8fr 2fr 2fr",
-        gap: 2
-=======
-        display:"flex",
-        justifyContent:"space-between",
-        gap:2,
-        alignItems:"center",
->>>>>>> origin/dev-agustin
-      }}
+        display: "flex",
+        justifyContent: "space-between",
+        gap: 2,
+        alignItems: "center",
+      }}>
+        {/*<h2>Filtros</h2>*/}
+      </Box>
+
+      {/* Mostrado + CSV + ABM */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "8fr 2fr 2fr",
+          gap: 2
+        }}
       >
-        <Typography sx={{
-          color:"#777"
-        }}>
-          Mostrando {loc[0].cantidad} localidades
+        <Typography
+          sx={{
+            color: "#777"
+          }}
+        >
+          Mostrando {loc[0]?.cantidad} localidades
         </Typography>
-        {/* BOTONES */}
+
         <Box
-<<<<<<< HEAD
           sx={{
             display: "flex",
             gap: 2
           }}
-=======
-        sx={{
-          display:"flex",
-          gap:2,
-          
-        }}
->>>>>>> origin/dev-agustin
         >
           <Button
-          variant="outlined"
-          //onClick={}
-          startIcon={<DescargaIcon />}
-          size="small"
-          sx={{
-            borderColor:"#65a30d",
-            color:"#65a30d",
-            background:"#fff",
-            borderRadius:2,
-            textTransform:"none",
-            whiteSpace:"nowrap",
-            px:1.5,
-            height:36,
-            fontSize:13
-          }}>
+            variant="outlined"
+            startIcon={<DescargaIcon />}
+            size="small"
+            sx={{
+              borderColor: "#65a30d",
+              color: "#65a30d",
+              background: "#fff",
+              borderRadius: 2,
+              textTransform: "none",
+              whiteSpace: "nowrap",
+              px: 1.5,
+              height: 36,
+              fontSize: 13
+            }}
+          >
             Exportar CSV
           </Button>
 
-          <Button 
-          variant="contained"
-          //onClick={}
-          startIcon={<NuevoIcon />}
-          size="small"
-          sx={{
-            background:"#3b82f6",
-            borderRadius:2,
-            textTransform: "none",
-            whiteSpace:"nowrap",
-            px:1.5,
-            height:36,
-            fontSize:13
-          }}>
-            Nuevo Localidad
+          <Button
+            variant="contained"
+            startIcon={<NuevoIcon />}
+            size="small"
+            onClick={() => setOpenABM(true)}
+            sx={{
+              background: "#3b82f6",
+              borderRadius: 2,
+              textTransform: "none",
+              whiteSpace: "nowrap",
+              px: 1.5,
+              height: 36,
+              fontSize: 13
+            }}
+          >
+            Nueva Localidad
           </Button>
+
+          <ABMLocalidades
+            open={openABM}
+            onClose={() => setOpenABM(false)}
+            idLocalidad={localidades}
+          />
         </Box>
       </Box>
 
       {/* Grilla */}
-<<<<<<< HEAD
       <Box>
-        {/* Grilla */}
-        <TableResumenCard></TableResumenCard>
-        {/* Filtros y paginacion */}
-        <Box sx={{
-          display: "grid",
-          gridTemplateColumns: "8fr 4fr",
-          gap: 2
-        }}
+
+        <TableResumenCard />
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "8fr 4fr",
+            gap: 2
+          }}
         >
-          <h3>Filas x pag</h3>
+          <h3>Filas por página</h3>
+
           <Box
             sx={{
               display: "flex",
               gap: 4,
             }}
           >
-            <p>Pagina 1 de 3</p>
-            <p> ant </p>
-            <p> 1 </p>
-            <p> 2 </p>
-            <p> 3 </p>
-            <p> sig </p>
+            <p>Página 1 de 3</p>
+            <p>Anterior</p>
+            <p>1</p>
+            <p>2</p>
+            <p>3</p>
+            <p>Siguiente</p>
           </Box>
         </Box>
-=======
-      <Box 
-      sx={{
-        backgroundColor:"#fff",
-        borderRadius:2,
-        border:"1px solid #e5e7eb",
-        boxShadow:
-        "0 1px 2px rgba(0,0,0,0.04)"
-      }}>
-        <TablaPaginacionContenedor>
-          <TablaLocalidades></TablaLocalidades>
-        </TablaPaginacionContenedor>        
->>>>>>> origin/dev-agustin
+
       </Box>
 
     </Box>
