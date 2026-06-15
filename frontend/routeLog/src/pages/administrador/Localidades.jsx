@@ -24,8 +24,15 @@ import cardsLocalidades from "../../components/datos/dataKPILocalidades.jsx"
 
 import ABMLocalidades from "../../components/abm/ABMLocalidades.jsx";
 
-// MOCK
+// MOCK BORRAR
 import localidadesMock from "../../mockData/LocalidadesMock.json"
+//MOCK BORRAR
+
+//nuevo
+//const [abrirABM, setAbrirABM] = useState(false);
+//const [idLocalidadSeleccionada, setIdLocalidadSeleccionada] = useState(null);
+//nuevo
+
 
 export default function Localidades() {
 
@@ -181,7 +188,7 @@ export default function Localidades() {
             variant="contained"
             startIcon={<NuevoIcon />}
             size="small"
-            onClick={() => setOpenABM(true)}
+            onClick={() => { setOpenABM(true) /*;setIdLocalidadSeleccionada(null) */ }}
             sx={{
               background: "#3b82f6",
               borderRadius: 2,
@@ -191,6 +198,7 @@ export default function Localidades() {
               height: 36,
               fontSize: 13
             }}
+
           >
             Nueva Localidad
           </Button>
@@ -199,6 +207,7 @@ export default function Localidades() {
             open={openABM}
             onClose={() => setOpenABM(false)}
             idLocalidad={localidades}
+            onSaved={() => { /*recargar la tabla*/ }}
           />
         </Box>
       </Box>
