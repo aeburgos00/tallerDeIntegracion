@@ -6,6 +6,10 @@ import transportistas from './routes/transportistas.route.js'
 import liquidaciones from './routes/liquidaciones.route.js'
 import localidades from './routes/localidades.route.js'
 import envios from "./routes/envios.route.js"
+import estados from "./routes/estados.route.js"
+import clientes from "./routes/clientes.route.js"
+import direcciones from "./routes/direcciones.route.js"
+import tarifas from "./routes/tarifas.route.js"
 
 const PORT = process.env.PORT || 3000
 
@@ -41,6 +45,18 @@ app.use('/envios/totales', envios)
 app.use('/envios/recientes',envios)
 
 app.use('/liquidaciones/totales',liquidaciones)
+
+app.use('/estados',estados)
+
+app.use('/clientes',clientes)
+
+app.use('/direcciones',direcciones)
+app.use('/direcciones/cliente/localidad',direcciones)
+
+app.use('/tarifas',tarifas)
+app.use('/tarifas/transportista/localidad',tarifas)
+
+
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`)

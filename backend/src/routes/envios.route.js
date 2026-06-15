@@ -5,12 +5,15 @@ import {
     obtenerEnviosPorTransportistas,
     obtenerEnviosTotales,
     obtenerEnviosRecientes,
-    exportarCSV
+    exportarCSV,
+    crearEnvio
 } from '../controllers/envios.controller.js'
 
 const router = express.Router();
 
 router.get('/', obtenerEnvios)
+
+router.post('/', crearEnvio)
 
 router.get("/exportar-csv",exportarCSV)
 

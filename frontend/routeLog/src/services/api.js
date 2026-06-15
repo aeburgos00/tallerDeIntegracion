@@ -130,4 +130,70 @@ export const exportarEnviosCSV = async (
   window.URL.revokeObjectURL(url)
 }
 
+export const crearEnvio = async (data) => {
+  const response = await fetch(
+    `${API_URL}/envios`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }
+  )
+  return response.json()
+}
+
+
+//Estados
+export const obtenerEstados= async () =>{
+  const response = await fetch(
+    `${API_URL}/estados`
+  )
+  return response.json()
+}
+
+//Clientes
+export const obtenerClientes = async () =>{
+  const response = await fetch(
+    `${API_URL}/clientes`
+  )
+  return response.json()
+}
+
+//Direcciones
+export const obtenerDirecciones = async () =>{
+  const response = await fetch(
+    `${API_URL}/clientes`
+  )
+  return response.json()
+}
+
+export const obtenerDireccionesPorClienteLocalidad  = async (
+  cliente,
+  localidad
+) =>{
+  const response = await fetch(
+    `${API_URL}/direcciones/cliente/localidad?cliente=${cliente}&localidad=${localidad}`
+  )
+  return response.json()
+}
+
+//Tarifas
+export const obtenerTarifas = async () =>{
+  const response = await fetch(
+    `${API_URL}/tarifas`
+  )
+  return response.json()
+}
+
+export const obtenerTarifasPorTransportistaLocalidad  = async (
+  transportista,
+  localidad
+) =>{
+  const response = await fetch(
+    `${API_URL}/tarifas/transportista/localidad?transportista=${transportista}&localidad=${localidad}`
+  )
+  return response.json()
+}
 
