@@ -1,7 +1,7 @@
 import pool from '../config/db.js'
 
-const obtenerLocalidades = async(req, res) => {
-    try{
+const obtenerLocalidades = async (req, res) => {
+    try {
         const result = await pool.query(`
             SELECT  id id_loc,
                     nombre,
@@ -13,13 +13,13 @@ const obtenerLocalidades = async(req, res) => {
                     case when estado is true then 'Activo' else 'Inactivo' end as estado
             FROM localidades
         `)
-        
+
         res.json({
-            ok:true,
-            data:result.rows
+            ok: true,
+            data: result.rows
         })
     }
-    catch(error){
+    catch (error) {
         res.status(500).json({
             ok: false,
             error: error.message
@@ -27,8 +27,8 @@ const obtenerLocalidades = async(req, res) => {
     }
 }
 
-const obtenerLocalidadesActivas = async(req, res) => {
-    try{
+const obtenerLocalidadesActivas = async (req, res) => {
+    try {
         const result = await pool.query(`
             SELECT  id id,
                     nombre,
@@ -41,13 +41,13 @@ const obtenerLocalidadesActivas = async(req, res) => {
             FROM localidades
             where estado is true
         `)
-        
+
         res.json({
-            ok:true,
-            data:result.rows
+            ok: true,
+            data: result.rows
         })
     }
-    catch(error){
+    catch (error) {
         res.status(500).json({
             ok: false,
             error: error.message
@@ -55,19 +55,19 @@ const obtenerLocalidadesActivas = async(req, res) => {
     }
 }
 
-const obtenerLocalidadesTotales = async(req, res) => {
-    try{
+const obtenerLocalidadesTotales = async (req, res) => {
+    try {
         const result = await pool.query(`
             SELECT *
             FROM vw_localidades_totales
         `)
-        
+
         res.json({
-            ok:true,
-            data:result.rows
+            ok: true,
+            data: result.rows
         })
     }
-    catch(error){
+    catch (error) {
         res.status(500).json({
             ok: false,
             error: error.message
@@ -75,4 +75,5 @@ const obtenerLocalidadesTotales = async(req, res) => {
     }
 }
 
-export {obtenerLocalidades, obtenerLocalidadesActivas, obtenerLocalidadesTotales}
+export { obtenerLocalidades, obtenerLocalidadesActivas, obtenerLocalidadesTotales }
+

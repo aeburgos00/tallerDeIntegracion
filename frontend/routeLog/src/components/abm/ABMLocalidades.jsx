@@ -106,59 +106,41 @@ export default function ABMLocalidades({
 
         // CUANDO TENGAN BACK
 
-        /*
+
         const cargarLocalidad = async () => {
-    
-          try {
-            const response = await obtenerLocalidadPorId(idLocalidad);
-            const localidad = response.data;
-    
-            setFormulario({    
-              nombre: localidad.nombre || "",    
-              codigo_postal: localidad.codigo_postal || "",
 
-              provincia: localidad.provincia || "", 
-              costo_envio: localidad.costo_envio || "",    
-              estado: localidad.estado
+            try {
+                const response = await obtenerLocalidadPorId(idLocalidad);
+                const localidad = response.data;
 
-            });
-              } catch(error){
- 
-            console.error(error);
-          }
+                setFormulario({
+                    nombre: localidad.nombre || "",
+                    codigo_postal: localidad.codigo_postal || "",
+
+                    provincia: localidad.provincia || "",
+                    costo_envio: localidad.costo_envio || "",
+                    estado: localidad.estado
+
+                });
+            } catch (error) {
+
+                console.error(error);
+            }
         }
 
         cargarLocalidad();
-        */
 
     }, [idLocalidad]);
-
-
 
     return (
 
         <FormularioABM
-
             open={open}
-
-            titulo={
-
-                idLocalidad
-
-                    ? "Modificar Localidad"
-
-                    : "Nueva Localidad"
-
-            }
-
+            titulo={idLocalidad ? "Modificar Localidad" : "Nueva Localidad"}
             onClose={onClose}
-
             onSave={handleGuardar}
-
         >
-
             <Box component="form">
-
                 <Grid container spacing={2}>
                     <Grid size={{ xs: 12, md: 6 }}>
                         <TextField

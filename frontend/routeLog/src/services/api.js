@@ -136,9 +136,76 @@ export const obtenerTransportistas = async () => {
   return data
 }
 
+export const crearEnvio = async (data) => {
+  const response = await fetch(
+    `${API_URL}/envios`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }
+  )
+  return response.json()
+}
+
+
+//Estados
+export const obtenerEstados = async () => {
+  const response = await fetch(
+    `${API_URL}/estados`
+  )
+  return response.json()
+}
+
+//Clientes
+export const obtenerClientes = async () => {
+  const response = await fetch(
+    `${API_URL}/clientes`
+  )
+  return response.json()
+}
+
+//Direcciones
+export const obtenerDirecciones = async () => {
+  const response = await fetch(
+    `${API_URL}/direcciones`
+  )
+  return response.json()
+}
+
+export const obtenerDireccionesPorClienteLocalidad = async (
+  cliente,
+  localidad
+) => {
+  const response = await fetch(
+    `${API_URL}/direcciones/cliente/localidad?cliente=${cliente}&localidad=${localidad}`
+  )
+  return response.json()
+}
+
+//Tarifas
+export const obtenerTarifas = async () => {
+  const response = await fetch(
+    `${API_URL}/tarifas`
+  )
+  return response.json()
+}
+
+export const obtenerTarifasPorTransportistaLocalidad = async (
+  transportista,
+  localidad
+) => {
+  const response = await fetch(
+    `${API_URL}/tarifas/transportista/localidad?transportista=${transportista}&localidad=${localidad}`
+  )
+  return response.json()
+}
+
 //Localidades - ABM
 
-/*
+
 
 export const obtenerLocalidadPorId = async (id) => {
   const response = await fetch(
@@ -188,4 +255,22 @@ export const eliminarLocalidad = async (id) => {
   return response.json()
 }
 
-*/
+export const exportarLocalidadesCSV = async () => {
+  const response = await fetch(
+    `${API_URL}/localidades/exportar-csv`,
+    { method: 'GET' }
+  )
+  const hoy = new Date()
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download =
+    'localidades_' +
+    hoy.toLocaleDateString('es-AR') +
+    '.csv'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}

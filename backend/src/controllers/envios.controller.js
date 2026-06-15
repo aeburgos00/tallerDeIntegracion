@@ -57,7 +57,7 @@ const obtenerEnvioPorId = async(req, res) => {
   try{
 
     const query = `
-      select  c.nombre_apellido cliente,
+      select  c.id id_cliente,
               d.descripcion direccion,
               l.id id_localidad,
               t.id id_transportista,
@@ -208,7 +208,7 @@ const obtenerEnviosRecientes = async (req,res) => {
                 c.nombre_apellido cliente,
                 d.descripcion || ', ' || l.nombre direccion,
                 u.nombre_apellido transportista,
-                ta.precio tarifa,
+                ta.id id_tarifa,
                 e.descripcion estado
             from paquetes p
             join clientes c on c.id = p.id_cliente
@@ -350,7 +350,117 @@ const exportarCSV = async (req, res) => {
   }
 }
 
+//POST
+const crearEnvio = async (req, res) => {
+  const {
+    id_cliente,
+    direccion,
+    id_localidad,
+    id_transportista,
+    fecha_envio,
+    id_tarifa
+  } = req.body
 
+  try {
+    //Validaciones
+    if(
+        !id_cliente ||
+        !direccion ||
+        !id_localidad ||
+        !id_transportista ||
+        !fecha_envio
+    ){
+    return res.status(400).json({
+        ok:false,
+        error:"Debe los datos obligatorios."
+    })
+    }
+
+    //Abro la transaccion
+    await pool.query("BEGIN")
+
+    //Busco la direccion a ver si existe
+    const query = `
+        SELECT id
+        FROM direcciones
+        WHERE descripcion = $1
+        AND id_cliente = $2
+        AND id_localidad = $3
+    `
+    const result = await pool.query(
+        query,
+        [direccion, id_cliente, id_localidad]
+    )
+    const idDireccion = result.rows[0].id
+    
+    //Si no existe, la cargo
+    if(!idDireccion){
+        const queryInsertDireccion = `
+            INSERT INTO direcciones(
+            descripcion,
+            id_cliente,
+            id_localidad
+            )
+            VALUES(
+            $1,
+            $2,
+            $3
+            )
+            RETURNING id
+        `
+        const direccionNueva = await pool.query(
+            queryInsertDireccion,
+            [direccion,id_cliente,id_localidad]
+            )
+        const idDireccion = direccionNueva.rows[0].id
+    }
+
+    //Agrego el nuevo envio
+    const queryInsertPaquete = `
+        INSERT INTO paquetes(
+            fecha,
+            id_cliente,
+            id_direccion,
+            id_transportista,
+            id_estado,
+            id_tarifa
+        )
+        VALUES(
+            $1,
+            $2,
+            $3,
+            $4,
+            $5,
+            $6
+        )
+        RETURNING id
+    `
+    const paqueteResult =
+    await pool.query(
+        queryInsertPaquete,
+        [ fecha_envio, id_cliente, idDireccion,
+        id_transportista, 1, tarifa.id ]
+    )
+    const idPaquete =paqueteResult.rows[0].id
+
+    res.status(201).json({
+        ok:true,
+        message:`Envío ${idPaquete} creado correctamente`
+    })
+
+    //Cierro la transaccion
+    await pool.query("COMMIT")
+
+  } catch(error) {
+    res.status(500).json({
+      ok:false,
+      error:error.message
+    })
+    await pool.query("ROLLBACK")
+    throw error
+  }
+
+}
 
 export {
   obtenerEnvios, 
@@ -358,5 +468,6 @@ export {
   obtenerEnviosPorTransportistas,
   obtenerEnviosTotales,
   obtenerEnviosRecientes,
-  exportarCSV
+  exportarCSV,
+  crearEnvio
 }

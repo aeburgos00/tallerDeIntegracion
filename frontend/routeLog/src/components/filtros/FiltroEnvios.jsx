@@ -5,6 +5,9 @@ import {
     InputAdornment,
 } from "@mui/material"
 
+import { useEffect, useState } from 'react'
+import { obtenerEstados } from "../../services/api";
+
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -14,7 +17,20 @@ export default function FiltroEnvios({
     filtros,
     setFiltros
 }) {
-  
+    
+    const [estados,setEstados] = useState([])
+    useEffect(()=>{
+        const obtenerDatos = async() =>{
+            try{
+                const result = await obtenerEstados()
+                setEstados(result.data)
+            } catch(error){
+                console.error(error)
+            }
+        }
+        obtenerDatos()
+    })
+
     const handleChange = (campo) => (e) => {
         setFiltros({
         ...filtros,
@@ -100,11 +116,16 @@ export default function FiltroEnvios({
         onChange={handleChange("estado")}
         size="small"
         >
-            <MenuItem value="">Todos</MenuItem>
+            {
+            estados.map((item) => (
+                <MenuItem value={item.id}>{item.descripcion}</MenuItem>
+            ))
+            }
+{/* 
             <MenuItem value="PENDIENTE">Pendiente</MenuItem>
             <MenuItem value="ENTREGADO">Entregado</MenuItem>
             <MenuItem value="VISITA_FALLIDA">Visita Fallida</MenuItem>
-            <MenuItem value="NO_VISITADO">No Visitado</MenuItem>
+            <MenuItem value="NO_VISITADO">No Visitado</MenuItem> */}
         </TextField>
 
         <TextField
