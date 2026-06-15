@@ -13,9 +13,9 @@ import {
 
 import { useEffect, useState } from 'react'
 
-import {obtenerEnviosPorTransportista} from '../services/api.js'
+import {obtenerEnviosPorTransportista} from '../../services/api.js'
 
-import useDateFilter from '../hooks/useDateFilter.js'
+import useDateFilter from '../../hooks/useDateFilter.js'
 
 export default function TableTransportistasResumen() {
     

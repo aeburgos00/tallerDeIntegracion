@@ -1,12 +1,14 @@
 import pool from '../config/db.js'
 
-export const obtenerLocalidadesTotales = async(req, res) => {
+const obtenerEstados = async(req, res) => {
     try{
-        const result = await pool.query(`
-            SELECT *
-            FROM vw_localidades_totales
-        `)
-        
+        const query = `
+            select  id,
+                    descripcion
+            from estados
+        `
+
+        const result = await pool.query(query,)    
         res.json({
             ok:true,
             data:result.rows
@@ -20,3 +22,4 @@ export const obtenerLocalidadesTotales = async(req, res) => {
     }
 }
 
+export {obtenerEstados}

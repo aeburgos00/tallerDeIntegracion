@@ -10,14 +10,12 @@ import {
   Divider,
 } from "@mui/material";
 
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import LogoutIcon from '@mui/icons-material/Logout'
 import IconButton from '@mui/material/IconButton'
 
-import {Link} from "react-router-dom"
-
-import menu from "./data"
+import {menuAdministrador} from "./datos/data"
 
 import logo from "./../assets/LogoSinTexto.svg"
 
@@ -114,32 +112,32 @@ export default function Sidebar()
           overflowY: "auto"
       }}
       >
-       {menu.map((e) => {
+       {menuAdministrador.map((e) => {
           const Icono = e.icono;
           
           return (
          <ListItem 
-        key={e.id} 
-        disablePadding
-        sx={{
-          mb:0.5
-        }}
-        >
-          <ListItemButton
-            component={Link}
-            to={e.ruta}
-            sx={{
-              borderRadius:3,
-              minHeight: 44,
-              "$&.Mui-selected": {
-                backgroundColor: "#eef2ff",
-                color: "#4338ca",
-                "& .MuiListItemIcon-root": {
-                      color: "#4338ca"
-                }
-              }
-            }}
+          key={e.id} 
+          disablePadding
+          sx={{
+            mb:0.5
+          }}
           >
+            <ListItemButton
+              component={Link}
+              to={e.ruta}
+              sx={{
+                borderRadius:3,
+                minHeight: 44,
+                "$&.Mui-selected": {
+                  backgroundColor: "#eef2ff",
+                  color: "#4338ca",
+                  "& .MuiListItemIcon-root": {
+                        color: "#4338ca"
+                  }
+                }
+              }}
+            >
             <ListItemIcon 
             sx={{
               minWidth: 40

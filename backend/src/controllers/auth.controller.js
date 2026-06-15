@@ -18,14 +18,18 @@ export const login = async (req, res) => {
     const result = await pool.query(
       `
       select
-        id,
-        usuario,
-        contraseña,
-        tipo_usuario,
-        nombre_apellido
-      from usuarios
-      where usuario = $1
-      and fecha_baja is null
+        u.id,
+        u.usuario,
+        u.contraseña,
+        u.tipo_usuario,
+        u.nombre_apellido,
+        u.correo,
+        u.dni,
+        t.costo_envio
+      from usuarios u
+      left join transportistas t on t.id_usuario = u.id
+      where u.usuario = $1
+      and u.fecha_baja is null
       `,
       [usuario]
     )
@@ -59,7 +63,11 @@ export const login = async (req, res) => {
       {
         id: user.id,
         rol: user.tipo_usuario,
-        nombre: user.nombre_apellido
+        nombre: user.nombre_apellido,
+        usuario: user.usuario,
+        correo: user.correo,
+        dni: user.dni,
+        costo_envio: user.costo_envio
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES }
@@ -70,7 +78,11 @@ export const login = async (req, res) => {
       user: {
         id: user.id,
         rol: user.tipo_usuario,
-        nombre: user.nombre_apellido
+        nombre: user.nombre_apellido,
+        usuario: user.usuario,
+        correo: user.correo,
+        dni: user.dni,
+        costo_envio: user.costo_envio
       }
     })
 
