@@ -1,9 +1,163 @@
-//import React from 'react'
+import {
+  Box,
+  Skeleton,
+  Typography,
+} from "@mui/material"
 
-const EnviosMob = () => {
+import { useEffect, useState } from "react"
+
+import useAuth from "../../hooks/useAuth"
+import FiltrosGenerico from "../../components/FiltrosGenericoMobile.jsx"
+import FiltroEnvios from "../../components/filtros/FiltroEnviosTransportista.jsx"
+import TablaPaginacionContenedor from "../../components/TablaPaginacionContenedor.jsx"
+import TablaEnviosTransportista from "../../components/tablasContenedor/TablaEnviosTransportista.jsx"
+
+import cardsEnvios from "../../components/datos/dataKPIEnvios.jsx"
+
+import { obtenerEnviosPorTransportistaId } from "../../services/api2.js"
+
+const KPICardMobile = ({ titulo, cantidad, icono: Icono, color, esUltimo }) => (
+  <Box sx={{
+    background: "#fff",
+    borderRadius: 3,
+    border: "1px solid #e5e7eb",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+    p: 2,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 1,
+    gridColumn: esUltimo ? "1 / -1" : "auto",
+  }}>
+    <Box sx={{
+      width: 36,
+      height: 36,
+      borderRadius: 2,
+      background: color + "20",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}>
+      <Icono sx={{ fontSize: 20, color }} />
+    </Box>
+    <Typography sx={{ fontSize: 22, fontWeight: 700, color: "#111827", lineHeight: 1 }}>
+      {cantidad}
+    </Typography>
+    <Typography sx={{ fontSize: 12, color: "#6b7280", fontWeight: 500 }}>
+      {titulo}
+    </Typography>
+  </Box>
+)
+
+
+export default function EnviosTransportista() {
+  const { user } = useAuth()
+
+  const [loadingKPI, setLoadingKPI] = useState(true)
+  const [envios, setEnvios] = useState([])
+  const [enviosTotales, setEnviosTotales] = useState({})
+
+  const [filtros, setFiltros] = useState({
+    fechaEnvio: null,
+    cliente: "",
+    direccion: "",
+    localidad: "",
+    estado: "",
+  })
+
+  const handleFilter = () => console.log(filtros)
+
+  const handleClear = () => {
+    setFiltros({
+      fechaEnvio: null,
+      cliente: "",
+      direccion: "",
+      localidad: "",
+      estado: "",
+    })
+  }
+
+  useEffect(() => {
+    const obtenerDatos = async () => {
+      try {
+        setLoadingKPI(true)
+        const result = await obtenerEnviosPorTransportistaId(user.id)
+        const data = result.data ?? []
+        setEnvios(data)
+
+        setEnviosTotales({
+          total: data.length,
+          entregados: data.filter(e => e.estado === "ENTREGADO").length,
+          no_visitados: data.filter(e => e.estado === "PENDIENTE").length,
+          visitas_fallidas: data.filter(e => e.estado === "CANCELADO").length,
+          pendientes: data.filter(e => e.estado === "EN_CAMINO").length,
+        })
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setLoadingKPI(false)
+      }
+    }
+
+    if (user?.id) obtenerDatos()
+  }, [user])
+
+  const cards = cardsEnvios.map(card => ({
+    ...card,
+    cantidad: Number(enviosTotales[card.id]) || 0,
+    descripcion: card.id === "total"
+      ? ""
+      : enviosTotales.total > 0
+        ? `${Math.round((enviosTotales[card.id] / enviosTotales.total) * 100)}% del total`
+        : ""
+  }))
+
   return (
-    <div>Envios</div>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pb: 4 }}>
+
+      {/* KPI — grilla 2 columnas mobile */}
+      <Box sx={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 1.5,
+      }}>
+        {loadingKPI
+          ? Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={110} />
+          ))
+          : cards.map((card, i) => (
+            <KPICardMobile
+              key={i}
+              titulo={card.titulo}
+              cantidad={card.cantidad}
+              icono={card.icono}
+              color={card.color}
+              esUltimo={i === cards.length - 1 && cards.length % 2 !== 0}
+            />
+          ))}
+      </Box>
+
+      {/* Filtros */}
+      <FiltrosGenerico onFilter={handleFilter} onClear={handleClear}>
+        <FiltroEnvios filtros={filtros} setFiltros={setFiltros} />
+      </FiltrosGenerico>
+
+      <Typography sx={{ color: "#777", fontSize: 13, textAlign: "center" }}>
+        Mostrando {cards[0].cantidad} envíos
+      </Typography>
+
+      {/* Tabla */}
+      <Box sx={{
+        backgroundColor: "#fff",
+        borderRadius: 2,
+        border: "1px solid #e5e7eb",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+      }}>
+        <TablaPaginacionContenedor>
+          <TablaEnviosTransportista envios={envios} />
+        </TablaPaginacionContenedor>
+      </Box>
+
+    </Box>
   )
 }
-
-export default EnviosMob
