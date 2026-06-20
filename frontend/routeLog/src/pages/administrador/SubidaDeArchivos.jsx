@@ -7,7 +7,6 @@ import {
 
 import ArchivoIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
-
 import FlechaIcon from '@mui/icons-material/ArrowCircleUpRounded';
 
 import { useDropzone } from 'react-dropzone'

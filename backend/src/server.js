@@ -1,6 +1,5 @@
 import express from 'express'
 import cors from 'cors'
-import transportistasRoutes from './routes/transportistas.route.js'
 
 import authRoutes from './routes/auth.route.js'
 
@@ -11,6 +10,14 @@ import liquidacionesTotales from './routes/liquidacionesTotales.route.js'
 import localidadesTotales from './routes/localidadesTotales.route.js'
 import liquidacionesPorTransportista from './routes/liquidacionesPorTransportista.route.js'
 
+import transportistas from './routes/transportistas.route.js'
+import liquidaciones from './routes/liquidaciones.route.js'
+import localidades from './routes/localidades.route.js'
+import envios from "./routes/envios.route.js"
+import estados from "./routes/estados.route.js"
+import clientes from "./routes/clientes.route.js"
+import direcciones from "./routes/direcciones.route.js"
+import tarifas from "./routes/tarifas.route.js"
 
 const PORT = process.env.PORT || 3000
 
@@ -33,7 +40,29 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes)
 
-app.use('/transportistas', transportistasRoutes)
+app.use('/transportistas', transportistas)
+app.use('/transportistas/activos', transportistas)
+
+app.use('/localidades', localidades)
+app.use('/localidades/activas', localidades)
+app.use('/localidades/totales', localidades)
+
+app.use('/envios', envios)
+app.use('/envios/transportistas',envios)
+app.use('/envios/totales', envios)
+app.use('/envios/recientes',envios)
+
+app.use('/liquidaciones/totales',liquidaciones)
+
+app.use('/estados',estados)
+
+app.use('/clientes',clientes)
+
+app.use('/direcciones',direcciones)
+app.use('/direcciones/cliente/localidad',direcciones)
+
+app.use('/tarifas',tarifas)
+app.use('/tarifas/transportista/localidad',tarifas)
 
 app.use('/envios-por-transportista',enviosPorTransportistasRoutes)
 app.use('/envios-totales', enviosTotales)
