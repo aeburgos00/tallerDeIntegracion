@@ -8,10 +8,10 @@ import {
 } from "@mui/material"
 
 const colEstado = {
-    PENDIENTE: { bg: "#fef9c3", color: "#854d0e" },
-    EN_CAMINO: { bg: "#dbeafe", color: "#1e40af" },
-    ENTREGADO: { bg: "#dcfce7", color: "#166534" },
-    CANCELADO: { bg: "#fee2e2", color: "#991b1b" },
+    1: { bg: "#fef9c3", color: "#854d0e" }, // Pendiente
+    2: { bg: "#dcfce7", color: "#166534" }, // Entregado
+    3: { bg: "#fee2e2", color: "#991b1b" }, // Visita fallida
+    4: { bg: "#dbeafe", color: "#1e40af" }, // No visitado
 }
 
 const headerSx = {
@@ -42,26 +42,12 @@ export default function TablaEnviosTransportista({ envios }) {
             </TableHead>
             <TableBody>
                 {envios.map((envio) => {
-                    const estilo = colEstado[envio.estado] ?? { bg: "#f3f4f6", color: "#374151" }
+                    const estilo = colEstado[envio.id_estado] ?? { bg: "#f3f4f6", color: "#374151" }
                     return (
                         <TableRow key={envio.id} hover>
-                            <TableCell sx={cellSx}>{envio.id}</TableCell>
-                            <TableCell sx={cellSx}>{envio.cliente}</TableCell>
-                            <TableCell sx={cellSx}>{envio.direccion}</TableCell>
-                            <TableCell sx={cellSx}>{envio.localidad}</TableCell>
                             <TableCell sx={cellSx}>{envio.fecha_envio}</TableCell>
                             <TableCell sx={cellSx}>
-                                <Chip
-                                    label={envio.estado}
-                                    size="small"
-                                    sx={{
-                                        background: estilo.bg,
-                                        color: estilo.color,
-                                        fontWeight: 600,
-                                        fontSize: 11,
-                                        borderRadius: 1,
-                                    }}
-                                />
+                                <Chip label={envio.estado} size="small" sx={{ background: estilo.bg, color: estilo.color, fontWeight: 600, fontSize: 11, borderRadius: 1 }} />
                             </TableCell>
                         </TableRow>
                     )

@@ -2,7 +2,6 @@ import {
     TextField,
     Box,
     Grid,
-    MenuItem,
     InputAdornment
 } from "@mui/material";
 
@@ -10,105 +9,67 @@ import { useEffect, useState } from "react";
 
 import FormularioABM from "../../layouts/FormularioABM";
 
-// IMPORTAR CUANDO EXISTA LA API
-/*
 import {
-  crearLocalidad,
-  modificarLocalidad,
-  obtenerLocalidadPorId
+    crearLocalidad,
+    modificarLocalidad,
+    obtenerLocalidadPorId
 } from "../../services/api";
-*/
+
+const formularioInicial = {
+    nombre: "",
+    codigo_postal: "",
+    provincia: "",
+    costo_envio: "",
+    estado: true
+}
 
 export default function ABMLocalidades({
     open,
     onClose,
-    idLocalidad
+    idLocalidad,
+    onSaved
 }) {
 
-    const [formulario, setFormulario] = useState({
-        nombre: "",
-        codigo_postal: "",
-        provincia: "",
-        costo_envio: "",
-        estado: true
-    });
+    const [formulario, setFormulario] = useState(formularioInicial);
 
     const handleChange = (campo) => (e) => {
-
         setFormulario(prev => ({
-
             ...prev,
-
             [campo]: e.target.value
-
         }));
-
     };
 
     const handleGuardar = async () => {
-
         try {
-
-            if (idLocalidad) {
-
-                console.log("Modificar localidad");
-
-                console.log(formulario);
-
-                /*
-                await modificarLocalidad(
-                  idLocalidad,
-                  formulario
-                )
-                */
-
-            } else {
-
-                console.log("Crear localidad");
-
-                console.log(formulario);
-
-                /*
-                await crearLocalidad(
-                  formulario
-                )
-                */
-
+            const payload = {
+                ...formulario,
+                costo_envio: Number(formulario.costo_envio)
             }
 
-            onClose();
+            if (idLocalidad) {
+                await modificarLocalidad(idLocalidad, payload)
+            } else {
+                await crearLocalidad(payload)
+            }
+
+            onSaved?.()
+            onClose()
 
         } catch (error) {
-
             console.error(error);
-
         }
-
     };
 
     useEffect(() => {
 
+        if (!open) return
+
         if (!idLocalidad) {
-
-            setFormulario({
-
-                nombre: "",
-                codigo_postal: "",
-                provincia: "",
-                costo_envio: "",
-                estado: true
-
-            });
-
+            setFormulario(formularioInicial);
             return;
-
         }
 
-        // CUANDO TENGAN BACK
-
-
         const cargarLocalidad = async () => {
-
             try {
                 const response = await obtenerLocalidadPorId(idLocalidad);
                 const localidad = response.data;
@@ -116,24 +77,20 @@ export default function ABMLocalidades({
                 setFormulario({
                     nombre: localidad.nombre || "",
                     codigo_postal: localidad.codigo_postal || "",
-
                     provincia: localidad.provincia || "",
                     costo_envio: localidad.costo_envio || "",
                     estado: localidad.estado
-
                 });
             } catch (error) {
-
                 console.error(error);
             }
         }
 
         cargarLocalidad();
 
-    }, [idLocalidad]);
+    }, [idLocalidad, open]);
 
     return (
-
         <FormularioABM
             open={open}
             titulo={idLocalidad ? "Modificar Localidad" : "Nueva Localidad"}
@@ -162,7 +119,6 @@ export default function ABMLocalidades({
                         />
                     </Grid>
 
-
                     <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                             fullWidth
@@ -172,6 +128,7 @@ export default function ABMLocalidades({
                             onChange={handleChange("provincia")}
                         />
                     </Grid>
+
                     <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                             fullWidth
@@ -183,19 +140,13 @@ export default function ABMLocalidades({
                             slotProps={{
                                 input: {
                                     startAdornment:
-                                        <InputAdornment position="start">
-                                            $
-                                        </InputAdornment>
+                                        <InputAdornment position="start">$</InputAdornment>
                                 }
                             }}
                         />
                     </Grid>
                 </Grid>
-
             </Box>
-
         </FormularioABM>
-
     )
-
 }

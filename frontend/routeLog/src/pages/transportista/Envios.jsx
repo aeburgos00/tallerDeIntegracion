@@ -49,6 +49,13 @@ const KPICardMobile = ({ titulo, cantidad, icono: Icono, color, esUltimo }) => (
   </Box>
 )
 
+const filtrosIniciales = {
+  fechaEnvio: null,
+  cliente: "",
+  direccion: "",
+  localidad: "",
+  estado: "",
+}
 
 export default function EnviosTransportista() {
   const { user } = useAuth()
@@ -56,51 +63,39 @@ export default function EnviosTransportista() {
   const [loadingKPI, setLoadingKPI] = useState(true)
   const [envios, setEnvios] = useState([])
   const [enviosTotales, setEnviosTotales] = useState({})
+  const [filtros, setFiltros] = useState(filtrosIniciales)
 
-  const [filtros, setFiltros] = useState({
-    fechaEnvio: null,
-    cliente: "",
-    direccion: "",
-    localidad: "",
-    estado: "",
-  })
+  const obtenerDatos = async (filtrosActivos = {}) => {
+    try {
+      setLoadingKPI(true)
+      const result = await obtenerEnviosPorTransportistaId(user.id, filtrosActivos)
+      const data = result.data ?? []
+      setEnvios(data)
 
-  const handleFilter = () => console.log(filtros)
-
-  const handleClear = () => {
-    setFiltros({
-      fechaEnvio: null,
-      cliente: "",
-      direccion: "",
-      localidad: "",
-      estado: "",
-    })
+      setEnviosTotales({
+        total: data.length,
+        pendientes: data.filter(e => e.id_estado === 1).length,
+        entregados: data.filter(e => e.id_estado === 2).length,
+        visitas_fallidas: data.filter(e => e.id_estado === 3).length,
+        no_visitados: data.filter(e => e.id_estado === 4).length,
+      })
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoadingKPI(false)
+    }
   }
 
   useEffect(() => {
-    const obtenerDatos = async () => {
-      try {
-        setLoadingKPI(true)
-        const result = await obtenerEnviosPorTransportistaId(user.id)
-        const data = result.data ?? []
-        setEnvios(data)
-
-        setEnviosTotales({
-          total: data.length,
-          entregados: data.filter(e => e.estado === "ENTREGADO").length,
-          no_visitados: data.filter(e => e.estado === "PENDIENTE").length,
-          visitas_fallidas: data.filter(e => e.estado === "CANCELADO").length,
-          pendientes: data.filter(e => e.estado === "EN_CAMINO").length,
-        })
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setLoadingKPI(false)
-      }
-    }
-
-    if (user?.id) obtenerDatos()
+    if (user?.id) obtenerDatos(filtros)
   }, [user])
+
+  const handleFilter = () => obtenerDatos(filtros)
+
+  const handleClear = () => {
+    setFiltros(filtrosIniciales)
+    obtenerDatos(filtrosIniciales)
+  }
 
   const cards = cardsEnvios.map(card => ({
     ...card,

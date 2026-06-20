@@ -204,9 +204,6 @@ export const obtenerTarifasPorTransportistaLocalidad = async (
 }
 
 //Localidades - ABM
-
-
-
 export const obtenerLocalidadPorId = async (id) => {
   const response = await fetch(
     `${API_URL}/localidades/${id}`
@@ -273,4 +270,12 @@ export const exportarLocalidadesCSV = async () => {
   link.click()
   link.remove()
   window.URL.revokeObjectURL(url)
+}
+
+export const cambiarEstadoLocalidad = async (id) => {
+  const response = await fetch(
+    `${API_URL}/localidades/${id}/estado`,
+    { method: 'PATCH' }
+  )
+  return response.json()
 }
