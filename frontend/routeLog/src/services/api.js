@@ -150,6 +150,29 @@ export const crearEnvio = async (data) => {
   return response.json()
 }
 
+export const modificarEnvio = async (id, data) => {
+  const response = await fetch(
+    `${API_URL}/envios/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }
+  )
+
+  return response.json()
+}
+
+export const cancelarEnvio = async (id) => {
+  const response = await fetch(
+    `${API_URL}/envios/${id}/cancelar`,
+    { method: "PUT" }
+  )
+  return response.json()
+}
+
 
 //Estados
 export const obtenerEstados = async () => {
@@ -163,6 +186,20 @@ export const obtenerEstados = async () => {
 export const obtenerClientes = async () => {
   const response = await fetch(
     `${API_URL}/clientes`
+  )
+  return response.json()
+}
+
+export const crearCliente = async (data) => {
+  const response = await fetch(
+    `${API_URL}/clientes`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }
   )
   return response.json()
 }

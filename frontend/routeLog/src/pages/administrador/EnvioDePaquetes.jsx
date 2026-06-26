@@ -3,6 +3,8 @@ import {
   Button,
   Skeleton,
   Typography,
+  Snackbar,
+  Alert
 } from "@mui/material"
 
 import DescargaIcon from '@mui/icons-material/ArrowDownward';
@@ -46,6 +48,11 @@ export default function EnvioDePaquetes() {
   const [openABM, setOpenABM] = useState(false);
   const [envioSeleccionado, setEnvioSeleccionado] = useState(null)
 
+  const [mensaje, setMensaje] = useState("")
+  const [tipoMensaje, setTipoMensaje] = useState("success")
+
+  const [refreshTabla, setRefreshTabla] = useState(0)
+
   const handleNuevo = () => {
     setEnvioSeleccionado(null);
     setOpenABM(true)
@@ -54,6 +61,11 @@ export default function EnvioDePaquetes() {
   const handleEditar = (envio) => {
     setEnvioSeleccionado(envio)
     setOpenABM(true)
+  }
+
+  const handleClose = () => {
+    setOpenABM(false)
+    setEnvioSeleccionado(null)
   }
 
   const handleFilter = () => {
@@ -238,9 +250,24 @@ export default function EnvioDePaquetes() {
 
            <ABMEnvios
               open={openABM}
-              onClose={() => setOpenABM(false)}
+              onClose={handleClose}
               idEnvio={envioSeleccionado}
+              onSuccess={(mensaje)=>{
+                setMensaje(mensaje)
+                setTipoMensaje("success")
+                setRefreshTabla(prev => prev + 1)
+                setOpenABM(false)
+              }}
             />
+            <Snackbar
+              open={!!mensaje}
+              autoHideDuration={4000}
+              onClose={() => setMensaje("")}
+            >
+              <Alert severity={tipoMensaje}>
+                {mensaje}
+              </Alert>
+            </Snackbar>
 
         </Box>
       </Box>
@@ -255,7 +282,11 @@ export default function EnvioDePaquetes() {
         "0 1px 2px rgba(0,0,0,0.04)"
       }}>
         <TablaPaginacionContenedor>
-          <TablaEnvios onEdit={handleEditar}/>
+          <TablaEnvios 
+          onEdit={handleEditar}
+          onClose={handleClose}
+          refresh={refreshTabla}
+          />
         </TablaPaginacionContenedor>
       </Box>
 

@@ -62,7 +62,8 @@ const obtenerEnvioPorId = async (req, res) => {
               l.id id_localidad,
               t.id id_transportista,
               TO_CHAR(p.fecha,'DD/MM/YYYY') fecha_envio,
-              tar.precio tarifa
+              tar.precio tarifa,
+              e.id id_estado
       from paquetes p
       join transportistas t on p.id_transportista = t.id
       join usuarios u on u.id = t.id_usuario
@@ -274,42 +275,15 @@ const exportarCSV = async (req, res) => {
         )
 
         const fields = [
-            {
-                label: 'Código',
-                value: 'id_envio'
-            },
-            {
-                label: 'Fecha Envío',
-                value: 'fecha_envio'
-            },
-            {
-                label: 'Cliente',
-                value: 'cliente'
-            },
-            {
-                label: 'Dirección',
-                value: 'direccion'
-            },
-            {
-                label: 'Localidad',
-                value: 'localidad'
-            },
-            {
-                label: 'Transportista',
-                value: 'transportista'
-            },
-            {
-                label: 'Estado',
-                value: 'estado'
-            },
-            {
-                label: 'Tarifa',
-                value: 'tarifa'
-            },
-            {
-                label: 'Liquidación',
-                value: 'liquidacion'
-            }
+            { label: 'Código', value: 'id_envio' },
+            { label: 'Fecha Envío', value: 'fecha_envio' },
+            { label: 'Cliente', value: 'cliente' },
+            { label: 'Dirección', value: 'direccion' },
+            { label: 'Localidad', value: 'localidad' },
+            { label: 'Transportista', value: 'transportista' },
+            { label: 'Estado', value: 'estado' },
+            { label: 'Tarifa', value: 'tarifa' },
+            { label: 'Liquidación', value: 'liquidacion' }
         ]
 
         const datosCSV = result.rows.map(item => ({
@@ -391,7 +365,8 @@ const crearEnvio = async (req, res) => {
             query,
             [direccion, id_cliente, id_localidad]
         )
-        const idDireccion = result.rows[0].id
+
+        let idDireccion = result?.rows[0]?.id || null
 
         //Si no existe, la cargo
         if (!idDireccion) {
@@ -412,7 +387,7 @@ const crearEnvio = async (req, res) => {
                 queryInsertDireccion,
                 [direccion, id_cliente, id_localidad]
             )
-            const idDireccion = direccionNueva.rows[0].id
+            idDireccion = direccionNueva.rows[0].id
         }
 
         //Agrego el nuevo envio
@@ -439,17 +414,20 @@ const crearEnvio = async (req, res) => {
             await pool.query(
                 queryInsertPaquete,
                 [fecha_envio, id_cliente, idDireccion,
-                    id_transportista, 1, tarifa.id]
+                    id_transportista, 1, id_tarifa]
             )
-        const idPaquete = paqueteResult.rows[0].id
 
-        res.status(201).json({
-            ok: true,
-            message: `Envío ${idPaquete} creado correctamente`
-        })
+        const nuevoEnvio = paqueteResult.rows[0]
+        const idPaquete = nuevoEnvio.id
 
         //Cierro la transaccion
         await pool.query("COMMIT")
+
+        res.status(201).json({
+            ok: true,
+            data: nuevoEnvio,
+            message: `Envío ${idPaquete} creado correctamente`
+        })
 
     } catch (error) {
         res.status(500).json({
@@ -511,6 +489,165 @@ const obtenerEnviosPorTransportistaId = async (req, res) => {
     }
 }
 
+//PUT
+const modificarEnvio = async (req, res) => {
+    const { id } = req.params
+    const {
+        id_transportista,
+        fecha_envio,
+        id_estado
+    } = req.body
+
+    try {
+        //Validaciones
+        if (
+            !id_transportista ||
+            !fecha_envio ||
+            !id_estado
+        ) {
+            return res.status(400).json({
+                ok: false,
+                error: "Debe los datos obligatorios."
+            })
+        }
+
+        await pool.query("BEGIN")
+
+        const queryUpdate = `
+            UPDATE paquetes
+            SET
+                fecha = $1,
+                id_transportista = $2,
+                id_estado = $3
+            WHERE id = $4
+            RETURNING id
+        `
+        const paqueteResult =
+            await pool.query(
+                queryUpdate,
+                [fecha_envio, id_transportista, id_estado, id]
+            )
+
+        await pool.query("COMMIT")
+
+        if (paqueteResult.rowCount === 0) {
+            return res.status(404).json({
+                ok: false,
+                error: "Envío no encontrado"
+            })
+        }
+
+        res.status(200).json({
+            ok: true,
+            message: `Envío ${id} modificado correctamente`
+        })
+    } catch (error) {
+        res.status(500).json({
+            ok: false,
+            error: error.message
+        })
+        await pool.query("ROLLBACK")
+        throw error
+    }
+
+}
+
+const cancelarEnvio = async (req, res) => {
+    const { id } = req.params
+
+    try {
+        const paqueteResult = await pool.query(
+            `
+      SELECT
+        id,
+        id_estado
+      FROM paquetes
+      WHERE id = $1
+      `,
+            [id]
+        )
+        if (paqueteResult.rowCount === 0) {
+            return res.status(404).json({
+                ok: false,
+                error: "Envío no encontrado"
+            })
+        }
+
+        const paquete = paqueteResult.rows[0]
+
+        const estadoCancelado = await pool.query(
+            `
+    SELECT id
+    FROM estados
+    WHERE UPPER(descripcion) = 'CANCELADO'
+    `
+        )
+        const idEstadoCancelado = estadoCancelado.rows[0].id
+        // Ya cancelado
+        if (paquete.id_estado === idEstadoCancelado) {
+            return res.status(400).json({
+                ok: false,
+                error: "El envío ya se encuentra cancelado"
+            })
+        }
+
+        const estadoEntregado = await pool.query(
+            `
+    SELECT id
+    FROM estados
+    WHERE UPPER(descripcion) = 'ENTREGADO'
+    `
+        )
+        const idEstadoEntregado = estadoEntregado.rows[0].id
+        // Entregado
+        if (paquete.id_estado === idEstadoEntregado) {
+            return res.status(400).json({
+                ok: false,
+                error: "No se puede cancelar un envío entregado"
+            })
+        }
+
+        // Verifico si fue liquidado
+        const liquidacionResult = await pool.query(
+            `
+      SELECT 1
+      FROM liquidaciones
+      WHERE id_paquete = $1
+      LIMIT 1
+      `,
+            [id]
+        )
+        if (liquidacionResult.rowCount > 0) {
+            return res.status(400).json({
+                ok: false,
+                error: "No se puede cancelar un envío liquidado"
+            })
+        }
+
+        await pool.query(
+            `
+      UPDATE paquetes
+      SET id_estado = $1
+      WHERE id = $2
+      `,
+            [idEstadoCancelado, id]
+        )
+
+        return res.status(200).json({
+            ok: true,
+            message: `Envío ${id} cancelado correctamente`
+        })
+
+    } catch (error) {
+
+        return res.status(500).json({
+            ok: false,
+            error: error.message
+        })
+
+    }
+}
+
 
 export {
     obtenerEnvios,
@@ -520,5 +657,7 @@ export {
     obtenerEnviosRecientes,
     exportarCSV,
     crearEnvio,
-    obtenerEnviosPorTransportistaId
+    obtenerEnviosPorTransportistaId,
+    modificarEnvio,
+    cancelarEnvio
 }
