@@ -1,25 +1,27 @@
 import {
   Box,
-  Skeleton
+  Skeleton,
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem 
 } from "@mui/material"
 
 import TableResumenCard from "../../components/TableResumenCard.jsx"
 import TableLiquidacionesResumen from "../../components/TableLiquidacionesResumen.jsx"
 import SummaryCard from "../../components/SummaryCard"
 
-import { obtenerLiquidacionesPorTransportista } from '../../services/api.js'
-import { obtenerTransportistas } from "../../services/api.js"
+import {cardsLiquidacionesAdmin} from "../../components/datos/dataKPILiquidaciones.jsx";
 
-import AbcIcon from '@mui/icons-material/Abc';
-import ValorTotalIcon from '@mui/icons-material/MonetizationOnOutlined'
-import EnviosIcon from '@mui/icons-material/LocalShippingOutlined'
-import { FormControl, InputLabel, Select, MenuItem } from "@mui/material"
+import { 
+  obtenerLiquidacionesTotales,
+  obtenerTransportistas 
+} from "../../services/api.js"
 
 
 import { useEffect, useState } from "react"
 
 import useDateFilter from "../../hooks/useDateFilter"
-import { obtenerEnviosPorTransportista } from "../../services/api.js"
 
 export default function Liquidaciones() {
 
@@ -32,23 +34,14 @@ export default function Liquidaciones() {
   const { fechaDesde, fechaHasta } = useDateFilter()
   
 
-  
-  
-  const kpis = [
-    {
-      titulo: "Total a Liquidar",
-      valor: "$" + Number(liqTotales.valor_total || 0).toLocaleString("es-AR"),
-      icono: ValorTotalIcon,
-      color: "#65a30d"
-    },
-    {
-      titulo: "Cantidad de Envíos",
-      valor: liqTotales.cantidad_envios || 0,
-      icono: EnviosIcon,
-      color: "#3b82f6"
-    }
-  ]
-
+  const kpis = cardsLiquidacionesAdmin.map(card => ({
+    ...card,
+    valor: card.id === "pct_paquetes_liquidados"
+      ? Number(liqTotales[card.id] || 0) + "%"
+      : card.id === "cantidad_envios"
+        ? Number(liqTotales[card.id] || 0)
+        : "$" + Number(liqTotales[card.id] || 0).toLocaleString("es-AR")
+  }))
 
   useEffect(() => {
     const traerDatos = async () => {
@@ -61,7 +54,7 @@ export default function Liquidaciones() {
           fechaHasta ? fechaHasta.format("YYYY-MM-DD") : null
         )
 
-        setLiqTotales(result.data[0])
+        setLiqTotales(result.data?.[0] || {})
 
       } catch (error) {
         console.error(error)
@@ -107,28 +100,36 @@ export default function Liquidaciones() {
       gap: 2
     }}
     >
-      {/* KPI x4 */}
-      <Box 
-      sx={{
-        display:"grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap:2
-      }}
+      {/* KPI x5 */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: 2
+        }}
       >
         {
-        kpis.map((e, index) => (
-          <SummaryCard 
-            key={index}
-            titulo={e.titulo}
-            cantidad={loading ? "..." : e.valor}
-            icono={e.icono}
-            color={e.color}
-          />
-        ))
+          loading ?
+            Array.from({ length: kpis.length }).map((_, index) => (
+              <Skeleton
+                key={index}
+                variant="rounded"
+                height={112}
+              />
+            ))
+          :
+            kpis.map((e, index) => (
+              <SummaryCard 
+                key={index}
+                titulo={e.titulo}
+                cantidad={e.valor}
+                icono={e.icono}
+                color={e.color}
+                height={112}
+              />
+            ))
         }
-  
       </Box>
-
       {/* Filtros */}
       <Box
         sx={{

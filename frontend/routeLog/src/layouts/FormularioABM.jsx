@@ -16,7 +16,8 @@ export default function FormularioABM({
   titulo,
   onClose,
   onSave,
-  children
+  children,
+  loading
 }) {
   return (
     <Dialog
@@ -70,12 +71,13 @@ export default function FormularioABM({
         <Button
           variant="contained"
           onClick={onSave}
+          disabled={loading}
         sx={{
           background:colores.azul,
           borderRadius:2,
           textTransform: "none"
         }}>
-          Guardar
+          {loading ? "Guardando..." : "Guardar"}
         </Button>
       </DialogActions>
     </Dialog>

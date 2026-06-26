@@ -29,24 +29,14 @@ export default function TableLiquidacionesResumen({transportista}) {
                 fechaDesde ? fechaDesde.format("YYYY-MM-DD") : null,
                 fechaHasta ? fechaHasta.format("YYYY-MM-DD") : null
             )
-
-            console.log("Result Liq:", result)
-
-            {/*setData(result.data)*/}
             
             const lista = result.data || result
 
             if (!lista || lista.length === 0) {
-                {/*Para probar si no hay datos en bd */}
-                setData([
-                    { Transportista: "Juan Perez", EnviosTotales: 15, ImporteTotal: 25000 },
-                    { Transportista: "Maria Gomez", EnviosTotales: 22, ImporteTotal: 37000 }
-                ])
+                setData([])
             } else {
-            setData(lista)
+                setData(lista)
             }
-
-
 
             } catch (error) {
             console.error(error)
@@ -87,12 +77,21 @@ export default function TableLiquidacionesResumen({transportista}) {
                     <TableRow key={index}>
                         <TableCell><Skeleton /></TableCell>
                         <TableCell><Skeleton /></TableCell>
+                        <TableCell><Skeleton /></TableCell>
                     </TableRow>
                 ))
                 :
+                /*Si no hay datos en la fecha, muestra un mensaje*/ 
+                data.length === 0 ? (
+                    <TableRow>
+                        <TableCell colSpan={3} align="center">
+                            No hay liquidaciones para mostrar
+                        </TableCell>
+                    </TableRow>
+                ):
                 data
                     .filter(item => {
-                        if (!transportista) return true
+                        if (!transportista || transportista === "Todos") return true
                         return `Transportista ${item.id_transportista}` === transportista
                     })
                     .map((item, index) => (
