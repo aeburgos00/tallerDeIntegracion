@@ -2,7 +2,10 @@ import {
     TextField,
     Box,
     Grid,
-    InputAdornment
+    InputAdornment,
+    Autocomplete,
+    Snackbar,
+    Alert
 } from "@mui/material";
 
 import { useEffect, useState } from "react";
@@ -12,7 +15,8 @@ import FormularioABM from "../../layouts/FormularioABM";
 import {
     crearLocalidad,
     modificarLocalidad,
-    obtenerLocalidadPorId
+    obtenerLocalidadPorId,
+    obtenerProvincias
 } from "../../services/api";
 
 const formularioInicial = {
@@ -27,10 +31,20 @@ export default function ABMLocalidades({
     open,
     onClose,
     idLocalidad,
-    onSaved
+    onSuccess
 }) {
 
     const [formulario, setFormulario] = useState(formularioInicial);
+    const [provincias, setProvincias] = useState([]);
+
+    const [mensaje, setMensaje] = useState("");
+    const [error, setError] = useState(false);
+    const [guardando, setGuardando] = useState(false);
+
+    const provinciaSeleccionada =
+        provincias.find(
+            p => p.nombre.toLowerCase() === formulario.provincia?.toLowerCase()
+        ) ?? null;
 
     const handleChange = (campo) => (e) => {
         setFormulario(prev => ({
@@ -39,26 +53,83 @@ export default function ABMLocalidades({
         }));
     };
 
+    const validarFormulario = () => {
+        if (!formulario.nombre?.trim()) {
+            return "Debe ingresar el nombre de la localidad";
+        }
+        if (!formulario.codigo_postal?.trim()) {
+            return "Debe ingresar el código postal";
+        }
+        if (!formulario.provincia) {
+            return "Debe seleccionar la provincia";
+        }
+        if (
+            formulario.costo_envio === "" ||
+            Number(formulario.costo_envio) <= 0
+        ) {
+            return "El costo de envío debe ser mayor a 0";
+        }
+        return null;
+    };
+
+    const limpiarFormulario = () => {
+        setFormulario(formularioInicial);
+    };
+
     const handleGuardar = async () => {
+        const errorValidacion = validarFormulario();
+
+        if (errorValidacion) {
+            setMensaje(errorValidacion);
+            setError(true);
+            return;
+        }
+
         try {
+            setGuardando(true);
+
             const payload = {
                 ...formulario,
                 costo_envio: Number(formulario.costo_envio)
+            };
+
+            const result = idLocalidad
+                ? await modificarLocalidad(idLocalidad, payload)
+                : await crearLocalidad(payload);
+
+            if (!result.ok) {
+                throw new Error(result.error || "Ocurrió un error al guardar");
             }
 
-            if (idLocalidad) {
-                await modificarLocalidad(idLocalidad, payload)
-            } else {
-                await crearLocalidad(payload)
-            }
+            onSuccess?.(
+                idLocalidad
+                    ? "Localidad modificada correctamente"
+                    : "Localidad creada correctamente"
+            );
 
-            onSaved?.()
-            onClose()
+            limpiarFormulario();
+            onClose();
 
         } catch (error) {
-            console.error(error);
+            setMensaje(error?.message || "Ocurrió un error al guardar");
+            setError(true);
+        } finally {
+            setGuardando(false);
         }
     };
+
+    // Combo de provincias — se carga una sola vez
+    useEffect(() => {
+        const cargarProvincias = async () => {
+            try {
+                const response = await obtenerProvincias();
+                setProvincias(response.data ?? []);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        cargarProvincias();
+    }, []);
 
     useEffect(() => {
 
@@ -96,6 +167,7 @@ export default function ABMLocalidades({
             titulo={idLocalidad ? "Modificar Localidad" : "Nueva Localidad"}
             onClose={onClose}
             onSave={handleGuardar}
+            loading={guardando}
         >
             <Box component="form">
                 <Grid container spacing={2}>
@@ -120,12 +192,28 @@ export default function ABMLocalidades({
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 6 }}>
-                        <TextField
+                        <Autocomplete
                             fullWidth
-                            required
-                            label="Provincia"
-                            value={formulario.provincia}
-                            onChange={handleChange("provincia")}
+                            options={provincias}
+                            value={provinciaSeleccionada}
+                            getOptionLabel={(option) => option.nombre}
+                            isOptionEqualToValue={(option, value) =>
+                                option.id === value.id
+                            }
+                            onChange={(event, value) => {
+                                setFormulario(prev => ({
+                                    ...prev,
+                                    provincia: value?.nombre ?? ""
+                                }))
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    fullWidth
+                                    required
+                                    label="Provincia"
+                                />
+                            )}
                         />
                     </Grid>
 
@@ -147,6 +235,17 @@ export default function ABMLocalidades({
                     </Grid>
                 </Grid>
             </Box>
+
+            <Snackbar
+                open={!!mensaje}
+                autoHideDuration={4000}
+                onClose={() => setMensaje("")}
+            >
+                <Alert severity={error ? "error" : "success"}>
+                    {mensaje}
+                </Alert>
+            </Snackbar>
+
         </FormularioABM>
     )
 }

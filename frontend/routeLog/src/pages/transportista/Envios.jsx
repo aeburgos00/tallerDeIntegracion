@@ -2,6 +2,8 @@ import {
   Box,
   Skeleton,
   Typography,
+  Snackbar,
+  Alert
 } from "@mui/material"
 
 import { useEffect, useState } from "react"
@@ -11,11 +13,15 @@ import FiltrosGenerico from "../../components/FiltrosGenericoMobile.jsx"
 import FiltroEnvios from "../../components/filtros/FiltroEnviosTransportista.jsx"
 import TablaPaginacionContenedor from "../../components/TablaPaginacionContenedor.jsx"
 import TablaEnviosTransportista from "../../components/tablasContenedor/TablaEnviosTransportista.jsx"
+import PanelDetalleEnvio from "../../components/abm/PanelDetalleEnvio.jsx"
 
 import cardsEnvios from "../../components/datos/dataKPIEnvios.jsx"
 
-import { obtenerEnviosPorTransportistaId } from "../../services/api2.js"
+import { obtenerEnviosPorTransportistaId } from "../../services/apiTransportistas.js"
 
+import KPICardMobile from "../../components/KPICardMobile.jsx"
+
+/*
 const KPICardMobile = ({ titulo, cantidad, icono: Icono, color, esUltimo }) => (
   <Box sx={{
     background: "#fff",
@@ -47,7 +53,7 @@ const KPICardMobile = ({ titulo, cantidad, icono: Icono, color, esUltimo }) => (
       {titulo}
     </Typography>
   </Box>
-)
+)*/
 
 const filtrosIniciales = {
   fechaEnvio: null,
@@ -64,6 +70,12 @@ export default function EnviosTransportista() {
   const [envios, setEnvios] = useState([])
   const [enviosTotales, setEnviosTotales] = useState({})
   const [filtros, setFiltros] = useState(filtrosIniciales)
+
+  const [openPanel, setOpenPanel] = useState(false)
+  const [envioSeleccionado, setEnvioSeleccionado] = useState(null)
+
+  const [mensaje, setMensaje] = useState("")
+  const [tipoMensaje, setTipoMensaje] = useState("success")
 
   const obtenerDatos = async (filtrosActivos = {}) => {
     try {
@@ -97,6 +109,17 @@ export default function EnviosTransportista() {
     obtenerDatos(filtrosIniciales)
   }
 
+  const handleVerMas = (envio) => {
+    setEnvioSeleccionado(envio)
+    setOpenPanel(true)
+  }
+
+  const handleSuccessPanel = (msg) => {
+    setMensaje(msg)
+    setTipoMensaje("success")
+    obtenerDatos(filtros)
+  }
+
   const cards = cardsEnvios.map(card => ({
     ...card,
     cantidad: Number(enviosTotales[card.id]) || 0,
@@ -110,12 +133,7 @@ export default function EnviosTransportista() {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pb: 4 }}>
 
-      {/* KPI — grilla 2 columnas mobile */}
-      <Box sx={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: 1.5,
-      }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
         {loadingKPI
           ? Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} variant="rounded" height={110} />
@@ -132,7 +150,6 @@ export default function EnviosTransportista() {
           ))}
       </Box>
 
-      {/* Filtros */}
       <FiltrosGenerico onFilter={handleFilter} onClear={handleClear}>
         <FiltroEnvios filtros={filtros} setFiltros={setFiltros} />
       </FiltrosGenerico>
@@ -141,7 +158,6 @@ export default function EnviosTransportista() {
         Mostrando {cards[0].cantidad} envíos
       </Typography>
 
-      {/* Tabla */}
       <Box sx={{
         backgroundColor: "#fff",
         borderRadius: 2,
@@ -149,9 +165,26 @@ export default function EnviosTransportista() {
         boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
       }}>
         <TablaPaginacionContenedor>
-          <TablaEnviosTransportista envios={envios} />
+          <TablaEnviosTransportista envios={envios} onVerMas={handleVerMas} />
         </TablaPaginacionContenedor>
       </Box>
+
+      <PanelDetalleEnvio
+        open={openPanel}
+        onClose={() => setOpenPanel(false)}
+        envio={envioSeleccionado}
+        onSuccess={handleSuccessPanel}
+      />
+
+      <Snackbar
+        open={!!mensaje}
+        autoHideDuration={4000}
+        onClose={() => setMensaje("")}
+      >
+        <Alert severity={tipoMensaje}>
+          {mensaje}
+        </Alert>
+      </Snackbar>
 
     </Box>
   )

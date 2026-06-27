@@ -1,7 +1,3 @@
-if (!formulario.fecha_envio) {
-  return "Debe seleccionar una fecha";
-}
-
 import {
   TextField,
   Box,
@@ -104,10 +100,10 @@ export default function ABMEnvios({
       return "Debe ingresar una dirección";
     }
     if (!formulario.id_transportista) {
-      return "Debe seleccionar un transportista";
+      return 'Debe seleccionar un transportista';
     }
     if (!formulario.fecha_envio) {
-      return "Debe seleccionar una fecha";
+      return 'Debe seleccionar una fecha';
     }
     if (formulario.fecha_envio.isBefore(hoy)) {
       return "La fecha de envío no puede ser anterior a hoy";

@@ -118,6 +118,26 @@ const crearLocalidad = async (req, res) => {
             })
         }
 
+        const queryDuplicado = `
+            SELECT id
+            FROM localidades
+            WHERE LOWER(TRIM(nombre)) = LOWER(TRIM($1))
+            AND LOWER(TRIM(provincia)) = LOWER(TRIM($2))
+        `
+        const duplicado = await pool.query(
+            queryDuplicado,
+            [nombre, provincia]
+        )
+
+        if (duplicado.rows.length > 0) {
+            return res.status(409).json({
+                ok: false,
+                error: "Ya existe una localidad con ese nombre en esa provincia."
+            })
+        }
+
+        await pool.query("BEGIN")
+
         const query = `
             INSERT INTO localidades (nombre, codigo_postal, provincia, costo_envio, estado, fecha_alta)
             VALUES ($1, $2, $3, $4, true, now())
@@ -128,12 +148,28 @@ const crearLocalidad = async (req, res) => {
             [nombre, codigo_postal, provincia, costo_envio]
         )
 
+        const idLocalidad = result.rows[0].id
+
+        // Genero la tarifa de esta localidad para cada transportista existente
+        // precio = transportista.costo_envio * localidad.costo_envio
+        await pool.query(
+            `
+            INSERT INTO tarifas (id_transportista, id_localidad, precio)
+            SELECT t.id, $1, t.costo_envio * $2
+            FROM transportistas t
+            `,
+            [idLocalidad, costo_envio]
+        )
+
+        await pool.query("COMMIT")
+
         res.status(201).json({
             ok: true,
-            message: `Localidad ${result.rows[0].id} creada correctamente`
+            message: `Localidad ${idLocalidad} creada correctamente`
         })
     }
     catch (error) {
+        await pool.query("ROLLBACK")
         res.status(500).json({
             ok: false,
             error: error.message
@@ -141,11 +177,33 @@ const crearLocalidad = async (req, res) => {
     }
 }
 
+
 const modificarLocalidad = async (req, res) => {
     const { id } = req.params
     const { nombre, codigo_postal, provincia, costo_envio, estado } = req.body
 
     try {
+        const queryDuplicado = `
+            SELECT id
+            FROM localidades
+            WHERE LOWER(TRIM(nombre)) = LOWER(TRIM($1))
+            AND LOWER(TRIM(provincia)) = LOWER(TRIM($2))
+            AND id != $3
+        `
+        const duplicado = await pool.query(
+            queryDuplicado,
+            [nombre, provincia, id]
+        )
+
+        if (duplicado.rows.length > 0) {
+            return res.status(409).json({
+                ok: false,
+                error: "Ya existe otra localidad con ese nombre en esa provincia."
+            })
+        }
+
+        await pool.query("BEGIN")
+
         const query = `
             UPDATE localidades
             SET nombre = $1,
@@ -161,18 +219,48 @@ const modificarLocalidad = async (req, res) => {
             [nombre, codigo_postal, provincia, costo_envio, estado, id]
         )
 
+        // Recalculo las tarifas que esta localidad ya tenía
+        await pool.query(
+            `
+            UPDATE tarifas t
+            SET precio = tr.costo_envio * $1
+            FROM transportistas tr
+            WHERE t.id_transportista = tr.id
+            AND t.id_localidad = $2
+            `,
+            [costo_envio, id]
+        )
+
+        await pool.query(
+            `
+            INSERT INTO tarifas (id_transportista, id_localidad, precio)
+            SELECT t.id, $2, t.costo_envio * $1
+            FROM transportistas t
+            WHERE NOT EXISTS (
+                SELECT 1 FROM tarifas tar
+                WHERE tar.id_transportista = t.id
+                AND tar.id_localidad = $2
+            )
+            `,
+            [costo_envio, id]
+        )
+
+        await pool.query("COMMIT")
+
         res.json({
             ok: true,
             message: "Localidad modificada correctamente"
         })
     }
     catch (error) {
+        await pool.query("ROLLBACK")
         res.status(500).json({
             ok: false,
             error: error.message
         })
     }
 }
+
 
 const eliminarLocalidad = async (req, res) => {
     const { id } = req.params

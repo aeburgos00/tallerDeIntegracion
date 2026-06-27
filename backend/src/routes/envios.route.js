@@ -9,7 +9,8 @@ import {
     crearEnvio,
     obtenerEnviosPorTransportistaId,
     modificarEnvio,
-    cancelarEnvio
+    cancelarEnvio,
+    cambiarEstadoEnvio
 } from '../controllers/envios.controller.js'
 
 const router = express.Router();
@@ -33,5 +34,7 @@ router.get('/:id', obtenerEnvioPorId)
 router.put('/:id', modificarEnvio)
 
 router.put('/:id/cancelar', cancelarEnvio)
+
+router.patch('/:id/estado', cambiarEstadoEnvio)
 
 export default router

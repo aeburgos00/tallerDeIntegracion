@@ -10,21 +10,23 @@ import estados from "./routes/estados.route.js"
 import clientes from "./routes/clientes.route.js"
 import direcciones from "./routes/direcciones.route.js"
 import tarifas from "./routes/tarifas.route.js"
+import provinciasRoutes from './routes/provincias.route.js'
 
 const PORT = process.env.PORT || 3000
 
 const app = express()
 
 app.use(cors(
-  {origin: [
-  'http://localhost:5173',
-  'https://tallerdeintegracionroutelog.vercel.app/'
-  ]}
+  {
+    origin: [
+      'http://localhost:5173',
+      'https://tallerdeintegracionroutelog.vercel.app/'
+    ]
+  }
 ))
 
 app.use(express.json())
 
-// ACA SE LISTAN LOS ENDPOINTS
 
 app.get('/', (req, res) => {
   res.send('Backend funcionando')
@@ -40,23 +42,25 @@ app.use('/localidades/activas', localidades)
 app.use('/localidades/totales', localidades)
 
 app.use('/envios', envios)
-app.use('/envios/transportistas',envios)
+app.use('/envios/transportistas', envios)
 app.use('/envios/totales', envios)
-app.use('/envios/recientes',envios)
+app.use('/envios/recientes', envios)
 
-app.use('/liquidaciones/totales',liquidaciones)
+app.use('/liquidaciones', liquidaciones)
+app.use('/liquidaciones/totales', liquidaciones)
 
-app.use('/estados',estados)
+app.use('/estados', estados)
 
-app.use('/clientes',clientes)
+app.use('/clientes', clientes)
 
-app.use('/direcciones',direcciones)
-app.use('/direcciones/cliente/localidad',direcciones)
+app.use('/direcciones', direcciones)
+app.use('/direcciones/cliente/localidad', direcciones)
 
-app.use('/tarifas',tarifas)
-app.use('/tarifas/transportista/localidad',tarifas)
+app.use('/tarifas', tarifas)
+app.use('/tarifas/transportista/localidad', tarifas)
 
 
+app.use('/provincias', provinciasRoutes)
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`)

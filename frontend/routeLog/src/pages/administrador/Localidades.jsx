@@ -3,6 +3,8 @@ import {
   Button,
   Skeleton,
   Typography,
+  Snackbar,
+  Alert
 } from "@mui/material"
 
 import DescargaIcon from '@mui/icons-material/ArrowDownward';
@@ -23,17 +25,14 @@ import cardsLocalidades from "../../components/datos/dataKPILocalidades.jsx"
 import ABMLocalidades from "../../components/abm/ABMLocalidades.jsx";
 
 import {
-  obtenerLocalidades,
-  exportarLocalidadesCSV,
-  eliminarLocalidad,
-  cambiarEstadoLocalidad
+  obtenerLocalidadesTotales,
+  exportarLocalidadesCSV
 } from "../../services/api.js"
 
 export default function Localidades() {
 
   const [loadingKPI, setLoadingKPI] = useState(true)
-
-  const [localidades, setLocalidades] = useState([])
+  const [totales, setTotales] = useState({})
 
   const [filtros, setFiltros] = useState({
     localidad: "",
@@ -43,14 +42,19 @@ export default function Localidades() {
   });
 
   const [openABM, setOpenABM] = useState(false);
-
   const [localidadSeleccionada, setLocalidadSeleccionada] = useState(null)
 
-  const obtenerDatos = async () => {
+  const [mensaje, setMensaje] = useState("")
+  const [tipoMensaje, setTipoMensaje] = useState("success")
+
+  // un solo contador: lo sube el ABM al guardar, y dispara el refetch de KPIs + tabla
+  const [refreshTabla, setRefreshTabla] = useState(0)
+
+  const obtenerDatosKPI = async () => {
     try {
       setLoadingKPI(true)
-      const result = await obtenerLocalidades()
-      setLocalidades(result.data)
+      const result = await obtenerLocalidadesTotales()
+      setTotales(result.data[0] || {})
     } catch (error) {
       console.error(error)
     } finally {
@@ -59,8 +63,8 @@ export default function Localidades() {
   }
 
   useEffect(() => {
-    obtenerDatos()
-  }, [])
+    obtenerDatosKPI()
+  }, [refreshTabla])
 
   const handleNuevo = () => {
     setLocalidadSeleccionada(null)
@@ -72,24 +76,10 @@ export default function Localidades() {
     setOpenABM(true)
   }
 
-  const handleEliminar = async (localidad) => {
-    if (!window.confirm(`¿Confirmás dar de baja la localidad "${localidad.nombre}"?`)) return
-
-    try {
-      await eliminarLocalidad(localidad.id_loc)
-      obtenerDatos()
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  const handleToggleEstado = async (localidad) => {
-    try {
-      await cambiarEstadoLocalidad(localidad.id_loc)
-      obtenerDatos()
-    } catch (error) {
-      console.error(error)
-    }
+  const handleSuccessABM = (msg) => {
+    setMensaje(msg)
+    setTipoMensaje("success")
+    setRefreshTabla(prev => prev + 1)
   }
 
   const handleFilter = () => {
@@ -114,37 +104,16 @@ export default function Localidades() {
   }
 
   const loc = cardsLocalidades.map(e => {
-
-    if (e.id === "total") {
-      return { ...e, cantidad: localidades.length }
-    }
-
-    if (e.id === "activas") {
-      return {
-        ...e,
-        cantidad: localidades.filter(l => l.estado === "Activo").length
-      }
-    }
-
-    if (e.id === "inactivas") {
-      return {
-        ...e,
-        cantidad: localidades.filter(l => l.estado === "Inactivo").length
-      }
-    }
-
     if (e.id === "costo_promedio") {
-      const promedio = localidades.length > 0
-        ? localidades.reduce((acc, l) => acc + Number(l.costo_envio), 0) / localidades.length
-        : 0
-
       return {
         ...e,
-        cantidad: "$" + promedio.toLocaleString("es-AR", { maximumFractionDigits: 0 })
+        cantidad: "$" + Number(totales.costo_promedio || 0).toLocaleString("es-AR", { maximumFractionDigits: 0 })
       }
     }
-
-    return { ...e, cantidad: 0 }
+    return {
+      ...e,
+      cantidad: Number(totales[e.id]) || 0
+    }
   })
 
   return (
@@ -182,7 +151,7 @@ export default function Localidades() {
       {/* Mostrado + Botones */}
       <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, alignItems: "center" }}>
         <Typography sx={{ color: "#777" }}>
-          Mostrando {localidades.length} localidades
+          Mostrando {totales.total || 0} localidades
         </Typography>
 
         <Box sx={{ display: "flex", gap: 2 }}>
@@ -217,26 +186,34 @@ export default function Localidades() {
             open={openABM}
             onClose={() => setOpenABM(false)}
             idLocalidad={localidadSeleccionada}
-            onSaved={obtenerDatos}
+            onSuccess={handleSuccessABM}
           />
         </Box>
       </Box>
 
-      {/* Tabla */}
+      {/* Tabla — trae sus propios datos y maneja baja/toggle internamente */}
       <Box sx={{
         backgroundColor: "#fff", borderRadius: 2, border: "1px solid #e5e7eb",
         boxShadow: "0 1px 2px rgba(0,0,0,0.04)"
       }}>
         <TablaPaginacionContenedor>
           <TablaLocalidades
-            localidades={localidades}
-            loading={loadingKPI}
+            refresh={refreshTabla}
             onEdit={handleEditar}
-            onDelete={handleEliminar}
-            onToggleEstado={handleToggleEstado}
+            onActionSuccess={obtenerDatosKPI}
           />
         </TablaPaginacionContenedor>
       </Box>
+
+      <Snackbar
+        open={!!mensaje}
+        autoHideDuration={4000}
+        onClose={() => setMensaje("")}
+      >
+        <Alert severity={tipoMensaje}>
+          {mensaje}
+        </Alert>
+      </Snackbar>
 
     </Box>
   )

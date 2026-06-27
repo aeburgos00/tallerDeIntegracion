@@ -648,6 +648,43 @@ const cancelarEnvio = async (req, res) => {
     }
 }
 
+const cambiarEstadoEnvio = async (req, res) => {
+    const { id } = req.params
+    const { id_estado } = req.body
+
+    try {
+        if (!id_estado) {
+            return res.status(400).json({
+                ok: false,
+                error: "Debe indicar el nuevo estado"
+            })
+        }
+
+        const result = await pool.query(
+            `UPDATE paquetes SET id_estado = $1 WHERE id = $2 RETURNING id`,
+            [id_estado, id]
+        )
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                ok: false,
+                error: "Envío no encontrado"
+            })
+        }
+
+        res.json({
+            ok: true,
+            message: `Estado del envío ${id} actualizado correctamente`
+        })
+    }
+    catch (error) {
+        res.status(500).json({
+            ok: false,
+            error: error.message
+        })
+    }
+}
+
 
 export {
     obtenerEnvios,
@@ -659,5 +696,6 @@ export {
     crearEnvio,
     obtenerEnviosPorTransportistaId,
     modificarEnvio,
-    cancelarEnvio
+    cancelarEnvio,
+    cambiarEstadoEnvio
 }

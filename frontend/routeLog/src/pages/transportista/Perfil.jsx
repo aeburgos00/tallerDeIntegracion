@@ -94,7 +94,7 @@ export default function Perfil() {
             py: 1,
             color: "#aaa",
           }}>
-          DATOS PERSONALES
+          Datos Personales
         </Typography>
 
         <Box

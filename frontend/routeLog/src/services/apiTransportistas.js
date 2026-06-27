@@ -29,3 +29,27 @@ export const obtenerEnviosPorTransportistaId = async (
     )
     return response.json()
 }
+
+export const cambiarEstadoEnvio = async (id_envio, id_estado) => {
+    const response = await fetch(
+        `${API_URL}/envios/${id_envio}/estado`,
+        {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_estado })
+        }
+    )
+    return response.json()
+}
+
+
+export const obtenerLiquidacionesPorTransportistaId = async (
+    id_transportista,
+    desde,
+    hasta
+) => {
+    const response = await fetch(
+        `${API_URL}/liquidaciones/transportista/${id_transportista}?desde=${desde}&hasta=${hasta}`
+    )
+    return response.json()
+}

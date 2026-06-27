@@ -7,20 +7,102 @@ import {
     TableRow,
     IconButton,
     Chip,
-    Skeleton
+    Skeleton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
+    Button,
+    Snackbar,
+    Alert,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
+import { useEffect, useState } from 'react'
+import {
+    obtenerLocalidades,
+    eliminarLocalidad,
+    cambiarEstadoLocalidad
+} from '../../services/api.js'
+
+const colores = {
+    azul: "#3b82f6",
+    gris: "#9ca3af",
+}
+
 export default function TablaLocalidades({
-    localidades = [],
-    loading = false,
     filasPorPagina = 10,
+    refresh = 0,
     onEdit,
-    onDelete,
-    onToggleEstado
+    onActionSuccess
 }) {
+
+    const [loading, setLoading] = useState(true)
+    const [localidades, setLocalidades] = useState([])
+
+    // refresh interno: se dispara cuando esta MISMA tabla hace una baja o un toggle
+    const [refreshAccion, setRefreshAccion] = useState(0)
+
+    const [mensaje, setMensaje] = useState("")
+    const [error, setError] = useState(false)
+
+    const [openEliminar, setOpenEliminar] = useState(false)
+    const [localidadSeleccionada, setLocalidadSeleccionada] = useState(null)
+
+    useEffect(() => {
+        const obtenerDatos = async () => {
+            try {
+                setLoading(true)
+                const result = await obtenerLocalidades()
+                setLocalidades(result.data)
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        obtenerDatos()
+    }, [refresh, refreshAccion])
+
+    const handleAbrirDialogo = (localidad) => {
+        setLocalidadSeleccionada(localidad)
+        setOpenEliminar(true)
+    }
+
+    const handleCerrarDialogo = () => {
+        setOpenEliminar(false)
+        setLocalidadSeleccionada(null)
+    }
+
+    const handleConfirmarEliminar = async () => {
+        try {
+            await eliminarLocalidad(localidadSeleccionada.id_loc)
+            setMensaje("Localidad dada de baja correctamente")
+            setError(false)
+            handleCerrarDialogo()
+            setRefreshAccion(prev => prev + 1)
+            onActionSuccess?.()   // avisa al padre para que refresque los KPIs
+        } catch (error) {
+            setMensaje(error?.message || "Error al dar de baja la localidad")
+            setError(true)
+        }
+    }
+
+    const handleToggleEstado = async (localidad) => {
+        try {
+            await cambiarEstadoLocalidad(localidad.id_loc)
+            setMensaje("Estado actualizado correctamente")
+            setError(false)
+            setRefreshAccion(prev => prev + 1)
+            onActionSuccess?.()
+        } catch (error) {
+            setMensaje(error?.message || "Error al cambiar el estado")
+            setError(true)
+        }
+    }
 
     return (
         <TableContainer sx={{ width: "100%", overflowX: "auto" }}>
@@ -64,7 +146,7 @@ export default function TablaLocalidades({
                                             label={item.estado}
                                             size="small"
                                             clickable
-                                            onClick={() => onToggleEstado(item)}
+                                            onClick={() => handleToggleEstado(item)}
                                             sx={{
                                                 fontWeight: 600,
                                                 fontSize: 12,
@@ -80,7 +162,7 @@ export default function TablaLocalidades({
                                         <IconButton color="primary" onClick={() => onEdit(item)}>
                                             <EditIcon />
                                         </IconButton>
-                                        <IconButton color="error" onClick={() => onDelete(item)}>
+                                        <IconButton color="error" onClick={() => handleAbrirDialogo(item)}>
                                             <DeleteIcon />
                                         </IconButton>
                                     </TableCell>
@@ -89,6 +171,44 @@ export default function TablaLocalidades({
                     }
                 </TableBody>
             </Table>
+
+            {/* Dialog y Snackbar: UNA sola vez, fuera del .map() */}
+            <Dialog open={openEliminar} onClose={handleCerrarDialogo}>
+                <DialogTitle>Dar de baja localidad</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        ¿Está seguro que desea dar de baja la localidad "{localidadSeleccionada?.nombre}"?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        variant="outlined"
+                        onClick={handleCerrarDialogo}
+                        sx={{ borderColor: colores.gris, color: colores.azul, borderRadius: 2, textTransform: "none" }}
+                    >
+                        Volver
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        sx={{ borderRadius: 2, textTransform: "none" }}
+                        onClick={handleConfirmarEliminar}
+                    >
+                        Dar de baja
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Snackbar
+                open={!!mensaje}
+                autoHideDuration={4000}
+                onClose={() => setMensaje("")}
+            >
+                <Alert severity={error ? "error" : "success"}>
+                    {mensaje}
+                </Alert>
+            </Snackbar>
+
         </TableContainer>
     )
 }
