@@ -239,7 +239,7 @@ export const obtenerEnviosRecientes = async (
   fecha_hasta
 ) => {
   const response = await fetch(
-    `${API_URL}/envios-recientes?desde=${fecha_desde}&hasta=${fecha_hasta}`
+    `${API_URL}/envios/recientes?desde=${fecha_desde}&hasta=${fecha_hasta}`
   )
   return response.json()
 }
@@ -253,7 +253,7 @@ export const obtenerEnvioPorId = async (
   return response.json()
 }
 
-export const crearEnvio = async (data) => {
+export const crearEnvio = async (envio) => {
   const response = await fetch(
     `${API_URL}/envios`,
     {
@@ -261,13 +261,13 @@ export const crearEnvio = async (data) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(envio)
     }
   )
   return response.json()
 }
 
-export const modificarEnvio = async (id, data) => {
+export const modificarEnvio = async (id, envio) => {
   const response = await fetch(
     `${API_URL}/envios/${id}`,
     {
@@ -275,7 +275,7 @@ export const modificarEnvio = async (id, data) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(envio)
     }
   )
 
