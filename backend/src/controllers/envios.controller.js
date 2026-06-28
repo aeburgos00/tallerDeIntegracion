@@ -242,6 +242,55 @@ const obtenerEnviosRecientes = async (req, res) => {
     }
 };
 
+const obtenerEnviosPorTransportistaId = async (req, res) => {
+    const { id } = req.params
+    const { cliente, direccion, localidad, estado, fecha } = req.query
+
+    try {
+        let query = `
+      select  p.id id_envio,
+              TO_CHAR(p.fecha,'DD/MM/YYYY') fecha_envio,
+              c.nombre_apellido cliente,
+              d.descripcion direccion,
+              l.nombre localidad,
+              e.id id_estado,
+              e.descripcion estado,
+              tar.precio tarifa
+      from paquetes p
+      join transportistas t on t.id = p.id_transportista
+      join clientes c on c.id = p.id_cliente
+      join direcciones d on d.id = p.id_direccion and d.id_cliente = c.id
+      join localidades l on l.id = d.id_localidad
+      join estados e on e.id = p.id_estado
+      join tarifas tar on tar.id = p.id_tarifa
+      where t.id_usuario = $1
+    `
+        const valores = [id]
+        let i = 2
+
+        if (cliente) { query += ` and c.nombre_apellido ilike $${i++}`; valores.push(`%${cliente}%`) }
+        if (direccion) { query += ` and d.descripcion ilike $${i++}`; valores.push(`%${direccion}%`) }
+        if (localidad) { query += ` and l.nombre ilike $${i++}`; valores.push(`%${localidad}%`) }
+        if (estado) { query += ` and p.id_estado = $${i++}`; valores.push(estado) }
+        if (fecha) { query += ` and p.fecha = $${i++}`; valores.push(fecha) }
+
+        query += ` order by p.fecha desc`
+
+        const result = await pool.query(query, valores)
+
+        res.json({
+            ok: true,
+            data: result.rows
+        })
+    }
+    catch (error) {
+        res.status(500).json({
+            ok: false,
+            error: error.message
+        })
+    }
+}
+
 const exportarCSV = async (req, res) => {
     const {
         desde,
@@ -438,55 +487,6 @@ const crearEnvio = async (req, res) => {
         throw error
     }
 
-}
-
-const obtenerEnviosPorTransportistaId = async (req, res) => {
-    const { id } = req.params
-    const { cliente, direccion, localidad, estado, fecha } = req.query
-
-    try {
-        let query = `
-      select  p.id id_envio,
-              TO_CHAR(p.fecha,'DD/MM/YYYY') fecha_envio,
-              c.nombre_apellido cliente,
-              d.descripcion direccion,
-              l.nombre localidad,
-              e.id id_estado,
-              e.descripcion estado,
-              tar.precio tarifa
-      from paquetes p
-      join transportistas t on t.id = p.id_transportista
-      join clientes c on c.id = p.id_cliente
-      join direcciones d on d.id = p.id_direccion and d.id_cliente = c.id
-      join localidades l on l.id = d.id_localidad
-      join estados e on e.id = p.id_estado
-      join tarifas tar on tar.id = p.id_tarifa
-      where t.id_usuario = $1
-    `
-        const valores = [id]
-        let i = 2
-
-        if (cliente) { query += ` and c.nombre_apellido ilike $${i++}`; valores.push(`%${cliente}%`) }
-        if (direccion) { query += ` and d.descripcion ilike $${i++}`; valores.push(`%${direccion}%`) }
-        if (localidad) { query += ` and l.nombre ilike $${i++}`; valores.push(`%${localidad}%`) }
-        if (estado) { query += ` and p.id_estado = $${i++}`; valores.push(estado) }
-        if (fecha) { query += ` and p.fecha = $${i++}`; valores.push(fecha) }
-
-        query += ` order by p.fecha desc`
-
-        const result = await pool.query(query, valores)
-
-        res.json({
-            ok: true,
-            data: result.rows
-        })
-    }
-    catch (error) {
-        res.status(500).json({
-            ok: false,
-            error: error.message
-        })
-    }
 }
 
 //PUT
@@ -692,9 +692,9 @@ export {
     obtenerEnviosPorTransportistas,
     obtenerEnviosTotales,
     obtenerEnviosRecientes,
+    obtenerEnviosPorTransportistaId,
     exportarCSV,
     crearEnvio,
-    obtenerEnviosPorTransportistaId,
     modificarEnvio,
     cancelarEnvio,
     cambiarEstadoEnvio
