@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import {Routes, Route, Navigate} from "react-router-dom";
 
 import ProtectedRoute from './ProctectedRoute.jsx'
 
@@ -9,9 +9,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import Dashboard from "../pages/administrador/Dashboard";
 import Envios from "../pages/administrador/EnvioDePaquetes";
 import Transportistas from "../pages/administrador/Transportistas";
-//import Transportistas from "../pages/administrador/TransportistasV2";
-import Localidades from "../pages/administrador/Localidades";
-/*import Localidades from "../pages/administrador/LocalidadesV2";*/
+import Localidades from "../pages/administrador/Localidades"
 import Liquidaciones from "../pages/administrador/Liquidaciones";
 import SubidaArchivos from "../pages/administrador/SubidaDeArchivos";
 import Configuracion from "../pages/administrador/Configuracion";
@@ -26,44 +24,40 @@ import Perfil from "../pages/transportista/Perfil";
 export default function AppRoutes() {
     return (
         <Routes>
-
-            {/* Ruta inicial */}
-            <Route
-                path="/"
-                element={<Navigate to="/login" />}
-            />
-
+            
             {/* Login */}
             <Route path="/login" element={<Login />} />
 
             {/* Administrador */}
-            <Route path="/" element={
-                //<ProtectedRoute rol="ADMINISTRADOR">
-                <DashboardLayout />
-                //</ProtectedRoute>
+            <Route 
+            path="/" 
+            element={
+                <ProtectedRoute rol="ADMINISTRADOR">
+                    <DashboardLayout />
+                </ProtectedRoute>
             }>
                 <Route index element={<Dashboard />} />
 
                 <Route path="/Envios" element={<Envios />} />
                 <Route path="/Transportistas" element={<Transportistas />} />
-                <Route path="/Localidades" element={<Localidades />} />
+                <Route path="/Localidades" element={<Localidades/>} />
                 <Route path="/Liquidaciones" element={<Liquidaciones />} />
                 <Route path="/Archivos" element={<SubidaArchivos />} />
                 <Route path="/Configuracion" element={<Configuracion />} />
             </Route>
 
             {/* Transportista */}
-            <Route
-                path="/transportista"
-                element={
+            <Route 
+            path="/transportista" 
+            element={
                     <ProtectedRoute rol="TRANSPORTISTA">
                         <MobileLayout />
                     </ProtectedRoute>
-                }>
+            }>
                 <Route index element={<Inicio />} />
-                <Route path="Envios" element={<EnviosMob />} />
-                <Route path="Liquidaciones" element={<LiquidacionesMob />} />
-                <Route path="Perfil" element={<Perfil />} />
+                <Route path="Envios"  element={<EnviosMob />} />
+                <Route path="Liquidaciones"  element={<LiquidacionesMob />} />
+                <Route path="Perfil"  element={<Perfil />} />
             </Route>
 
             {/* Ruta Default */}
@@ -72,6 +66,6 @@ export default function AppRoutes() {
                 element={<Navigate to="/login" replace />}
             />
 
-        </Routes >
+        </Routes>
     );
 }
