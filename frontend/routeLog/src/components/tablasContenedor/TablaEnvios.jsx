@@ -35,7 +35,11 @@ import {
 import useDateFilter from "../../hooks/useDateFilter.js";
 
 export default function TablaEnvios ({
-  filasPorPagina = 0,
+  cantEnvios,
+  filtros,
+  pagina = 1,
+  filasPorPagina = 10,
+  onTotalPaginasChange,
   onEdit,
   refresh
 }) {
@@ -49,7 +53,7 @@ export default function TablaEnvios ({
   const [mensaje, setMensaje] = useState("")
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [envios, setEnvios] = useState({});
+  const [envios, setEnvios] = useState([]);
   const [openCancelar, setOpenCancelar] = useState(false)
   const [envioSeleccionado, setEnvioSeleccionado] = useState(null)
 
@@ -95,23 +99,30 @@ export default function TablaEnvios ({
     }
   }
 
-  // const handleCancelar = async(id) => {
-  //   try {
-  //     await cancelarEnvio(id)
-  //   } catch(error) {
-  //     console.error(error)
-  //   } 
-  // }
+  
 
   useEffect(() => {
     const obtenerDatos = async () => {
         try {
           setLoading(true)
+          
           const result = await obtenerEnvios(
             fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
-            fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
+            fechaHasta? fechaHasta.format('YYYY-MM-DD'): null,
+            filtros
           );
+          
           setEnvios(result.data)
+
+          cantEnvios?.(result.data.length);
+          
+          const totalPaginas = Math.max(
+              1,
+              Math.ceil(result.data.length / filasPorPagina)
+          );
+
+          onTotalPaginasChange?.(totalPaginas);
+
         } catch (error) {
             console.error(error)
         } finally {
@@ -119,7 +130,21 @@ export default function TablaEnvios ({
         }
     }
   obtenerDatos()
-  },[fechaDesde,fechaHasta,refresh,refreshBaja])
+  },[
+    filtros,
+    fechaDesde,
+    fechaHasta,
+    refresh,
+    refreshBaja,
+    filasPorPagina,
+    onTotalPaginasChange,
+    cantEnvios
+  ])
+
+  const enviosPagina = envios.slice(
+      (pagina - 1) * filasPorPagina,
+      pagina * filasPorPagina
+  );
 
   return (
     <TableContainer 
@@ -168,7 +193,7 @@ export default function TablaEnvios ({
                 </TableRow>
               ))
             :
-            envios.map((item) => (
+            enviosPagina.map((item) => (
                  <TableRow
                 key={item.id_envio}
                 hover
@@ -196,7 +221,6 @@ export default function TablaEnvios ({
                           color="error"
                           disabled={noPuedeCancelar(item)}
                           onClick={() => {
-                            //handleCancelar(item.id_envio)
                             setEnvioSeleccionado(item.id_envio)
                             handleAbrirDialogo(item.id_envio)
                           }}
@@ -205,64 +229,61 @@ export default function TablaEnvios ({
                           </IconButton>
                          </span>
                       </Tooltip>
-
-                      <Dialog
-                        open={openCancelar}
-                        onClose={handleCerrarDialogo}
-                      >
-                        <DialogTitle>
-                          Cancelar envío
-                        </DialogTitle>
-
-                        <DialogContent>
-                          <DialogContentText>
-                            ¿Está seguro que desea cancelar el envío {envioSeleccionado}?
-                          </DialogContentText>
-                        </DialogContent>
-
-                        <DialogActions>
-                          <Button
-                          variant="outlined"
-                          onClick={handleCerrarDialogo}
-                          sx={{
-                          borderColor:colores.gris,
-                          color:colores.azul,
-                          borderRadius:2,
-                          textTransform:"none",
-                          }}
-                          >
-                            Volver
-                          </Button>
-
-                          <Button
-                          variant="contained"
-                          color="error"
-                          sx={{
-                          borderRadius:2,
-                          textTransform: "none"
-                          }}
-                          onClick={handleConfirmarCancelacion}
-                          >
-                            Cancelar envío
-                          </Button>
-                        </DialogActions>
-                      </Dialog>
-                      
-                      <Snackbar
-                      open={!!mensaje}
-                      autoHideDuration={4000}
-                      onClose={() => setMensaje("")}
-                      >
-                        <Alert severity={error ? "error" : "success"}>
-                          {mensaje}
-                        </Alert>
-                      </Snackbar>
-
                     </TableCell>
             </TableRow>
             ))
             }
             </TableBody>
+
+            <Dialog
+              open={openCancelar}
+              onClose={handleCerrarDialogo}
+            >
+              <DialogTitle>Cancelar envío</DialogTitle>
+
+              <DialogContent>
+                <DialogContentText>
+                  ¿Está seguro que desea cancelar el envío {envioSeleccionado}?
+                </DialogContentText>
+              </DialogContent>
+
+              <DialogActions>
+                <Button
+                variant="outlined"
+                onClick={handleCerrarDialogo}
+                sx={{
+                borderColor:colores.gris,
+                color:colores.azul,
+                borderRadius:2,
+                textTransform:"none",
+                }}
+                >
+                  Volver
+                </Button>
+
+                <Button
+                variant="contained"
+                color="error"
+                sx={{
+                borderRadius:2,
+                textTransform: "none"
+                }}
+                onClick={handleConfirmarCancelacion}
+                >
+                  Cancelar envío
+                </Button>
+              </DialogActions>
+            </Dialog>
+                      
+            <Snackbar
+            open={!!mensaje}
+            autoHideDuration={4000}
+            onClose={() => setMensaje("")}
+            >
+              <Alert severity={error ? "error" : "success"}>
+                {mensaje}
+              </Alert>
+            </Snackbar>
 
         </Table>
     </TableContainer>

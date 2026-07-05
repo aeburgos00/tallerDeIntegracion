@@ -6,7 +6,11 @@ import {
 } from "@mui/material"
 
 import { useEffect, useState } from 'react'
-import { obtenerEstados } from "../../services/api";
+import { 
+    obtenerEstados, 
+    obtenerLocalidades,
+    obtenerTransportistas
+} from "../../services/api";
 
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -19,17 +23,26 @@ export default function FiltroEnvios({
 }) {
     
     const [estados,setEstados] = useState([])
+    const [localidades, setLocalidades] = useState([])
+    const [transportistas, setTransportistas] = useState([])
+
     useEffect(()=>{
-        const obtenerDatos = async() =>{
+        const cargarCombos = async() =>{
             try{
-                const result = await obtenerEstados()
-                setEstados(result.data)
+                const estadosResp = await obtenerEstados()
+                const localidadesResp = await obtenerLocalidades()
+                const transportistasResp = await obtenerTransportistas()
+                setEstados(estadosResp.data)
+                setLocalidades(localidadesResp.data)
+                setTransportistas(transportistasResp.data)
             } catch(error){
                 console.error(error)
             }
         }
-        obtenerDatos()
-    })
+        cargarCombos()
+    },[])
+
+
 
     const handleChange = (campo) => (e) => {
         setFiltros({
@@ -93,20 +106,48 @@ export default function FiltroEnvios({
         />
 
         <TextField
-        fullWidth
-        label="Localidad"
-        value={filtros.localidad}
-        onChange={handleChange("localidad")}
-        size="small"
-        />
+            fullWidth
+            select
+            label="Localidad"
+            value={filtros.localidad}
+            onChange={handleChange("localidad")}
+            size="small"
+        >
+            <MenuItem value="">
+                Todas
+            </MenuItem>
+
+            {localidades.map((item) => (
+                <MenuItem
+                    key={item.id}
+                    value={item.nombre}
+                >
+                    {item.nombre}
+                </MenuItem>
+            ))}
+        </TextField>
 
         <TextField
-        fullWidth
-        label="Transportista"
-        value={filtros.transportista}
-        onChange={handleChange("transportista")}
-        size="small"
-        />
+            fullWidth
+            select
+            label="Transportista"
+            value={filtros.transportista}
+            onChange={handleChange("transportista")}
+            size="small"
+        >
+            <MenuItem value="">
+                Todos
+            </MenuItem>
+
+            {transportistas.map((item) => (
+                <MenuItem
+                    key={item.id}
+                    value={item.nombre}
+                >
+                    {item.nombre}
+                </MenuItem>
+            ))}
+        </TextField>
 
         <TextField
         fullWidth
@@ -115,17 +156,15 @@ export default function FiltroEnvios({
         value={filtros.estado}
         onChange={handleChange("estado")}
         size="small"
-        >
+        >  
+            <MenuItem value="">
+                Todos
+            </MenuItem>
             {
             estados.map((item) => (
                 <MenuItem value={item.id}>{item.descripcion}</MenuItem>
             ))
             }
-{/* 
-            <MenuItem value="PENDIENTE">Pendiente</MenuItem>
-            <MenuItem value="ENTREGADO">Entregado</MenuItem>
-            <MenuItem value="VISITA_FALLIDA">Visita Fallida</MenuItem>
-            <MenuItem value="NO_VISITADO">No Visitado</MenuItem> */}
         </TextField>
 
         <TextField

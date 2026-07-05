@@ -104,14 +104,14 @@ export default function Dashboard() {
             gridTemplateColumns: {
               xs: "1fr",
               sm: "1fr 1fr",
-              lg: "repeat(5, 1fr)"
+              lg: "repeat(6, 1fr)"
             },
             gap: 2
           }}
           >
           {
             loadingEnviosTotales?
-            Array.from({ length: 5 }).map((_, index) => (
+            Array.from({ length: 6 }).map((_, index) => (
               <Skeleton
                 key={index}
                 variant="rounded"
