@@ -108,7 +108,7 @@ export default function ABMEnvios({
     if (formulario.fecha_envio.isBefore(hoy)) {
       return "La fecha de envío no puede ser anterior a hoy";
     }
-    if (!formulario.id_estado) {
+    if (idEnvio && !formulario.id_estado) {
       return "Debe seleccionar un estado";
     }
     return null;

@@ -11,6 +11,7 @@ import clientes from "./routes/clientes.route.js"
 import direcciones from "./routes/direcciones.route.js"
 import tarifas from "./routes/tarifas.route.js"
 import provincias from './routes/provincias.route.js'
+import archivos from "./routes/archivos.route.js"
 
 const PORT = process.env.PORT || 3000
 
@@ -59,7 +60,8 @@ app.use('/direcciones/cliente/localidad', direcciones)
 app.use('/tarifas', tarifas)
 app.use('/tarifas/transportista/localidad', tarifas)
 
-app.use('/provincias', provincias)
+app.use('/archivos', archivos)
+app.use('/archivos/envios', archivos)
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`)

@@ -2,15 +2,23 @@ import {
   Box,
   Button,
   Divider,
-  Typography
+  Typography,
+  Snackbar,
+  Alert,
+  CircularProgress
 } from "@mui/material"
 
 import ArchivoIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import FlechaIcon from '@mui/icons-material/ArrowCircleUpRounded';
 
+import CardExitosaArchivo from "../../components/cards/CardExitosaArchivo.jsx"
+import CardErrorArchivo from "../../components/cards/CardErrorArchivo.jsx"
+
 import { useDropzone } from 'react-dropzone'
 import { useState } from 'react'
+
+import { subirArchivoEnvios } from "../../services/api.js"
 
 const colores = {
   primario: "#3b82f6",
@@ -21,12 +29,21 @@ const colores = {
 
 export default function SubidaDeArchivos() {
   
+  const [resultado, setResultado] = useState(null);
+  const [loading, setLoading] = useState(false);
+  // const [mensaje, setMensaje] = useState("");
+  // const [tipoMensaje, setTipoMensaje] = useState("success");
+  const [mensajeError, setMensajeError] = useState("");
   const [archivo, setArchivo] = useState(null)
+  //const [nombreArchivoProcesado, setNombreArchivoProcesado] = useState("");
 
   const onDrop = (acceptedFiles) => {
     const file = acceptedFiles[0]
+
     if (file) {
-      setArchivo(file)
+      setArchivo(file);
+      setResultado(null);
+      setMensajeError("");
     }
   }
 
@@ -43,23 +60,48 @@ export default function SubidaDeArchivos() {
   })
 
   const subirArchivo = async () => {
-    if (!archivo) return
+    if (!archivo) return;
+
     try {
-      const formData = new FormData()
-      formData.append('archivo', archivo)
-      const response = await fetch(
-        'http://localhost:3000/subir-archivo',
-        {
-          method: 'POST',
-          body: formData
-        }
-      )
-      const result = await response.json()
-      console.log(result)
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("archivo", archivo);
+      
+      const respuesta = await subirArchivoEnvios(formData);
+
+      setResultado(respuesta);
+      if (respuesta.ok) {
+            setArchivo(null);
+            setMensajeError("");
+      }
+      //setNombreArchivoProcesado(archivo.name);
+      // setArchivo(null);
+      // setMensajeError("");
+      // setTipoMensaje("success");
+      // setMensaje(
+      //   `Archivo importado correctamente.
+
+      //   • Envíos importados: ${resultado.enviosImportados}
+      //   • Clientes creados: ${resultado.clientesCreados}
+      //   • Direcciones creadas: ${resultado.direccionesCreadas}
+      //   • Tiempo: ${resultado.duracionMs} ms`
+      // );
+
+      
     } catch (error) {
-      console.error(error)
+      // setTipoMensaje("error");
+      //setResultado(null);
+       setResultado({
+            ok: false,
+            mensaje: "No fue posible conectarse con el servidor.",
+            errores: []
+        });
+      setMensajeError(error?.message ?? "Ocurrió un error al importar el archivo.");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Box
@@ -202,6 +244,7 @@ export default function SubidaDeArchivos() {
           }}>
             <Button
             variant="outlined"
+            disabled={loading}
             onClick={() => setArchivo(null)}
             sx={{
                 borderColor:colores.textosSec,
@@ -213,18 +256,40 @@ export default function SubidaDeArchivos() {
 
             <Button 
             variant="contained"
-            disabled={!archivo}
+            disabled={!archivo || loading}
             onClick={subirArchivo}
-            startIcon={<FlechaIcon />}
+            startIcon={
+                loading
+                    ? <CircularProgress size={18} color="inherit"/>
+                    : <FlechaIcon/>
+            }
             sx={{
                 background:colores.primario,
                 borderRadius:2,
                 textTransform: "none"
             }}
-            >Subir archivo </Button>
+            >
+              {
+                  loading
+                      ? "Procesando..."
+                      : "Subir archivo"
+              }
+            </Button>
           </Box>
 
       </Box>
+      
+      {/*Card Resultado*/ }
+      {
+          resultado?.ok &&
+          <CardExitosaArchivo resultado={resultado}/>
+      }
+
+      {
+          resultado && !resultado.ok &&
+          <CardErrorArchivo errores={resultado.errores}/>
+      }
+        
 
       {/* Card Info */}
       <Box 
@@ -258,6 +323,20 @@ export default function SubidaDeArchivos() {
           }} >• csv - Plantilla de Envios de Paquetes</Typography>
         </Box>
       </Box>
+
+      <Snackbar
+          open={!!mensajeError}
+          autoHideDuration={6000}
+          onClose={() =>  setMensajeError("")}
+      >
+          <Alert
+              severity="error"
+              variant="filled"
+              onClose={() => setMensajeError("")}
+          >
+              {mensajeError}
+          </Alert>
+      </Snackbar>
     </Box>
   )
 }

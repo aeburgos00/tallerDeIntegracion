@@ -513,19 +513,34 @@ const modificarEnvio = async (req, res) => {
 
         await pool.query("BEGIN")
 
+        const queryTarifa = `
+        SELECT id
+        FROM tarifas
+        WHERE id_transportista = $1
+        `
+
+        const tarifa = 
+            await pool.query(
+                queryTarifa,
+                [id_transportista]
+            )
+        
+        let id_tarifa = tarifa?.rows[0]?.id || null
+        
         const queryUpdate = `
             UPDATE paquetes
             SET
                 fecha = $1,
                 id_transportista = $2,
-                id_estado = $3
-            WHERE id = $4
+                id_estado = $3,
+                id_tarifa = $4
+            WHERE id = $5
             RETURNING id
         `
         const paqueteResult =
             await pool.query(
                 queryUpdate,
-                [fecha_envio, id_transportista, id_estado, id]
+                [fecha_envio, id_transportista, id_estado, id_tarifa, id]
             )
 
         await pool.query("COMMIT")
