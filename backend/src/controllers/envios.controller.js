@@ -7,11 +7,19 @@ import { generarCSV } from '../utils/exportadorCSV.js';
 const obtenerEnvios = async (req, res) => {
     const {
         desde,
-        hasta
+        hasta,
+        fechaEnvio,
+        cliente,
+        direccion,
+        localidad,
+        transportista,
+        estado,
+        tarifa,
+        liquidacion
     } = req.query
 
     try {
-        const query = `
+        let query = `
             select  p.id id_envio,
                     TO_CHAR(p.fecha,'DD/MM/YYYY') fecha_envio,
                     c.nombre_apellido || ' (ID ' || cast(c.ID as varchar) || ')' cliente,
@@ -30,12 +38,87 @@ const obtenerEnvios = async (req, res) => {
             join estados e on e.id = p.id_estado
             join tarifas tar on tar.id = p.id_tarifa
             left join liquidaciones liq on liq.id_paquete = p.id
-            where p.fecha between $1 and $2
+            where 1=1
         `
+        const parametros = [];
 
+        if (desde && hasta) {
+            parametros.push(desde);
+            parametros.push(hasta);
+
+            query += `
+                AND p.fecha BETWEEN $${parametros.length - 1}
+                                AND $${parametros.length}
+            `;
+        }
+
+        if (fechaEnvio) {
+            parametros.push(fechaEnvio);
+
+            query += `
+                AND p.fecha = $${parametros.length}
+            `;
+        }
+
+        if (cliente) {
+            parametros.push(`%${cliente.toUpperCase()}%`);
+
+            query += `
+                AND upper(c.nombre_apellido) LIKE $${parametros.length}
+            `;
+        }
+
+        if (direccion) {
+            parametros.push(`%${direccion.toUpperCase()}%`);
+
+            query += `
+                AND upper(d.descripcion) LIKE $${parametros.length}
+            `;
+        }
+
+        if (estado) {
+            parametros.push(estado);
+
+            query += `
+                AND p.id_estado = $${parametros.length}
+            `;
+        }
+        
+        if (localidad) {
+            parametros.push(`%${localidad.toUpperCase()}%`);
+
+            query += `
+                AND upper(l.nombre) LIKE $${parametros.length}
+            `;
+        }
+
+        if (transportista) {
+            parametros.push(`%${transportista.toUpperCase()}%`);
+
+            query += `
+                AND upper(u.nombre_apellido) LIKE $${parametros.length}
+            `;
+        }
+
+        if (tarifa) {
+            parametros.push(Number(tarifa));
+
+            query += `
+                AND tar.precio = $${parametros.length}
+            `;
+        }
+
+        if (liquidacion) {
+            parametros.push(Number(liquidacion));
+
+            query += `
+                AND $${parametros.length} = ( case when liq.id is not null then tar.precio else 0 end)
+            `;
+        }
+                
         const result = await pool.query(
             query,
-            [desde, hasta]
+            parametros
         )
 
         res.json({
@@ -171,7 +254,10 @@ const obtenerEnviosTotales = async (req, res) => {
             ) visitas_fallidas,
             count(
                 case when p.id_estado = 4 then 1 end
-            ) no_visitados
+            ) no_visitados,
+            count(
+                case when p.id_estado = 5 then 1 end
+            ) cancelados 
             from paquetes p
             where p.fecha between $1 and $2
         `
@@ -294,33 +380,118 @@ const obtenerEnviosPorTransportistaId = async (req, res) => {
 const exportarCSV = async (req, res) => {
     const {
         desde,
-        hasta
+        hasta,
+        fechaEnvio,
+        cliente,
+        direccion,
+        localidad,
+        transportista,
+        estado,
+        tarifa,
+        liquidacion
     } = req.query
-    try {
 
+    try {
+        let query = `
+            select  p.id id_envio,
+                    TO_CHAR(p.fecha,'DD/MM/YYYY') fecha_envio,
+                    c.nombre_apellido || ' (ID ' || cast(c.ID as varchar) || ')' cliente,
+                    d.descripcion direccion,
+                    l.nombre localidad,
+                    u.nombre_apellido transportista,
+                    e.descripcion estado,
+                    tar.precio tarifa,
+                    case when liq.id is not null then tar.precio else 0 end as liquidacion
+            from paquetes p
+            join transportistas t on p.id_transportista = t.id
+            join usuarios u on u.id = t.id_usuario
+            join clientes c on c.id = p.id_cliente
+            join direcciones d on d.id = p.id_direccion and d.id_cliente = c.id
+            join localidades l on l.id = d.id_localidad
+            join estados e on e.id = p.id_estado
+            join tarifas tar on tar.id = p.id_tarifa
+            left join liquidaciones liq on liq.id_paquete = p.id
+            where 1=1
+        `
+        const parametros = [];
+
+        if (desde && hasta) {
+            parametros.push(desde);
+            parametros.push(hasta);
+
+            query += `
+                AND p.fecha BETWEEN $${parametros.length - 1}
+                                AND $${parametros.length}
+            `;
+        }
+
+        if (fechaEnvio) {
+            parametros.push(fechaEnvio);
+
+            query += `
+                AND p.fecha = $${parametros.length}
+            `;
+        }
+
+        if (cliente) {
+            parametros.push(`%${cliente.toUpperCase()}%`);
+
+            query += `
+                AND upper(c.nombre_apellido) LIKE $${parametros.length}
+            `;
+        }
+
+        if (direccion) {
+            parametros.push(`%${direccion.toUpperCase()}%`);
+
+            query += `
+                AND upper(d.descripcion) LIKE $${parametros.length}
+            `;
+        }
+
+        if (estado) {
+            parametros.push(estado);
+
+            query += `
+                AND p.id_estado = $${parametros.length}
+            `;
+        }
+        
+        if (localidad) {
+            parametros.push(`%${localidad.toUpperCase()}%`);
+
+            query += `
+                AND upper(l.nombre) LIKE $${parametros.length}
+            `;
+        }
+
+        if (transportista) {
+            parametros.push(`%${transportista.toUpperCase()}%`);
+
+            query += `
+                AND upper(u.nombre_apellido) LIKE $${parametros.length}
+            `;
+        }
+
+        if (tarifa) {
+            parametros.push(Number(tarifa));
+
+            query += `
+                AND tar.precio = $${parametros.length}
+            `;
+        }
+
+        if (liquidacion) {
+            parametros.push(Number(liquidacion));
+
+            query += `
+                AND $${parametros.length} = ( case when liq.id is not null then tar.precio else 0 end)
+            `;
+        }
+                
         const result = await pool.query(
-            `
-    select  p.id id_envio,
-            TO_CHAR(p.fecha,'DD/MM/YYYY') fecha_envio,
-            c.nombre_apellido || ' (ID ' || cast(c.ID as varchar) || ')' cliente,
-            d.descripcion direccion,
-            l.nombre localidad,
-            u.nombre_apellido transportista,
-            e.descripcion estado,
-            tar.precio tarifa,
-            case when liq.id is not null then tar.precio else 0 end as liquidacion
-    from paquetes p
-    join transportistas t on p.id_transportista = t.id
-    join usuarios u on u.id = t.id_usuario
-    join clientes c on c.id = p.id_cliente
-    join direcciones d on d.id = p.id_direccion and d.id_cliente = c.id
-    join localidades l on l.id = d.id_localidad
-    join estados e on e.id = p.id_estado
-    join tarifas tar on tar.id = p.id_tarifa
-    left join liquidaciones liq on liq.id_paquete = p.id
-    where p.fecha between $1 and $2
-    `,
-            [desde, hasta]
+            query,
+            parametros
         )
 
         const fields = [
