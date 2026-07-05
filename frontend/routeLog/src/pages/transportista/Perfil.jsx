@@ -32,7 +32,7 @@ export default function Perfil() {
       {/* Header */}
       <Box
         sx={{
-          backgroundColor: "#185fa5",
+          background: "linear-gradient(135deg, #185fa5 0%, #2563eb 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -94,7 +94,7 @@ export default function Perfil() {
             py: 1,
             color: "#aaa",
           }}>
-          Datos Personales
+          Datos personales
         </Typography>
 
         <Box
@@ -125,7 +125,7 @@ export default function Perfil() {
           <Divider />
 
           <Box>
-            <Typography sx={{ color: "#aaa" }}>Costo Envío</Typography>
+            <Typography sx={{ color: "#aaa" }}>Costo envío</Typography>
             <Typography> {Number(user.costo_envio).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}</Typography>
           </Box>
         </Box>
@@ -144,7 +144,7 @@ export default function Perfil() {
             color: "#aaa",
           }}
         >
-          OPCIONES
+          Opciones
         </Typography>
 
         <Box

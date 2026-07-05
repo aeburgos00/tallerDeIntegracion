@@ -42,6 +42,13 @@ export const cambiarEstadoEnvio = async (id_envio, id_estado) => {
     return response.json()
 }
 
+export const obtenerProximoEnvio = async (id_transportista) => {
+    const response = await fetch(
+        `${API_URL}/envios/proximo/transportista/${id_transportista}`
+    )
+    return response.json()
+}
+
 
 export const obtenerLiquidacionesPorTransportistaId = async (
     id_transportista,

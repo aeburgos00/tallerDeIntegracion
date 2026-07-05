@@ -1,119 +1,124 @@
 import {
     Box,
     TextField,
-    MenuItem,
-    InputAdornment,
+    Autocomplete,
 } from "@mui/material"
 
 import { useEffect, useState } from 'react'
-import { obtenerEstados } from "../../services/api";
+import { obtenerEstados, obtenerClientes, obtenerLocalidadesActivas } from "../../services/api";
 
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import "dayjs/locale/es";
 
-export default function FiltroEnvios({
+export default function FiltroEnviosTransportista({
     filtros,
     setFiltros
 }) {
 
     const [estados, setEstados] = useState([])
+    const [clientes, setClientes] = useState([])
+    const [localidades, setLocalidades] = useState([])
+
     useEffect(() => {
-        const obtenerDatos = async () => {
+        const cargarCombos = async () => {
             try {
-                const result = await obtenerEstados()
-                setEstados(result.data)
+                const [estadosResp, clientesResp, localidadesResp] = await Promise.all([
+                    obtenerEstados(),
+                    obtenerClientes(),
+                    obtenerLocalidadesActivas()
+                ])
+                setEstados(estadosResp.data ?? [])
+                setClientes(clientesResp.data ?? [])
+                setLocalidades(localidadesResp.data ?? [])
             } catch (error) {
                 console.error(error)
             }
         }
-        obtenerDatos()
-    })
-
-    const handleChange = (campo) => (e) => {
-        setFiltros({
-            ...filtros,
-            [campo]: e.target.value
-        });
-    };
+        cargarCombos()
+    }, [])   // ← solo al montar, no en cada render
 
     return (
-        <Box
-            sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                    xs: "1fr",
-                    sm: "1fr 1fr",
-                    lg: "150px 180px 180px 180px 180px 130px 120px 120px"
-                },
-                gap: 2,
-                alignItems: "center",
-            }}>
+        <Box sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+        }}>
 
+            {/* Fecha — ancho completo, igual que los demás */}
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                 <DatePicker
                     label="Fecha Envío"
                     value={filtros.fechaEnvio}
                     onChange={(newValue) =>
-                        setFiltros({
-                            ...filtros,
-                            fechaEnvio: newValue
-                        })}
+                        setFiltros({ ...filtros, fechaEnvio: newValue })
+                    }
                     format="DD/MM/YYYY"
                     slotProps={{
                         textField: {
-                            size: "small"
-                        }
-                    }}
-                    sx={{
-                        width: {
-                            xs: 100,
-                            sm: 140,
-                            md: 180
+                            fullWidth: true,
+                            size: "small",
+                            sx: { "& .MuiOutlinedInput-root": { borderRadius: 2 } }
                         }
                     }}
                 />
             </LocalizationProvider>
 
-            <TextField
+            {/* Cliente — combo */}
+            <Autocomplete
                 fullWidth
-                label="Cliente"
-                value={filtros.cliente}
-                onChange={handleChange("cliente")}
-                size="small"
+                options={clientes}
+                value={clientes.find(c => c.nombre_apellido === filtros.cliente) ?? null}
+                getOptionLabel={(option) => option.nombre_apellido}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(event, value) =>
+                    setFiltros({ ...filtros, cliente: value?.nombre_apellido ?? "" })
+                }
+                renderInput={(params) => (
+                    <TextField {...params} fullWidth label="Cliente" size="small" />
+                )}
             />
 
+            {/* Dirección — texto libre (depende del cliente) */}
             <TextField
                 fullWidth
                 label="Dirección"
                 value={filtros.direccion}
-                onChange={handleChange("direccion")}
+                onChange={(e) => setFiltros({ ...filtros, direccion: e.target.value })}
                 size="small"
             />
 
-            <TextField
+            {/* Localidad — combo */}
+            <Autocomplete
                 fullWidth
-                label="Localidad"
-                value={filtros.localidad}
-                onChange={handleChange("localidad")}
-                size="small"
-            />
-
-            <TextField
-                fullWidth
-                select
-                label="Estado"
-                value={filtros.estado}
-                onChange={handleChange("estado")}
-                size="small"
-            >
-                {
-                    estados.map((item) => (
-                        <MenuItem value={item.id}>{item.descripcion}</MenuItem>
-                    ))
+                options={localidades}
+                value={localidades.find(l => l.nombre === filtros.localidad) ?? null}
+                getOptionLabel={(option) => option.nombre}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(event, value) =>
+                    setFiltros({ ...filtros, localidad: value?.nombre ?? "" })
                 }
-            </TextField>
+                renderInput={(params) => (
+                    <TextField {...params} fullWidth label="Localidad" size="small" />
+                )}
+            />
+
+            {/* Estado — combo */}
+            <Autocomplete
+                fullWidth
+                options={estados}
+                value={estados.find(e => e.id === filtros.estado) ?? null}
+                getOptionLabel={(option) => option.descripcion}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(event, value) =>
+                    setFiltros({ ...filtros, estado: value?.id ?? "" })
+                }
+                renderInput={(params) => (
+                    <TextField {...params} fullWidth label="Estado" size="small" />
+                )}
+            />
+
         </Box>
     )
 }

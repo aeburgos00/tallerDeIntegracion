@@ -94,7 +94,7 @@ export default function LiquidacionesMob() {
         px: 2
       }}>
         <Typography sx={{ fontSize: 12, color: "#9ca3af", fontWeight: 600, mb: 1.5 }}>
-          Período a Consultar
+          Período a consultar
         </Typography>
 
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
