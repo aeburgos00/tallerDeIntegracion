@@ -333,3 +333,18 @@ export const obtenerProvincias = async () => {
   )
   return response.json()
 }
+
+
+//==================== ARCHIVOS ====================
+
+export const subirArchivoEnvios = async (formData) => {
+  const response = await fetch(
+    `${API_URL}/archivos/envios`,
+    {
+      method: "POST",
+      body: formData
+    }
+  );
+
+  return response.json();
+};
