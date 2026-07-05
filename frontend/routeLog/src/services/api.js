@@ -206,10 +206,32 @@ export const obtenerEstados = async () => {
 
 export const obtenerEnvios = async (
   fecha_desde,
-  fecha_hasta
+  fecha_hasta,
+  filtros
 ) => {
+
+  const params = new URLSearchParams();
+
+  if (fecha_desde) {
+    params.append("desde", fecha_desde);
+  }
+
+  if (fecha_hasta) {
+    params.append("hasta", fecha_hasta);
+  }
+
+  Object.entries(filtros).forEach(([key, value]) => {
+    if (
+        value !== null &&
+        value !== undefined &&
+        value !== ""
+    ) {
+        params.append(key, value);
+    }
+  });
+
   const response = await fetch(
-    `${API_URL}/envios?desde=${fecha_desde}&hasta=${fecha_hasta}`
+    `${API_URL}/envios?${params.toString()}`
   )
   return response.json()
 }
@@ -292,11 +314,32 @@ export const cancelarEnvio = async (id) => {
 
 export const exportarEnviosCSV = async (
   fechaDesde,
-  fechaHasta
+  fechaHasta,
+  filtros
 ) => {
 
+  const params = new URLSearchParams();
+
+  if (fechaDesde) {
+    params.append("desde", fechaDesde);
+  }
+
+  if (fechaHasta) {
+    params.append("hasta", fechaHasta);
+  }
+
+  Object.entries(filtros).forEach(([key, value]) => {
+    if (
+        value !== null &&
+        value !== undefined &&
+        value !== ""
+    ) {
+        params.append(key, value);
+    }
+  });
+
   const response = await fetch(
-    `${API_URL}/envios/exportar-csv?desde=${fechaDesde}&hasta=${fechaHasta}`,
+    `${API_URL}/envios/exportar-csv?${params.toString()}`,
     { method: 'GET' }
   )
   const hoy = new Date();

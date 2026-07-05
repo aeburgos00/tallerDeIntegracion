@@ -40,10 +40,23 @@ export default function EnvioDePaquetes() {
     direccion: "",
     localidad: "",
     transportista: "",
-    estado:"",
-    tarifa:"",
-    liquidacion:""
+    estado: "",
+    tarifa: "",
+    liquidacion: ""
   });
+
+  const filtrosVacios = {
+      fechaEnvio: null,
+      cliente: "",
+      direccion: "",
+      localidad: "",
+      transportista: "",
+      estado: "",
+      tarifa: "",
+      liquidacion: ""
+  };
+
+  const [filtrosAplicados, setFiltrosAplicados] = useState(filtros);
 
   const [openABM, setOpenABM] = useState(false);
   const [envioSeleccionado, setEnvioSeleccionado] = useState(null)
@@ -53,6 +66,11 @@ export default function EnvioDePaquetes() {
 
   const [refreshTabla, setRefreshTabla] = useState(0)
 
+  const [pagina, setPagina] = useState(1);
+  const [filasPorPagina, setFilasPorPagina] = useState(10);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [enviosMostrados, setEnviosMostrados] = useState(0)
+  
   const handleNuevo = () => {
     setEnvioSeleccionado(null);
     setOpenABM(true)
@@ -69,20 +87,14 @@ export default function EnvioDePaquetes() {
   }
 
   const handleFilter = () => {
-    console.log(filtros);
-  };
+    setPagina(1);
+    setFiltrosAplicados({ ...filtros });
+};
 
   const handleClear = () => {
-    setFiltros({
-      fechaEnvio: null,
-      cliente: "",
-      direccion: "",
-      localidad: "",
-      transportista: "",
-      estado:"",
-      tarifa:"",
-      liquidacion:""
-    });
+    setFiltros({...filtrosVacios});
+    setFiltrosAplicados({...filtrosVacios});
+    setPagina(1);
   };
 
   const {
@@ -94,7 +106,8 @@ export default function EnvioDePaquetes() {
     try {
       await exportarEnviosCSV(
         fechaDesde.format("YYYY-MM-DD"),
-        fechaHasta.format("YYYY-MM-DD")
+        fechaHasta.format("YYYY-MM-DD"),
+        filtros
       )
     } catch(error) {
       console.error(error)
@@ -135,7 +148,6 @@ export default function EnvioDePaquetes() {
   }))
 
   return (
-    //Contenedor total
     <Box
     sx={{
       display:"flex",
@@ -150,14 +162,14 @@ export default function EnvioDePaquetes() {
         gridTemplateColumns: {
           xs: "1fr",
           sm: "1fr 1fr",
-          lg: "repeat(5, 1fr)"
+          lg: "repeat(6, 1fr)"
         },
         gap: 2
       }}
       >
         {
         loadingKPI?
-        Array.from({ length: 5 }).map((_, index) => (
+        Array.from({ length: 6 }).map((_, index) => (
           <Skeleton
             key={index}
             variant="rounded"
@@ -190,8 +202,7 @@ export default function EnvioDePaquetes() {
         />
       </FiltrosGenerico>
 
-
-      {/* Mostrado... + CSV + ABM */}
+      {/* Mostrado... + Botones */}
       <Box sx={{
         display:"flex",
         justifyContent:"space-between",
@@ -202,7 +213,7 @@ export default function EnvioDePaquetes() {
         <Typography sx={{
           color:"#777"
         }}>
-          Mostrando {cards[0].cantidad} envios
+          Mostrando {enviosMostrados} envios
         </Typography>
         {/* BOTONES */}
         <Box
@@ -281,10 +292,23 @@ export default function EnvioDePaquetes() {
         boxShadow:
         "0 1px 2px rgba(0,0,0,0.04)"
       }}>
-        <TablaPaginacionContenedor>
+        <TablaPaginacionContenedor
+          pagina={pagina}
+          filasPorPagina={filasPorPagina}
+          totalPaginas={totalPaginas}
+          onPaginaChange={setPagina}
+          onFilasPorPaginaChange={(valor) => {
+            setPagina(1);
+            setFilasPorPagina(valor);
+          }}
+        >
           <TablaEnvios 
+          cantEnvios={setEnviosMostrados}
+          filtros={filtrosAplicados}
+          pagina={pagina}
+          filasPorPagina={filasPorPagina}
+          onTotalPaginasChange={setTotalPaginas}
           onEdit={handleEditar}
-          onClose={handleClose}
           refresh={refreshTabla}
           />
         </TablaPaginacionContenedor>
