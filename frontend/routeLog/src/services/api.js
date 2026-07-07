@@ -26,6 +26,130 @@ export const obtenerTransportistasActivos = async () => {
   return response.json()
 }
 
+export const obtenerTransportistasTotales = async () => {
+  const response = await fetch(
+    `${API_URL}/transportistas/totales`
+  );
+
+  return response.json();
+};
+
+///para filtros
+export const obtenerTransportistas = async (filtros = {}) => {
+
+  const params = new URLSearchParams();
+
+  Object.entries(filtros).forEach(([key, value]) => {
+    if (
+      value !== null &&
+      value !== undefined &&
+      value !== ""
+    ) {
+      params.append(key, value);
+    }
+  });
+
+  const response = await fetch(
+    `${API_URL}/transportistas?${params.toString()}`
+  );
+
+  return response.json();
+};
+
+//obtenerTransportistaPorId
+export const obtenerTransportistaPorId = async (id) => {
+
+  const response = await fetch(
+    `${API_URL}/transportistas/${id}`
+  );
+
+  return response.json();
+
+};
+
+/// para el ABM
+//crearTransportista(formulario)
+export const crearTransportista = async (data) => {
+
+  const response = await fetch(
+    `${API_URL}/transportistas`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }
+  );
+
+  return response.json();
+
+};
+
+//modificarTransportista(formulario)
+export const modificarTransportista = async (id, data) => {
+
+  const response = await fetch(
+    `${API_URL}/transportistas/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }
+  );
+
+  return response.json();
+
+};
+//eliminarTransportista(id_transportista)
+export const eliminarTransportista = async (id) => {
+
+  const response = await fetch(
+    `${API_URL}/transportistas/${id}`,
+    {
+      method: "DELETE"
+    }
+  );
+
+  return response.json();
+
+};
+
+///exportarTransportistasCSV
+export const exportarTransportistasCSV = async () => {
+
+  const response = await fetch(
+    `${API_URL}/transportistas/exportar/csv`,
+    {
+      method: "GET"
+    }
+  );
+
+  const hoy = new Date();
+
+  const blob = await response.blob();
+
+  const url = window.URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+
+  link.href = url;
+
+  link.download =
+    `transportistas_${hoy.toLocaleDateString("es-AR")}.csv`;
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+
+  window.URL.revokeObjectURL(url);
+
+};
+
 //Liquidaciones
 export const obtenerLiquidacionesTotales = async (
   fecha_desde,

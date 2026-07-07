@@ -1,10 +1,32 @@
-import express from 'express'
-import { obtenerTransportistas, obtenerTransportistasActivos } from '../controllers/transportistas.controller.js'
+import express from "express";
 
-const router = express.Router()
+import {
+  obtenerTransportistas,
+  obtenerTransportistasActivos,
+  obtenerTransportistaPorId,
+  crearTransportista,
+  actualizarTransportista,
+  eliminarTransportista,
+  exportarTransportistasCSV,
+  obtenerTransportistasTotales
+} from "../controllers/transportistas.controller.js";
 
-router.get('/', obtenerTransportistas)
+const router = express.Router();
 
-router.get('/activos', obtenerTransportistasActivos)
+router.get("/", obtenerTransportistas);
 
-export default router
+router.get("/activos", obtenerTransportistasActivos);
+
+router.get("/totales", obtenerTransportistasTotales);
+
+router.get("/exportar/csv", exportarTransportistasCSV);
+
+router.get("/:id", obtenerTransportistaPorId);
+
+router.post("/", crearTransportista);
+
+router.put("/:id", actualizarTransportista);
+
+router.delete("/:id", eliminarTransportista);
+
+export default router;
