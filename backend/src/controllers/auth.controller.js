@@ -14,6 +14,7 @@ export const login = async (req, res) => {
       password
     } = req.body
 
+    console.log(req.body)
     // Busco al usuario
     const result = await pool.query(
       `

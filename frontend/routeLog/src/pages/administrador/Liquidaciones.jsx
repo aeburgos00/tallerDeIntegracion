@@ -4,18 +4,21 @@ import {
   FormControl, 
   InputLabel, 
   Select, 
-  MenuItem 
+  MenuItem,
+  Typography,
 } from "@mui/material"
 
-import TableResumenCard from "../../components/TableResumenCard.jsx"
-import TableLiquidacionesResumen from "../../components/TableLiquidacionesResumen.jsx"
+import TablaPaginacionContenedor from "../../components/TablaPaginacionContenedor.jsx"
+import TablaLiquidaciones from "../../components/tablasContenedor/TablaLiquidaciones.jsx"
 import SummaryCard from "../../components/SummaryCard"
+
+import FiltrosGenerico from "../../components/FiltrosGenerico.jsx"
+import FiltroLiquidaciones from "../../components/filtros/FiltroLiquidaciones.jsx"
 
 import {cardsLiquidacionesAdmin} from "../../components/datos/dataKPILiquidaciones.jsx";
 
 import { 
-  obtenerLiquidacionesTotales,
-  obtenerTransportistas 
+  obtenerLiquidacionesTotales, 
 } from "../../services/api.js"
 
 
@@ -27,27 +30,51 @@ export default function Liquidaciones() {
 
   const [liqTotales, setLiqTotales] = useState({})
   const [loading, setLoading] = useState(true)
+
+  const [filtros, setFiltros] = useState({
+    fechaEnvio: null,
+    fechaLiquidacion: null,
+    transportista: "",
+    localidad: "",
+    liquidado: "",
+    montoDesde: "",
+    montoHasta: ""
+  })
+
+  const filtrosVacios = {
+    fechaEnvio: null,
+    fechaLiquidacion: null,
+    transportista: "",
+    localidad: "",
+    liquidado: "",
+    montoDesde: "",
+    montoHasta: ""
+  }
+ 
+  const [filtrosAplicados, setFiltrosAplicados] = useState(filtros)
   
-  const [transportistaSeleccionado, setTransportistaSeleccionado] = useState("")
-  const [transportistas, setTransportistas] = useState([])
+  const [pagina, setPagina] = useState(1)
+  const [filasPorPagina, setFilasPorPagina] = useState(10)
+  const [totalPaginas, setTotalPaginas] = useState(1)
+  const [liquidacionesMostradas, setLiquidacionesMostradas] = useState(0)
 
   const { fechaDesde, fechaHasta } = useDateFilter()
-  
 
-  const kpis = cardsLiquidacionesAdmin.map(card => ({
-    ...card,
-    valor: card.id === "pct_paquetes_liquidados"
-      ? Number(liqTotales[card.id] || 0) + "%"
-      : card.id === "cantidad_envios"
-        ? Number(liqTotales[card.id] || 0)
-        : "$" + Number(liqTotales[card.id] || 0).toLocaleString("es-AR")
-  }))
+  const handleFilter = () => {
+    setPagina(1)
+    setFiltrosAplicados({ ...filtros })
+  }
+
+  const handleClear = () => {
+    setFiltros({ ...filtrosVacios })
+    setFiltrosAplicados({ ...filtrosVacios })
+    setPagina(1)
+  }
 
   useEffect(() => {
     const traerDatos = async () => {
       try {
         setLoading(true)
-
         
         const result = await obtenerLiquidacionesTotales(
           fechaDesde ? fechaDesde.format("YYYY-MM-DD") : null,
@@ -67,32 +94,17 @@ export default function Liquidaciones() {
   }, [fechaDesde, fechaHasta])
 
 
-  
-  useEffect(() => {
-    const cargarTransportistas = async () => {
-      try {
-        const result = await obtenerTransportistas()
-        
-        if (result.ok) 
-        {
-          setTransportistas(result.data || [])
-        } else 
-        {
-          setTransportistas([])
-        }
-
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    cargarTransportistas()
-  }, [])
-
-
+  const kpis = cardsLiquidacionesAdmin.map(card => ({
+    ...card,
+    valor: card.id === "pct_paquetes_liquidados"
+      ? Number(liqTotales[card.id] || 0) + "%"
+      : card.id === "cantidad_envios"
+        ? Number(liqTotales[card.id] || 0)
+        : "$" + Number(liqTotales[card.id] || 0).toLocaleString("es-AR")
+  }))
 
   return (
-    //Contenedor total
+
     <Box
     sx={{
       display:"flex",
@@ -104,7 +116,11 @@ export default function Liquidaciones() {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "1fr 1fr",
+            lg: "repeat(5, 1fr)"
+          },
           gap: 2
         }}
       >
@@ -118,106 +134,64 @@ export default function Liquidaciones() {
               />
             ))
           :
-            kpis.map((e, index) => (
+            kpis.map((card, index) => (
               <SummaryCard 
                 key={index}
-                titulo={e.titulo}
-                cantidad={e.valor}
-                icono={e.icono}
-                color={e.color}
+                titulo={card.titulo}
+                cantidad={card.valor}
+                icono={card.icono}
+                color={card.color}
                 height={112}
               />
             ))
         }
       </Box>
       {/* Filtros */}
-      <Box
-        sx={{
-          display: "flex",
-          gap: 2,
-          alignItems: "center",
-          padding: 2,
-          background: "#f5f5f5",
-          borderRadius: 2
-        }}
-      >
-        
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 0.5
-          }}
-        >
-          {/*
-          <span style={{ fontSize: 13, fontWeight: 500 }}>
-            Transportista
-          </span>
-          */}
-            <FormControl size="small" sx={{ minWidth: 220 }}>
-              <InputLabel>Transportista</InputLabel>
-              <Select
-                value={transportistaSeleccionado}
-                label="Transportista"
-                onChange={(e) => setTransportistaSeleccionado(e.target.value)}
-              >
-                <MenuItem value="">
-                  Todos
-                </MenuItem>
+      <FiltrosGenerico
+          onFilter={handleFilter}
+          onClear={handleClear}
+       >
+          <FiltroLiquidaciones
+            filtros={filtros}
+            setFiltros={setFiltros}
+          />
+      </FiltrosGenerico>
 
-                
-                {transportistas.map((t, index) => {
-                  const nombre = `Transportista ${t.id_usuario || t.id}`
-
-                  return (
-                    <MenuItem
-                      key={t.id || index}
-                      value={nombre}
-                    >
-                      {nombre}
-                    </MenuItem>
-                  )
-                })}
-
-              </Select>
-            </FormControl>
-        </Box>
-      </Box>
-
+      {/* Mostrado... */}
+      <Typography sx={{
+        color:"#777"
+      }}>
+        Mostrando {liquidacionesMostradas} liquidaciones
+      </Typography>
 
       {/* Grilla */}
-      <Box>
-                
-        <TableResumenCard titulo="Liquidaciones por transportista">   
-          <TableLiquidacionesResumen 
-            transportista={transportistaSeleccionado}
-          />
-        </TableResumenCard>
-
-        {/* Filtros y paginacion */}
-        <Box sx={{
-          display:"grid",
-          gridTemplateColumns: "8fr 4fr",
-          gap:2
-        }}
-        >
-          <h3>Filas x pag</h3>
-          <Box
-          sx={{
-            display:"flex",
-            gap:4,
+      <Box
+        sx={{
+          backgroundColor:"#fff",
+          borderRadius:2,
+          border:"1px solid #e5e7eb",
+          boxShadow:
+          "0 1px 2px rgba(0,0,0,0.04)"
+        }}>
+        <TablaPaginacionContenedor
+          pagina={pagina}
+          filasPorPagina={filasPorPagina}
+          totalPaginas={totalPaginas}
+          onPaginaChange={setPagina}
+          onFilasPorPaginaChange={(valor) => {
+            setPagina(1)
+            setFilasPorPagina(valor)
           }}
-          >
-            <p>Pagina 1 de 3</p>
-            <p> ant </p>
-            <p> 1 </p>
-            <p> 2 </p>
-            <p> 3 </p>
-            <p> sig </p>
-          </Box>
-        </Box>
+        >
+          <TablaLiquidaciones
+            filtros={filtrosAplicados}
+            pagina={pagina}
+            filasPorPagina={filasPorPagina}
+            cantLiquidaciones={setLiquidacionesMostradas}
+            onTotalPaginasChange={setTotalPaginas}
+          />
+        </TablaPaginacionContenedor>
       </Box>
-
     </Box>
   )
 }

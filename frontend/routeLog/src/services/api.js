@@ -356,6 +356,38 @@ export const exportarEnviosCSV = async (
 
 //==================== LIQUIDACIONES ====================
 
+export const obtenerLiquidacionesListado = async (
+  fecha_desde,
+  fecha_hasta,
+  filtros
+) => {
+ 
+  const params = new URLSearchParams();
+ 
+  if (fecha_desde) {
+    params.append("desde", fecha_desde);
+  }
+ 
+  if (fecha_hasta) {
+    params.append("hasta", fecha_hasta);
+  }
+ 
+  Object.entries(filtros).forEach(([key, value]) => {
+    if (
+        value !== null &&
+        value !== undefined &&
+        value !== ""
+    ) {
+        params.append(key, value);
+    }
+  });
+ 
+  const response = await fetch(
+    `${API_URL}/liquidaciones/listado?${params.toString()}`
+  )
+  return response.json()
+}
+
 export const obtenerLiquidacionesTotales = async (
   fecha_desde,
   fecha_hasta

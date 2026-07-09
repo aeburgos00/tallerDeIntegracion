@@ -1,5 +1,148 @@
 import pool from '../config/db.js'
 
+/** Consulta default a la tabla liquidaciones */
+export  const obtenerLiquidaciones = async (req, res) => {
+  try 
+  {
+    const result = await pool.query(
+      `SELECT 
+       id, id_paquete, fecha_alta
+       FROM liquidaciones
+       ORDER BY fecha_alta DESC
+       `
+    )
+     res.json({
+      ok: true,
+      data: result.rows
+    })
+  } 
+  catch (error)
+  {
+    res.status(500).json({
+      ok: false,
+      error: error.message
+    })
+  }
+}
+
+/** Listado detallado de liquidaciones por envío, con filtros dinámicos.*/
+export const obtenerLiquidacionesListado = async (req, res) => {
+  const {
+    desde,          // fecha envío desde (rango global)
+    hasta,          // fecha envío hasta (rango global de la pagina)
+    fechaEnvio,     // fecha envío exacta
+    fechaLiquidacion,
+    transportista,
+    localidad,
+    liquidado,      // "true" | "false"
+    montoDesde,
+    montoHasta
+  } = req.query
+ 
+  try {
+    let query = `
+      SELECT
+          p.id AS id_envio,
+          TO_CHAR(p.fecha, 'DD/MM/YYYY') AS fecha_envio,
+          TO_CHAR(liq.fecha_alta, 'DD/MM/YYYY') AS fecha_liquidacion,
+          u.nombre_apellido AS transportista,
+          CASE WHEN liq.id IS NOT NULL THEN true ELSE false END AS liquidado,
+          COALESCE(tar.precio, 0) AS monto
+        FROM paquetes p
+        JOIN transportistas t ON t.id = p.id_transportista
+        JOIN usuarios u ON u.id = t.id_usuario
+        JOIN tarifas tar ON tar.id = p.id_tarifa
+        JOIN direcciones d ON d.id = p.id_direccion
+        JOIN localidades l ON l.id = d.id_localidad
+        LEFT JOIN liquidaciones liq ON liq.id_paquete = p.id
+        WHERE 1=1
+    `
+    const parametros = []
+ 
+    if (desde && hasta) {
+      parametros.push(desde)
+      parametros.push(hasta)
+ 
+      query += `
+        AND p.fecha BETWEEN $${parametros.length - 1}
+                        AND $${parametros.length}
+      `
+    }
+ 
+    if (fechaEnvio) {
+      parametros.push(fechaEnvio)
+ 
+      query += `
+        AND p.fecha = $${parametros.length}
+      `
+    }
+ 
+    if (fechaLiquidacion) {
+      parametros.push(fechaLiquidacion)
+ 
+      query += `
+        AND liq.fecha_alta::date = $${parametros.length}
+      `
+    }
+ 
+    if (transportista) {
+      parametros.push(`%${transportista.toUpperCase()}%`)
+ 
+      query += `
+        AND upper(u.nombre_apellido) LIKE $${parametros.length}
+      `
+    }
+ 
+    if (localidad) {
+      parametros.push(`%${localidad.toUpperCase()}%`)
+ 
+      query += `
+        AND upper(l.nombre) LIKE $${parametros.length}
+      `
+    }
+ 
+    if (liquidado === 'true' || liquidado === 'false') {
+      const esLiquidado = liquidado === 'true'
+      query += `
+        AND (liq.id IS NOT NULL) = ${esLiquidado}
+      `
+    }
+ 
+    if (montoDesde) {
+      parametros.push(Number(montoDesde))
+ 
+      query += `
+        AND tar.precio >= $${parametros.length}
+      `
+    }
+ 
+    if (montoHasta) {
+      parametros.push(Number(montoHasta))
+ 
+      query += `
+        AND tar.precio <= $${parametros.length}
+      `
+    }
+ 
+    query += `
+      ORDER BY p.fecha DESC
+    `
+ 
+    const result = await pool.query(query, parametros)
+ 
+    res.json({
+      ok: true,
+      data: result.rows
+    })
+ 
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      error: error.message
+    })
+  }
+}
+
 /** Obtener listado agrupado: Envíos e importe total para cada transportista */
 export const obtenerLiquidacionesTransportistas = async (req, res) => {
   try {
