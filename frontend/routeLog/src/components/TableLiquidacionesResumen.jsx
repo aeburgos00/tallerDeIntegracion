@@ -10,7 +10,7 @@ import {
 
 import { useEffect, useState } from 'react'
 
-import { obtenerLiquidacionesPorTransportista } from '../services/api.js'
+import { obtenerLiquidacionesTransportistas } from '../services/api.js'
 import useDateFilter from '../hooks/useDateFilter.js'
 
 
@@ -25,7 +25,7 @@ export default function TableLiquidacionesResumen({transportista}) {
             try {
             setLoading(true)
 
-            const result = await obtenerLiquidacionesPorTransportista(
+            const result = await obtenerLiquidacionesTransportistas(
                 fechaDesde ? fechaDesde.format("YYYY-MM-DD") : null,
                 fechaHasta ? fechaHasta.format("YYYY-MM-DD") : null
             )

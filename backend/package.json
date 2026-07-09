@@ -17,10 +17,13 @@
     "@supabase/supabase-js": "^2.105.4",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
+    "csv-parser": "^3.2.1",
+    "dayjs": "^1.11.21",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
     "pg": "^8.20.0",
     "zod": "^4.4.3"
   },

@@ -9,7 +9,7 @@ const obtenerClientes = async(req, res) => {
             from clientes
         `
 
-        const result = await pool.query(query,)    
+        const result = await pool.query(query)    
         res.json({
             ok:true,
             data:result.rows
@@ -42,7 +42,7 @@ const crearCliente = async (req, res) => {
     })
     }
 
-    //Busco la direccion a ver si existe
+    //Busco al cliente a ver si existe
     const query = `
         SELECT id
         FROM clientes
@@ -82,7 +82,7 @@ const crearCliente = async (req, res) => {
     )
 
     const nuevoCliente = clienteResult.rows[0]
-    const idPaquete = nuevoCliente.id
+    const idCliente = nuevoCliente.id
 
     //Cierro la transaccion
     await pool.query("COMMIT")
@@ -90,7 +90,7 @@ const crearCliente = async (req, res) => {
     res.status(201).json({
         ok:true,
         data: nuevoCliente,
-        message:`Cliente ${idPaquete} creado correctamente`
+        message:`Cliente ${idCliente} creado correctamente`
     })
   } catch(error) {
     res.status(500).json({

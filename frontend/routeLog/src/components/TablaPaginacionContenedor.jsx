@@ -9,11 +9,13 @@ import {
 export default function TablaPaginacionContenedor ({
   children,
   pagina,
-  totalPaginas,
   filasPorPagina,
+  totalPaginas,
   onPaginaChange,
   onFilasPorPaginaChange
 }) {
+
+
   return (
      <Box
       sx={{
@@ -50,10 +52,8 @@ export default function TablaPaginacionContenedor ({
 
             <Select
                 size="small"
-                value={filasPorPagina || 10 }
-                onChange={(e) =>
-                    onFilasPorPaginaChange(e.target.value)
-                }
+                value={filasPorPagina}
+                onChange={(e) => onFilasPorPaginaChange(e.target.value)}
             >
                 <MenuItem value={10}>10</MenuItem>
                 <MenuItem value={25}>25</MenuItem>
@@ -65,9 +65,7 @@ export default function TablaPaginacionContenedor ({
             <Pagination
             page={pagina}
             count={totalPaginas}
-            onChange={(e,value)=>
-                onPaginaChange(value)
-            }
+            onChange={(e, value) => onPaginaChange(value)}
             color="primary"
             />
         </Box>

@@ -1,24 +1,31 @@
 const API_URL = import.meta.env.VITE_API_URL
 
-//Login
+//==================== AUTH ====================
+
 export const loginRequest = async (usuario, password) => {
   const response = await fetch(
-      `${API_URL}/auth/login`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type':'application/json'
-        },
-        body: JSON.stringify({
-          usuario,
-          password
-        })
-      }
-    )
-    return response.json()
+    `${API_URL}/auth/login`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        usuario,
+        password
+      })
+    }
+  )
+  return response.json()
 }
 
-//Transportistas
+//==================== TRANSPORTISTAS ====================
+
+export const obtenerTransportistas = async () => {
+  const response = await fetch(`${API_URL}/transportistas`)
+  return response.json()
+}
+
 export const obtenerTransportistasActivos = async () => {
   const response = await fetch(
     `${API_URL}/transportistas/activos`
@@ -26,25 +33,50 @@ export const obtenerTransportistasActivos = async () => {
   return response.json()
 }
 
-//Liquidaciones
-export const obtenerLiquidacionesTotales = async (
-  fecha_desde,
-  fecha_hasta
+//==================== CLIENTES ====================
+
+export const obtenerClientes = async () => {
+  const response = await fetch(
+    `${API_URL}/clientes`
+  )
+  return response.json()
+}
+
+export const crearCliente = async (data) => {
+    const response = await fetch(
+    `${API_URL}/clientes`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }
+  )
+  return response.json()
+}
+
+//==================== DIRECCIONES ====================
+
+export const obtenerDirecciones = async () => {
+  const response = await fetch(
+    `${API_URL}/direcciones`
+  )
+  return response.json()
+}
+
+export const obtenerDireccionesPorClienteLocalidad = async (
+  cliente,
+  localidad
 ) => {
   const response = await fetch(
-    `${API_URL}/liquidaciones/totales?desde=${fecha_desde}&hasta=${fecha_hasta}`
+    `${API_URL}/direcciones/cliente/localidad?cliente=${cliente}&localidad=${localidad}`
   )
   return response.json()
 }
 
-export const obtenerLiquidacionesPorTransportista = async (desde, hasta) => {
-  const response = await fetch(
-    `${API_URL}/liquidaciones/transportista?desde=${desde}&hasta=${hasta}`
-  )
-  return response.json()
-}
+//==================== LOCALIDADES ====================
 
-//localidades
 export const obtenerLocalidades = async () => {
   const response = await fetch(
     `${API_URL}/localidades`
@@ -66,13 +98,140 @@ export const obtenerLocalidadesTotales = async () => {
   return response.json()
 }
 
-//Envios
-export const obtenerEnvios = async (
-  fecha_desde,
-  fecha_hasta
+export const obtenerLocalidadPorId = async (id) => {
+  const response = await fetch(
+    `${API_URL}/localidades/${id}`
+  )
+  return response.json()
+}
+
+export const crearLocalidad = async (localidad) => {
+  const response = await fetch(
+    `${API_URL}/localidades`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(localidad)
+    }
+  )
+  return response.json()
+}
+
+export const modificarLocalidad = async (
+  id,
+  localidad
 ) => {
   const response = await fetch(
-    `${API_URL}/envios?desde=${fecha_desde}&hasta=${fecha_hasta}`
+    `${API_URL}/localidades/${id}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(localidad)
+    }
+  )
+  return response.json()
+}
+
+export const eliminarLocalidad = async (id) => {
+  const response = await fetch(
+    `${API_URL}/localidades/${id}`,
+    {
+      method: 'DELETE'
+    }
+  )
+  return response.json()
+}
+
+export const cambiarEstadoLocalidad = async (id) => {
+  const response = await fetch(
+    `${API_URL}/localidades/${id}/estado`,
+    { method: 'PATCH' }
+  )
+  return response.json()
+}
+
+export const exportarLocalidadesCSV = async () => {
+  const response = await fetch(
+    `${API_URL}/localidades/exportar-csv`,
+    { method: 'GET' }
+  )
+  const hoy = new Date()
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download =
+    'localidades_' +
+    hoy.toLocaleDateString('es-AR') +
+    '.csv'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+//==================== TARIFAS ====================
+
+export const obtenerTarifas = async () => {
+  const response = await fetch(
+    `${API_URL}/tarifas`
+  )
+  return response.json()
+}
+
+export const obtenerTarifasPorTransportistaLocalidad = async (
+  transportista,
+  localidad
+) => {
+  const response = await fetch(
+    `${API_URL}/tarifas/transportista/localidad?transportista=${transportista}&localidad=${localidad}`
+  )
+  return response.json()
+}
+
+//==================== ESTADOS ====================
+
+export const obtenerEstados = async () => {
+  const response = await fetch(
+    `${API_URL}/estados`
+  )
+  return response.json()
+}
+
+//==================== ENVIOS ====================
+
+export const obtenerEnvios = async (
+  fecha_desde,
+  fecha_hasta,
+  filtros
+) => {
+
+  const params = new URLSearchParams();
+
+  if (fecha_desde) {
+    params.append("desde", fecha_desde);
+  }
+
+  if (fecha_hasta) {
+    params.append("hasta", fecha_hasta);
+  }
+
+  Object.entries(filtros).forEach(([key, value]) => {
+    if (
+        value !== null &&
+        value !== undefined &&
+        value !== ""
+    ) {
+        params.append(key, value);
+    }
+  });
+
+  const response = await fetch(
+    `${API_URL}/envios?${params.toString()}`
   )
   return response.json()
 }
@@ -102,42 +261,21 @@ export const obtenerEnviosRecientes = async (
   fecha_hasta
 ) => {
   const response = await fetch(
-     `${API_URL}/envios/recientes?desde=${fecha_desde}&hasta=${fecha_hasta}`
+    `${API_URL}/envios/recientes?desde=${fecha_desde}&hasta=${fecha_hasta}`
   )
   return response.json()
 }
 
 export const obtenerEnvioPorId = async (
   id
-) =>{
+) => {
   const response = await fetch(
     `${API_URL}/envios/${id}`
   )
   return response.json()
 }
 
-export const exportarEnviosCSV = async (
-  fechaDesde,
-  fechaHasta
-) => {
-
-  const response = await fetch(
-    `${API_URL}/envios/exportar-csv?desde=${fechaDesde}&hasta=${fechaHasta}`,
-    {method:'GET'}
-  )
-  const hoy = new Date();
-  const blob = await response.blob()
-  const url = window.URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = 'envios_'+ hoy.toLocaleDateString('es-AR') +'.csv'
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  window.URL.revokeObjectURL(url)
-}
-
-export const crearEnvio = async (data) => {
+export const crearEnvio = async (envio) => {
   const response = await fetch(
     `${API_URL}/envios`,
     {
@@ -145,19 +283,13 @@ export const crearEnvio = async (data) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(envio)
     }
   )
   return response.json()
 }
 
-export const obtenerTransportistas = async () => {
-  const response = await fetch(
-    `${API_URL}/transportistas`
-  )
-  return response.json()
-}
-export const modificarEnvio = async (id, data) => {
+export const modificarEnvio = async (id, envio) => {
   const response = await fetch(
     `${API_URL}/envios/${id}`,
     {
@@ -165,7 +297,7 @@ export const modificarEnvio = async (id, data) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(envio)
     }
   )
 
@@ -173,77 +305,101 @@ export const modificarEnvio = async (id, data) => {
 }
 
 export const cancelarEnvio = async (id) => {
-   const response = await fetch(
+  const response = await fetch(
     `${API_URL}/envios/${id}/cancelar`,
     { method: "PUT" }
   )
   return response.json()
 }
 
+export const exportarEnviosCSV = async (
+  fechaDesde,
+  fechaHasta,
+  filtros
+) => {
 
-//Estados
-export const obtenerEstados= async () =>{
+  const params = new URLSearchParams();
+
+  if (fechaDesde) {
+    params.append("desde", fechaDesde);
+  }
+
+  if (fechaHasta) {
+    params.append("hasta", fechaHasta);
+  }
+
+  Object.entries(filtros).forEach(([key, value]) => {
+    if (
+        value !== null &&
+        value !== undefined &&
+        value !== ""
+    ) {
+        params.append(key, value);
+    }
+  });
+
   const response = await fetch(
-    `${API_URL}/estados`
+    `${API_URL}/envios/exportar-csv?${params.toString()}`,
+    { method: 'GET' }
+  )
+  const hoy = new Date();
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'envios_' + hoy.toLocaleDateString('es-AR') + '.csv'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+//==================== LIQUIDACIONES ====================
+
+export const obtenerLiquidacionesTotales = async (
+  fecha_desde,
+  fecha_hasta
+) => {
+  const response = await fetch(
+    `${API_URL}/liquidaciones/totales?desde=${fecha_desde}&hasta=${fecha_hasta}`
   )
   return response.json()
 }
 
-//Clientes
-export const obtenerClientes = async () =>{
+export const obtenerLiquidacionesTransportistas = async (desde, hasta) => {
   const response = await fetch(
-    `${API_URL}/clientes`
+    `${API_URL}/liquidaciones/transportistas?desde=${desde}&hasta=${hasta}`
   )
   return response.json()
 }
 
-export const crearCliente = async (data) => {
+export const obtenerLiquidacionesPorTransportista = async (id, desde, hasta) => {
   const response = await fetch(
-    `${API_URL}/clientes`,
+    `${API_URL}/liquidaciones/transportista/${id}?desde=${desde}&hasta=${hasta}`
+  )
+  return response.json()
+}
+
+//==================== PROVINCIAS ====================
+
+export const obtenerProvincias = async () => {
+  const response = await fetch(
+    `${API_URL}/provincias`
+  )
+  return response.json()
+}
+
+
+//==================== ARCHIVOS ====================
+
+export const subirArchivoEnvios = async (formData) => {
+  const response = await fetch(
+    `${API_URL}/archivos/envios`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
+      body: formData
     }
-  )
-  return response.json()
-}
+  );
 
-//Direcciones
-export const obtenerDirecciones = async () =>{
-  const response = await fetch(
-    `${API_URL}/clientes`
-  )
-  return response.json()
-}
-
-export const obtenerDireccionesPorClienteLocalidad  = async (
-  cliente,
-  localidad
-) =>{
-  const response = await fetch(
-    `${API_URL}/direcciones/cliente/localidad?cliente=${cliente}&localidad=${localidad}`
-  )
-  return response.json()
-}
-
-//Tarifas
-export const obtenerTarifas = async () =>{
-  const response = await fetch(
-    `${API_URL}/tarifas`
-  )
-  return response.json()
-}
-
-export const obtenerTarifasPorTransportistaLocalidad  = async (
-  transportista,
-  localidad
-) =>{
-  const response = await fetch(
-    `${API_URL}/tarifas/transportista/localidad?transportista=${transportista}&localidad=${localidad}`
-  )
-  return response.json()
-}
-
+  return response.json();
+};

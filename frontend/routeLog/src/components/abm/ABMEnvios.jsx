@@ -27,8 +27,8 @@ dayjs.extend(customParseFormat)
 import ABMClientes from "./ABMClientes.jsx"
 
 import {
-  obtenerLocalidadesActivas, 
-  obtenerTransportistasActivos, 
+  obtenerLocalidadesActivas,
+  obtenerTransportistasActivos,
   obtenerEnvioPorId,
   obtenerClientes,
   obtenerDireccionesPorClienteLocalidad,
@@ -49,8 +49,8 @@ export default function ABMEnvios({
   const [localidades, setLocalidades] = useState([])
   const [transportistas, setTransportistas] = useState([])
   const [direcciones, setDirecciones] = useState([])
-  const [tarifa,setTarifa] = useState([])
-  const [estados,setEstados] = useState([])
+  const [tarifa, setTarifa] = useState([])
+  const [estados, setEstados] = useState([])
 
   const [openABMCliente, setOpenABMCliente] = useState(false)
 
@@ -59,8 +59,8 @@ export default function ABMEnvios({
     direccion: null,
     id_localidad: "",
     id_transportista: "",
-    fecha_envio:null,
-    id_tarifa:null,
+    fecha_envio: null,
+    id_tarifa: null,
     id_estado: 1
   })
 
@@ -75,7 +75,7 @@ export default function ABMEnvios({
   }
 
   const estadoSeleccionado =
-  estados.find(
+    estados.find(
       e => e.id === formulario.id_estado
     ) ?? null;
 
@@ -88,7 +88,7 @@ export default function ABMEnvios({
   const [refreshCliente, setRefreshCliente] = useState(0)
 
   ///FUNCIONES
-  const validarFormulario = () => {    
+  const validarFormulario = () => {
     const hoy = dayjs().startOf("day");
     if (!formulario.id_cliente) {
       return "Debe seleccionar un cliente";
@@ -100,15 +100,15 @@ export default function ABMEnvios({
       return "Debe ingresar una dirección";
     }
     if (!formulario.id_transportista) {
-      return "Debe seleccionar un transportista";
+      return 'Debe seleccionar un transportista';
     }
     if (!formulario.fecha_envio) {
-      return "Debe seleccionar una fecha";
+      return 'Debe seleccionar una fecha';
     }
     if (formulario.fecha_envio.isBefore(hoy)) {
       return "La fecha de envío no puede ser anterior a hoy";
     }
-    if (!formulario.id_estado) {
+    if (idEnvio && !formulario.id_estado) {
       return "Debe seleccionar un estado";
     }
     return null;
@@ -125,10 +125,10 @@ export default function ABMEnvios({
 
     try {
       setGuardando(true)
-      if(!idEnvio){
+      if (!idEnvio) {
         await crearEnvio(formulario)
         onSuccess("Envío creado correctamente")
-      }else{
+      } else {
         await modificarEnvio(
           idEnvio,
           formulario
@@ -138,7 +138,7 @@ export default function ABMEnvios({
       setError(false);
       limpiarFormulario();
       onClose();
-    } catch(error) {
+    } catch (error) {
       setMensaje(
         error?.message || "Ocurrió un error al guardar"
       );
@@ -159,7 +159,7 @@ export default function ABMEnvios({
 
   ///USE EFFECTS
   useEffect(() => {
-  const cargarCombos = async () => {
+    const cargarCombos = async () => {
       try {
         const clientesResp = await obtenerClientes()
         const localidadesResp = await obtenerLocalidadesActivas()
@@ -169,7 +169,7 @@ export default function ABMEnvios({
         setLocalidades(localidadesResp.data)
         setTransportistas(transportistasResp.data)
         setEstados(estadosResp.data)
-      } catch(error) {
+      } catch (error) {
         console.error(error)
       }
     }
@@ -181,24 +181,24 @@ export default function ABMEnvios({
       try {
         const clientesResp = await obtenerClientes()
         setClientes(clientesResp.data)
-      } catch(error) {
+      } catch (error) {
         console.error(error)
       }
     }
     recargarClientes()
   }, [refreshCliente])
-  
+
   useEffect(() => {
-    if(!idEnvio) {
+    if (!idEnvio) {
       const timeout = setTimeout(() => {
         setFormulario({
           id_cliente: null,
           direccion: null,
           id_localidad: "",
           id_transportista: "",
-          fecha_envio:null,
-          id_tarifa:null,
-          id_estado:null
+          fecha_envio: null,
+          id_tarifa: null,
+          id_estado: null
         });
       }, 0);
       return () => clearTimeout(timeout);
@@ -207,22 +207,22 @@ export default function ABMEnvios({
     let cancelled = false;
 
     const cargarEnvio = async () => {
-      try{    
+      try {
         const response = await obtenerEnvioPorId(idEnvio)
         const envio = response.data
         if (cancelled) return;
         setFormulario({
-            id_cliente: envio.id_cliente || "",
-            direccion: envio.direccion || "",
-            id_localidad: envio.id_localidad || "",
-            id_transportista: envio.id_transportista || "",
-            fecha_envio: envio.fecha_envio
+          id_cliente: envio.id_cliente || "",
+          direccion: envio.direccion || "",
+          id_localidad: envio.id_localidad || "",
+          id_transportista: envio.id_transportista || "",
+          fecha_envio: envio.fecha_envio
             ? dayjs(envio.fecha_envio, "DD/MM/YYYY")
             : null,
-            id_tarifa: envio.id_tarifa || "",
-            id_estado: envio.id_estado ||""
+          id_tarifa: envio.id_tarifa || "",
+          id_estado: envio.id_estado || ""
         })
-      } catch(error) {
+      } catch (error) {
         console.error(error)
       }
     }
@@ -230,29 +230,29 @@ export default function ABMEnvios({
     return () => { cancelled = true; };
   }, [idEnvio])
 
-  useEffect(() =>{
+  useEffect(() => {
     if (
       !formulario.id_cliente ||
       !formulario.id_localidad
-    ) 
-    return
+    )
+      return
 
     const cargarDirecciones = async () => {
-      try{
+      try {
         const response =
           await obtenerDireccionesPorClienteLocalidad(
             formulario.id_cliente,
             formulario.id_localidad
           )
         setDirecciones(response.data ?? [])
-      } catch(error) {
+      } catch (error) {
         console.error(error)
       }
     }
     cargarDirecciones()
   }, [formulario.id_cliente, formulario.id_localidad])
 
-  useEffect(() =>{
+  useEffect(() => {
     if (
       !formulario.id_transportista ||
       !formulario.id_localidad
@@ -261,14 +261,14 @@ export default function ABMEnvios({
         setTarifa(null)
         setFormulario(prev => ({
           ...prev,
-          id_tarifa:null
+          id_tarifa: null
         }))
-      },0)
+      }, 0)
       return () => clearTimeout(timeout);
     }
-    
+
     const cargarTarifa = async () => {
-      try{
+      try {
         const response =
           await obtenerTarifasPorTransportistaLocalidad(
             formulario.id_transportista,
@@ -278,9 +278,9 @@ export default function ABMEnvios({
         setTarifa(tarifa)
         setFormulario(prev => ({
           ...prev,
-          id_tarifa:tarifa?.id ?? null
+          id_tarifa: tarifa?.id ?? null
         }))
-      } catch(error) {
+      } catch (error) {
         console.error(error)
       }
     }
@@ -304,44 +304,44 @@ export default function ABMEnvios({
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Box
-            sx={{
-              display: "flex",
-              gap: 1            
-            }}
+              sx={{
+                display: "flex",
+                gap: 1
+              }}
             >
               <Autocomplete
-              disabled={!!idEnvio}
-              fullWidth
-              options={clientes}
-              value={ clientes.find(
-                        c => c.id === formulario.id_cliente
-                      ) ?? null
-              }
-              getOptionLabel={(option) =>
-                `${option.nombre_apellido} - DNI ${option.dni}`
-              }
-              isOptionEqualToValue={(option, value) =>
-                option.id === value.id
-              }
-              onChange={(event, value) => {
-                setFormulario(prev => ({
-                  ...prev,
-                  id_cliente: value?.id ?? null
-                }))
-              }}
-              renderInput={(params) => (
-                <TextField 
-                {...params}
-                fullWidth 
-                required 
-                label="Cliente"
-                />
+                disabled={!!idEnvio}
+                fullWidth
+                options={clientes}
+                value={clientes.find(
+                  c => c.id === formulario.id_cliente
+                ) ?? null
+                }
+                getOptionLabel={(option) =>
+                  `${option.nombre_apellido} - DNI ${option.dni}`
+                }
+                isOptionEqualToValue={(option, value) =>
+                  option.id === value.id
+                }
+                onChange={(event, value) => {
+                  setFormulario(prev => ({
+                    ...prev,
+                    id_cliente: value?.id ?? null
+                  }))
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    required
+                    label="Cliente"
+                  />
                 )
-              }
+                }
               />
               <IconButton
                 disabled={!!idEnvio}
-                sx={{color:"#3b82f6"}}
+                sx={{ color: "#3b82f6" }}
                 onClick={() => setOpenABMCliente(true)}
               >
                 <AddIcon />
@@ -350,7 +350,7 @@ export default function ABMEnvios({
               <ABMClientes
                 open={openABMCliente}
                 onClose={() => setOpenABMCliente(false)}
-                onSuccess={(mensajeCliente)=>{
+                onSuccess={(mensajeCliente) => {
                   setMensajeCliente(mensajeCliente)
                   setTipoMensajeCliente("success")
                   setRefreshCliente(prev => prev + 1)
@@ -368,189 +368,191 @@ export default function ABMEnvios({
 
             </Box>
           </Grid>
+
           <Grid size={{ xs: 12, md: 6 }}>
             <Autocomplete
-            disabled={!!idEnvio}
-            fullWidth
-            options={localidades}
-            value={
-              localidades.find(
-                l => l.id === formulario.id_localidad
-              ) ?? null
-            }
-            getOptionLabel={(option) =>
-              `${option.nombre}`
-            }
-            isOptionEqualToValue={(option, value) =>
-              option.id === value.id
-            }
-            onChange={(event, value) => {
-              setFormulario(prev => ({
-                ...prev,
-                id_localidad: value?.id ?? null,
-              }))
-            }}
-            renderInput={(params) => (
-              <TextField 
-              {...params}
-              fullWidth 
-              required 
-              label="Localidad"
-              />
-              )
-            }
-            />
-          </Grid>
-          
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Autocomplete
-            disabled={!!idEnvio}
-            fullWidth
-            freeSolo
-            options={
-              formulario.id_cliente &&
-              formulario.id_localidad
-                ? direcciones
-                : []
-            }
-            getOptionLabel={(option) =>
-              typeof option === "string"
-                ? option
-                : option.descripcion
-            }
-            inputValue={formulario.direccion ?? ""}
-            value={ direcciones.find(
-                        d => d.descripcion === formulario.direccion
-                      ) ?? null
-            }
-            onChange={(event, value) => {
-              setFormulario(prev => ({
-                ...prev,
-                direccion: typeof value === "string"
-                  ? value
-                  : value?.descripcion ?? ""
-              }))
-            }}
-            onInputChange={(event, value, reason) => {
-              if (reason === "input") {
+              disabled={!!idEnvio}
+              fullWidth
+              options={localidades}
+              value={
+                localidades.find(
+                  l => l.id === formulario.id_localidad
+                ) ?? null
+              }
+              getOptionLabel={(option) =>
+                `${option.nombre}`
+              }
+              isOptionEqualToValue={(option, value) =>
+                option.id === value.id
+              }
+              onChange={(event, value) => {
                 setFormulario(prev => ({
                   ...prev,
-                  direccion: value
+                  id_localidad: value?.id ?? null,
                 }))
-              }
-            }}
-            renderInput={(params) => (
-              <TextField 
-              {...params}
-              fullWidth 
-              required 
-              label="Dirección"
-              />
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  required
+                  label="Localidad"
+                />
               )
-            }
+              }
             />
           </Grid>
+
           <Grid size={{ xs: 12, md: 6 }}>
             <Autocomplete
-            fullWidth
-            options={transportistas}
-            value={ 
-              transportistas.find(
-                t => t.id === formulario.id_transportista
+              disabled={!!idEnvio}
+              fullWidth
+              freeSolo
+              options={
+                formulario.id_cliente &&
+                  formulario.id_localidad
+                  ? direcciones
+                  : []
+              }
+              getOptionLabel={(option) =>
+                typeof option === "string"
+                  ? option
+                  : option.descripcion
+              }
+              inputValue={formulario.direccion ?? ""}
+              value={direcciones.find(
+                d => d.descripcion === formulario.direccion
               ) ?? null
-            }
-            getOptionLabel={(option) =>
-              `${option.nombre} - Usuario: ${option.usuario}`
-            }
-            isOptionEqualToValue={(option, value) =>
-              option.id === value.id
-            }
-            onChange={(event, value) => {
-              setFormulario(prev => ({
-                ...prev,
-                id_transportista: value?.id ?? null
-              }))
-            }}
-            renderInput={(params) => (
-              <TextField 
-              {...params}
-              fullWidth 
-              required 
-              label="Transportista"
-              />
+              }
+              onChange={(event, value) => {
+                setFormulario(prev => ({
+                  ...prev,
+                  direccion: typeof value === "string"
+                    ? value
+                    : value?.descripcion ?? ""
+                }))
+              }}
+              onInputChange={(event, value, reason) => {
+                if (reason === "input") {
+                  setFormulario(prev => ({
+                    ...prev,
+                    direccion: value
+                  }))
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  required
+                  label="Dirección"
+                />
               )
-            }
+              }
+            />
+          </Grid>
 
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Autocomplete
+              fullWidth
+              options={transportistas}
+              value={
+                transportistas.find(
+                  t => t.id === formulario.id_transportista
+                ) ?? null
+              }
+              getOptionLabel={(option) =>
+                `${option.nombre} - Usuario: ${option.usuario}`
+              }
+              isOptionEqualToValue={(option, value) =>
+                option.id === value.id
+              }
+              onChange={(event, value) => {
+                setFormulario(prev => ({
+                  ...prev,
+                  id_transportista: value?.id ?? null
+                }))
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  required
+                  label="Transportista"
+                />
+              )
+              }
             />
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
               <DatePicker
-              required
-              label="Fecha Envío *"
-              format="DD/MM/YYYY"
-              sx={{width: '100%'}}
-              value={formulario.fecha_envio}   
-              onChange={(newValue) =>
-                setFormulario({
-                  ...formulario,
-                  fecha_envio: dayjs(newValue, "DD/MM/YYYY")
-                })
-              }
-            />
+                required
+                label="Fecha Envío *"
+                format="DD/MM/YYYY"
+                sx={{ width: '100%' }}
+                value={formulario.fecha_envio}
+                onChange={(newValue) =>
+                  setFormulario({
+                    ...formulario,
+                    fecha_envio: newValue
+                  })
+                }
+              />
             </LocalizationProvider>
           </Grid>
+
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField 
-            disabled 
-            fullWidth
-            variant="filled"
-            slotProps={{
-              input: {
-                readOnly: true,
-                startAdornment: <InputAdornment position="start">$</InputAdornment>,
-              },
-            }}
-            label="Tarifa"
-            value={Number(tarifa?.precio || 0).toLocaleString("es-AR")}
+            <TextField
+              disabled
+              fullWidth
+              variant="filled"
+              slotProps={{
+                input: {
+                  readOnly: true,
+                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                },
+              }}
+              label="Tarifa"
+              value={Number(tarifa?.precio || 0).toLocaleString("es-AR")}
             />
           </Grid>
-          
+
           {idEnvio && (
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Autocomplete
-            fullWidth
-            options={estados}
-            value={estadoSeleccionado}
-            getOptionLabel={(option) =>
-              `${option.descripcion}`
-            }
-            isOptionEqualToValue={(option, value) =>
-              option.id === value.id
-            }
-            onChange={(event, value) => {
-              setFormulario(prev => ({
-                ...prev,
-                id_estado: value?.id ?? null
-              }))
-            }}
-            renderInput={(params) => (
-              <TextField 
-              {...params}
-              fullWidth 
-              required 
-              label="Estado"
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Autocomplete
+                fullWidth
+                options={estados}
+                value={estadoSeleccionado}
+                getOptionLabel={(option) =>
+                  `${option.descripcion}`
+                }
+                isOptionEqualToValue={(option, value) =>
+                  option.id === value.id
+                }
+                onChange={(event, value) => {
+                  setFormulario(prev => ({
+                    ...prev,
+                    id_estado: value?.id ?? null
+                  }))
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    required
+                    label="Estado"
+                  />
+                )
+                }
               />
-              )
-            }
-            />
-          </Grid>
+            </Grid>
           )}
-          
+
         </Grid>
       </Box>
-      
+
       <Snackbar
         open={!!mensaje}
         autoHideDuration={4000}
@@ -564,6 +566,6 @@ export default function ABMEnvios({
       </Snackbar>
 
     </FormularioABM>
-    
+
   )
 }
