@@ -320,7 +320,15 @@ export default function SubidaDeArchivos() {
           <Typography sx={{
             fontSize: 14,
             color: colores.primario
-          }} >• csv - Plantilla de Envios de Paquetes</Typography>
+          }} >• csv - Plantilla de Envios de Paquetes
+          </Typography>
+
+          <Typography sx={{
+            fontSize: 14,
+            color: colores.primario
+          }} >• Tamaño máximo por archivo: 5MB
+          </Typography>
+
         </Box>
       </Box>
 

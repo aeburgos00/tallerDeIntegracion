@@ -6,7 +6,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import cardsEnvios from "../../components/datos/dataKPIEnvios.jsx";
-import cardsLiquidaciones from "../../components/datos/dataKPILiquidaciones.jsx";
+import cardsDashboardFooter from "../../components/datos/dataKPIDashboard.jsx";
 
 import SummaryCard from "../../components/SummaryCard.jsx";
 import StatusCard from "../../components/StatusCard";
@@ -16,7 +16,7 @@ import TableEnviosResumen from "../../components/tablasResumenes/TableEnviosResu
 
 import useDateFilter from '../../hooks/useDateFilter.js'
 
-import {obtenerEnviosTotales, obtenerLiquidacionesTotales} from '../../services/api.js'
+import {obtenerEnviosTotales, obtenerLiquidacionesDashboard} from '../../services/api.js'
 
 export default function Dashboard() {
   
@@ -42,7 +42,7 @@ export default function Dashboard() {
             fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
             fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
           ),
-          obtenerLiquidacionesTotales(
+          obtenerLiquidacionesDashboard(
             fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
             fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
           )
@@ -73,7 +73,7 @@ export default function Dashboard() {
                     : ""
   }))
 
-  const cardsFooter = cardsLiquidaciones.map(card => ({
+  const cardsFooter = cardsDashboardFooter.map(card => ({
     ...card,
     cantidad: card.id !== "pct_paquetes_liquidados"?
               "$" + Number(liqTotales[card.id] || "0").toLocaleString('es-AR')

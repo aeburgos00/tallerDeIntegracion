@@ -28,14 +28,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useEffect, useState } from 'react'
 import {
-  obtenerEnvios, 
-  cancelarEnvio 
+  obtenerTransportistas, 
+  eliminarTransportista 
 } from '../../services/api.js'
 
-import useDateFilter from "../../hooks/useDateFilter.js";
-
-export default function TablaEnvios ({
-  cantEnvios,
+export default function TablaTransportistas ({
+  cantTransportistas,
   filtros,
   pagina = 1,
   filasPorPagina = 10,
@@ -45,58 +43,47 @@ export default function TablaEnvios ({
   onDeleteSuccess
 }) {
 
-  const {
-    fechaDesde,
-    fechaHasta
-  } = useDateFilter()
   
   const [refreshBaja,setRefreshBaja] = useState(0)
   const [mensaje, setMensaje] = useState("")
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [envios, setEnvios] = useState([]);
+  const [transportistas, setTransportistas] = useState([]);
   const [openCancelar, setOpenCancelar] = useState(false)
-  const [envioSeleccionado, setEnvioSeleccionado] = useState(null)
+  const [transportistaSeleccionado, setTransportistaSeleccionado] = useState(null)
 
-  const handleAbrirDialogo = (envio) => {
-    setEnvioSeleccionado(envio)
+  const handleAbrirDialogo = (transportista) => {
+    setTransportistaSeleccionado(transportista)
     setOpenCancelar(true)
   }
   const handleCerrarDialogo = () => {
     setOpenCancelar(false)
-    setEnvioSeleccionado(null)
+    setTransportistaSeleccionado(null)
   }
 
-  const noPuedeCancelar = (envio) => {
+  const noPuedeCancelar = (transportista) => {
     return (
-      ( Number(envio.liquidacion) &&
-      Number(envio.liquidacion) !== 0 ) ||
-      envio.estado == 'Entregado' ||
-      envio.estado == 'Cancelado'
+      transportista.estado === "Inactivo"
     )
   }
 
   const obtenerMotivoCancelacion = (row) => {
-    if (Number(row.liquidacion) && Number(row.liquidacion)!== 0)
-      return "El envío fue liquidado"
-    if (row.estado === 'Entregado')
-      return "El envío fue entregado"
-    if (row.estado === 'Cancelado')
-      return "El envío ya está cancelado"
-    return "Cancelar envío"
+    if (row.estado === "Inactivo")
+      return "El transportista ya está dado de baja"
+    return "Dar de baja"
   }
 
   const handleConfirmarCancelacion =
   async () => {
     try {
-      await cancelarEnvio(envioSeleccionado)
-      setMensaje("Envío cancelado correctamente")
+      await eliminarTransportista(transportistaSeleccionado)
+      setMensaje("Transportista dado de baja correctamente")
       setError(false)
       handleCerrarDialogo()
       setRefreshBaja(prev => prev + 1)
       onDeleteSuccess?.();
     } catch(error) {
-      setMensaje( error?.message || "Error al cancelar el envío" )
+      setMensaje( error?.message || "Error al dar de baja al transportista" )
       setError(true)
     }
   }
@@ -108,15 +95,11 @@ export default function TablaEnvios ({
         try {
           setLoading(true)
           
-          const result = await obtenerEnvios(
-            fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
-            fechaHasta? fechaHasta.format('YYYY-MM-DD'): null,
-            filtros
-          );
+          const result = await obtenerTransportistas(filtros);
           
-          setEnvios(result.data)
+          setTransportistas(result.data)
 
-          cantEnvios?.(result.data.length);
+          cantTransportistas?.(result.data.length);
           
           const totalPaginas = Math.max(
               1,
@@ -134,16 +117,14 @@ export default function TablaEnvios ({
   obtenerDatos()
   },[
     filtros,
-    fechaDesde,
-    fechaHasta,
     refresh,
     refreshBaja,
     filasPorPagina,
     onTotalPaginasChange,
-    cantEnvios
+    cantTransportistas
   ])
 
-  const enviosPagina = envios.slice(
+  const transportistasPagina = transportistas.slice(
       (pagina - 1) * filasPorPagina,
       pagina * filasPorPagina
   );
@@ -164,15 +145,15 @@ export default function TablaEnvios ({
                 backgroundColor:"#F0EEE8",
             }}>
                 <TableRow>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Cod. Envío</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Envío</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Cliente</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Dirección</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Localidad</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Transportista</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Código</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Nombre Completo</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Usuario</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>DNI</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Correo</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Alta</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Baja</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Estado</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Tarifa</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Liquidación</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Costo Envio</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Acciones</TableCell>
                 </TableRow>
             </TableHead>
@@ -185,7 +166,7 @@ export default function TablaEnvios ({
             loading? 
             Array.from(new Array(filasPorPagina)).map((_, index) => (
                 <TableRow key={index}>
-                  {Array.from(new Array(10)).map((_, cellIndex) => (
+                  {Array.from(new Array(9)).map((_, cellIndex) => (
                     <TableCell key={cellIndex}>
                       <Skeleton
                         variant="text"
@@ -195,24 +176,31 @@ export default function TablaEnvios ({
                 </TableRow>
               ))
             :
-            enviosPagina.map((item) => (
+            transportistasPagina.map((item) => (
                  <TableRow
-                key={item.id_envio}
+                key={item.id}
                 hover
                 >
-                    <TableCell sx={{whiteSpace: "nowrap"}} align="center">{item.id_envio}</TableCell>
-                    <TableCell sx={{whiteSpace: "nowrap"}} align="center" >{item.fecha_envio}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.cliente}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.direccion}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.localidad}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.transportista}</TableCell>
+                    <TableCell sx={{whiteSpace: "nowrap"}} align="center">{item.id}</TableCell>
+                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.nombre}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}}>{item.usuario}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}}>{item.dni}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}}>{item.correo}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}} align="center">{item.fecha_alta}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}} align="center">{item.fecha_baja || "-"}</TableCell>
                     <TableCell sx={{textWrap:'nowrap'}}>{item.estado}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.tarifa || 0).toLocaleString('es-AR')} </TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.liquidacion || 0).toLocaleString('es-AR')} </TableCell>                    
+                    <TableCell sx={{textWrap:'nowrap'}}> 
+                        {Number(item.costo_envio || 0).toLocaleString("es-AR", {
+                            style: "currency",
+                            currency: "ARS",
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                        })}
+                    </TableCell>
                     <TableCell align="center">
                         <IconButton
                         color="primary"
-                        onClick={() => onEdit(item.id_envio)}
+                        onClick={() => onEdit(item.id)}
                         >
                             <EditIcon />
                         </IconButton>
@@ -223,8 +211,8 @@ export default function TablaEnvios ({
                           color="error"
                           disabled={noPuedeCancelar(item)}
                           onClick={() => {
-                            setEnvioSeleccionado(item.id_envio)
-                            handleAbrirDialogo(item.id_envio)
+                            setTransportistaSeleccionado(item.id)
+                            handleAbrirDialogo(item.id)
                           }}
                           >
                               <DeleteIcon />
@@ -241,11 +229,11 @@ export default function TablaEnvios ({
               open={openCancelar}
               onClose={handleCerrarDialogo}
             >
-              <DialogTitle>Cancelar envío</DialogTitle>
+              <DialogTitle>Baja de transportista</DialogTitle>
 
               <DialogContent>
                 <DialogContentText>
-                  ¿Está seguro que desea cancelar el envío {envioSeleccionado}?
+                  ¿Está seguro que desea dar de baja al transportista {transportistaSeleccionado}?
                 </DialogContentText>
               </DialogContent>
 
@@ -272,7 +260,7 @@ export default function TablaEnvios ({
                 }}
                 onClick={handleConfirmarCancelacion}
                 >
-                  Cancelar envío
+                  Dar de baja
                 </Button>
               </DialogActions>
             </Dialog>

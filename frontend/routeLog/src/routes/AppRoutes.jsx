@@ -12,7 +12,6 @@ import Transportistas from "../pages/administrador/Transportistas";
 import Localidades from "../pages/administrador/Localidades"
 import Liquidaciones from "../pages/administrador/Liquidaciones";
 import SubidaArchivos from "../pages/administrador/SubidaDeArchivos";
-import Configuracion from "../pages/administrador/Configuracion";
 
 //TRANSPORTISTA
 import MobileLayout from "../layouts/MobileLayout";
@@ -43,7 +42,6 @@ export default function AppRoutes() {
                 <Route path="/Localidades" element={<Localidades/>} />
                 <Route path="/Liquidaciones" element={<Liquidaciones />} />
                 <Route path="/Archivos" element={<SubidaArchivos />} />
-                <Route path="/Configuracion" element={<Configuracion />} />
             </Route>
 
             {/* Transportista */}
