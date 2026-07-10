@@ -21,8 +21,28 @@ export const loginRequest = async (usuario, password) => {
 
 //==================== TRANSPORTISTAS ====================
 
-export const obtenerTransportistas = async () => {
-  const response = await fetch(`${API_URL}/transportistas`)
+export const obtenerTransportistas = async (filtros) => {
+  
+  let response;
+
+  if(filtros){
+    const params = new URLSearchParams();
+
+    Object.entries(filtros).forEach(([key, value]) => {
+      if (
+          value !== null &&
+          value !== undefined &&
+          value !== ""
+      ) {
+          params.append(key, value);
+      }
+    });
+
+    response = await fetch(`${API_URL}/transportistas?${params.toString()}`)
+  }else{
+    response  = await fetch(`${API_URL}/transportistas`)
+  }
+
   return response.json()
 }
 
@@ -33,6 +53,110 @@ export const obtenerTransportistasActivos = async () => {
   return response.json()
 }
 
+export const obtenerTransportistasTotales = async () => {
+  const response = await fetch(`${API_URL}/transportistas/totales`)
+  return response.json()
+}
+
+export const exportarTransportistasCSV = async (
+  filtros
+) => {
+
+  const params = new URLSearchParams();
+
+  Object.entries(filtros).forEach(([key, value]) => {
+    if (
+        value !== null &&
+        value !== undefined &&
+        value !== ""
+    ) {
+        params.append(key, value);
+    }
+  });
+
+  const response = await fetch(
+    `${API_URL}/transportistas/exportar-csv?${params.toString()}`,
+    { method: 'GET' }
+  )
+  const hoy = new Date();
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'transportistas_' + hoy.toLocaleDateString('es-AR') + '.csv'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+export const obtenerTransportistaPorId = async (
+  id
+) => {
+  const response = await fetch(
+    `${API_URL}/transportistas/${id}`
+  )
+  return response.json()
+}
+
+export const crearTransportista = async (tranpsortista) => {
+  const response = await fetch(
+    `${API_URL}/transportistas`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(tranpsortista)
+    }
+  )
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
+}
+
+export const modificarTransportista = async (id, tranpsortista) => {
+  const response = await fetch(
+    `${API_URL}/transportistas/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(tranpsortista)
+    }
+  )
+
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
+}
+
+export const eliminarTransportista = async (id) => {
+  const response = await fetch(
+    `${API_URL}/transportistas/${id}`,
+    {
+      method: 'DELETE'
+    }
+  )
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
+}
+
+
 //==================== CLIENTES ====================
 
 export const obtenerClientes = async () => {
@@ -42,7 +166,7 @@ export const obtenerClientes = async () => {
   return response.json()
 }
 
-export const crearCliente = async (data) => {
+export const crearCliente = async (cliente) => {
   const response = await fetch(
     `${API_URL}/clientes`,
     {
@@ -50,10 +174,16 @@ export const crearCliente = async (data) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(cliente)
     }
   )
-  return response.json()
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
 }
 
 //==================== DIRECCIONES ====================
@@ -116,7 +246,13 @@ export const crearLocalidad = async (localidad) => {
       body: JSON.stringify(localidad)
     }
   )
-  return response.json()
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
 }
 
 export const modificarLocalidad = async (
@@ -133,7 +269,13 @@ export const modificarLocalidad = async (
       body: JSON.stringify(localidad)
     }
   )
-  return response.json()
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
 }
 
 export const eliminarLocalidad = async (id) => {
@@ -143,7 +285,13 @@ export const eliminarLocalidad = async (id) => {
       method: 'DELETE'
     }
   )
-  return response.json()
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
 }
 
 export const cambiarEstadoLocalidad = async (id) => {
@@ -151,7 +299,13 @@ export const cambiarEstadoLocalidad = async (id) => {
     `${API_URL}/localidades/${id}/estado`,
     { method: 'PATCH' }
   )
-  return response.json()
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
 }
 
 export const exportarLocalidadesCSV = async () => {
@@ -286,7 +440,13 @@ export const crearEnvio = async (envio) => {
       body: JSON.stringify(envio)
     }
   )
-  return response.json()
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
 }
 
 export const modificarEnvio = async (id, envio) => {
@@ -301,7 +461,13 @@ export const modificarEnvio = async (id, envio) => {
     }
   )
 
-  return response.json()
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
 }
 
 export const cancelarEnvio = async (id) => {
@@ -309,7 +475,13 @@ export const cancelarEnvio = async (id) => {
     `${API_URL}/envios/${id}/cancelar`,
     { method: "PUT" }
   )
-  return response.json()
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
 }
 
 export const exportarEnviosCSV = async (
@@ -356,6 +528,16 @@ export const exportarEnviosCSV = async (
 
 //==================== LIQUIDACIONES ====================
 
+export const obtenerLiquidacionesDashboard = async (
+  fecha_desde,
+  fecha_hasta
+) => {
+  const response = await fetch(
+    `${API_URL}/liquidaciones/dashboard?desde=${fecha_desde}&hasta=${fecha_hasta}`
+  )
+  return response.json()
+}
+
 export const obtenerLiquidacionesTotales = async (
   fecha_desde,
   fecha_hasta
@@ -389,5 +571,11 @@ export const subirArchivoEnvios = async (formData) => {
     }
   );
 
-  return response.json();
+  const data = await response.json();
+
+  if (!response.ok) {
+      throw new Error(data.error);
+  }
+
+  return data;
 };

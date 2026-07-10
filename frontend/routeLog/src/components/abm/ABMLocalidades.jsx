@@ -136,8 +136,10 @@ export default function ABMLocalidades({
         if (!open) return
 
         if (!idLocalidad) {
-            setFormulario(formularioInicial);
-            return;
+            const timeout = setTimeout(() => {
+                setFormulario(formularioInicial);
+            }, 0);
+            return () => clearTimeout(timeout);
         }
 
         const cargarLocalidad = async () => {

@@ -63,7 +63,11 @@ export default function Localidades() {
   }
 
   useEffect(() => {
-    obtenerDatosKPI()
+    const timeout = setTimeout(() => {
+        obtenerDatosKPI()
+      }, 0);
+      return () => clearTimeout(timeout);
+    
   }, [refreshTabla])
 
   const handleNuevo = () => {

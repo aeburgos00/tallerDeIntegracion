@@ -37,7 +37,7 @@ const obtenerEnvios = async (req, res) => {
             join localidades l on l.id = d.id_localidad
             join estados e on e.id = p.id_estado
             join tarifas tar on tar.id = p.id_tarifa
-            left join liquidaciones liq on liq.id_paquete = p.id
+            left join liquidaciones liq on liq.id = p.id_liquidacion
             where 1=1
         `
         const parametros = [];
@@ -155,7 +155,7 @@ const obtenerEnvioPorId = async (req, res) => {
       join localidades l on l.id = d.id_localidad
       join estados e on e.id = p.id_estado
       join tarifas tar on tar.id = p.id_tarifa
-      left join liquidaciones liq on liq.id_paquete = p.id
+      left join liquidaciones liq on liq.id = p.id_liquidacion
       where p.id = $1
     `
 
@@ -410,7 +410,7 @@ const exportarCSV = async (req, res) => {
             join localidades l on l.id = d.id_localidad
             join estados e on e.id = p.id_estado
             join tarifas tar on tar.id = p.id_tarifa
-            left join liquidaciones liq on liq.id_paquete = p.id
+            left join liquidaciones liq on liq.id = p.id_liquidacion
             where 1=1
         `
         const parametros = [];
@@ -536,8 +536,6 @@ const exportarCSV = async (req, res) => {
         return res.send(csvConBOM)
 
     } catch (error) {
-        console.error(error)
-
         return res.status(500).json({
             message: 'Error exportando CSV'
         })
@@ -797,8 +795,9 @@ const cancelarEnvio = async (req, res) => {
         const liquidacionResult = await pool.query(
             `
       SELECT 1
-      FROM liquidaciones
+      FROM paquetes
       WHERE id_paquete = $1
+      and id_liquidacion is not null
       LIMIT 1
       `,
             [id]
