@@ -63,6 +63,8 @@ app.use('/tarifas/transportista/localidad', tarifas)
 app.use('/archivos', archivos)
 app.use('/archivos/envios', archivos)
 
+app.use('/provincias', provincias)
+
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`)
 })

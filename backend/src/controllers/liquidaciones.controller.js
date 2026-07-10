@@ -61,24 +61,20 @@ export const obtenerLiquidacionesTotales = async (req, res) => {
 
 
 export const obtenerLiquidacionesPorTransportista = async (req, res) => {
-    const { id } = req.params   // id = usuarios.id (viene de user.id en el front)
+    const { id } = req.params
     const { desde, hasta } = req.query
 
     try {
         const query = `
-            select
-                coalesce(sum(aux.precio), 0) as valor_total,
-                coalesce(sum(case when aux.liq_id is not null then aux.precio else 0 end), 0) as pago_realizado,
-                coalesce(sum(case when aux.liq_id is null then aux.precio else 0 end), 0) as pago_pendiente
-            from (
-                select liq.id as liq_id, p.id as paq_id, tar.precio as precio
-                from paquetes p
-                join transportistas t on t.id = p.id_transportista
-                join tarifas tar on tar.id = p.id_tarifa
-                left join liquidaciones liq on liq.id_paquete = p.id
-                where t.id_usuario = $1
-                and p.fecha between $2 and $3
-            ) aux
+            SELECT
+                coalesce(sum(tar.precio), 0) as valor_total,
+                coalesce(sum(case when p.id_liquidacion is not null then tar.precio else 0 end), 0) as pago_realizado,
+                coalesce(sum(case when p.id_liquidacion is null then tar.precio else 0 end), 0) as pago_pendiente
+            FROM paquetes p
+            JOIN transportistas t ON t.id = p.id_transportista
+            JOIN tarifas tar ON tar.id = p.id_tarifa
+            WHERE t.id_usuario = $1
+            AND p.fecha BETWEEN $2 AND $3
         `
         const result = await pool.query(query, [id, desde, hasta])
 

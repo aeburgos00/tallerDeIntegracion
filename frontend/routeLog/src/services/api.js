@@ -77,9 +77,16 @@ export const obtenerDireccionesPorClienteLocalidad = async (
 
 //==================== LOCALIDADES ====================
 
-export const obtenerLocalidades = async () => {
+export const obtenerLocalidades = async (filtros = {}) => {
+  const params = new URLSearchParams()
+
+  if (filtros.localidad) params.append("localidad", filtros.localidad)
+  if (filtros.codigoPostal) params.append("codigoPostal", filtros.codigoPostal)
+  if (filtros.provincia) params.append("provincia", filtros.provincia)
+  if (filtros.estado) params.append("estado", filtros.estado)
+
   const response = await fetch(
-    `${API_URL}/localidades`
+    `${API_URL}/localidades?${params.toString()}`
   )
   return response.json()
 }
@@ -154,9 +161,16 @@ export const cambiarEstadoLocalidad = async (id) => {
   return response.json()
 }
 
-export const exportarLocalidadesCSV = async () => {
+export const exportarLocalidadesCSV = async (filtros = {}) => {
+  const params = new URLSearchParams()
+
+  if (filtros.localidad) params.append("localidad", filtros.localidad)
+  if (filtros.codigoPostal) params.append("codigoPostal", filtros.codigoPostal)
+  if (filtros.provincia) params.append("provincia", filtros.provincia)
+  if (filtros.estado) params.append("estado", filtros.estado)
+
   const response = await fetch(
-    `${API_URL}/localidades/exportar-csv`,
+    `${API_URL}/localidades/exportar-csv?${params.toString()}`,
     { method: 'GET' }
   )
   const hoy = new Date()
@@ -164,10 +178,7 @@ export const exportarLocalidadesCSV = async () => {
   const url = window.URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download =
-    'localidades_' +
-    hoy.toLocaleDateString('es-AR') +
-    '.csv'
+  link.download = 'localidades_' + hoy.toLocaleDateString('es-AR') + '.csv'
   document.body.appendChild(link)
   link.click()
   link.remove()
@@ -222,11 +233,11 @@ export const obtenerEnvios = async (
 
   Object.entries(filtros).forEach(([key, value]) => {
     if (
-        value !== null &&
-        value !== undefined &&
-        value !== ""
+      value !== null &&
+      value !== undefined &&
+      value !== ""
     ) {
-        params.append(key, value);
+      params.append(key, value);
     }
   });
 
@@ -330,11 +341,11 @@ export const exportarEnviosCSV = async (
 
   Object.entries(filtros).forEach(([key, value]) => {
     if (
-        value !== null &&
-        value !== undefined &&
-        value !== ""
+      value !== null &&
+      value !== undefined &&
+      value !== ""
     ) {
-        params.append(key, value);
+      params.append(key, value);
     }
   });
 
@@ -371,12 +382,9 @@ export const obtenerLiquidacionesTotales = async (
 //==================== PROVINCIAS ====================
 
 export const obtenerProvincias = async () => {
-  const response = await fetch(
-    `${API_URL}/provincias`
-  )
+  const response = await fetch(`${API_URL}/provincias`)
   return response.json()
 }
-
 
 //==================== ARCHIVOS ====================
 
