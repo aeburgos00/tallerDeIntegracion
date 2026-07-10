@@ -27,6 +27,51 @@ import { useEffect, useState } from "react"
 import useDateFilter from "../../hooks/useDateFilter"
 
 export default function Liquidaciones() {
+  const [loadingKPI, setLoadingKPI] = useState(true)
+
+  const {
+    fechaDesde,
+    fechaHasta
+  } = useDateFilter()
+
+  const [liqTotales, setLiqTotales] = useState({});
+
+  useEffect(() => {
+    const obtenerDatos = async () => {
+      try {
+        setLoadingKPI(true)
+
+        const liqTotResult = await obtenerLiquidacionesTotales(
+          fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
+          fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
+        )
+        
+        setLiqTotales(liqTotResult.data[0])
+
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setLoadingKPI(false)
+      }
+    }
+    obtenerDatos()
+  }, [fechaDesde,fechaHasta])
+
+  const cards = cardLiquidaciones.map(card => ({
+    ...card,
+    cantidad: card.id === "pct_paquetes_liquidados"?
+              Number(liqTotales[card.id] || 0) + "%"
+              :
+              card.id === "valor_total" || card.id === "valor_liquidado"?
+              Number(liqTotales[card.id] || 0).toLocaleString("es-AR", {
+                style: "currency",
+                currency: "ARS",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })
+              :
+              Number(liqTotales[card.id] || 0)
+  }))
 
   const [liqTotales, setLiqTotales] = useState({})
   const [loading, setLoading] = useState(true)

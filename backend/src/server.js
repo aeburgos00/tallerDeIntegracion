@@ -38,6 +38,8 @@ app.use('/auth', authRoutes)
 
 app.use('/transportistas', transportistas)
 app.use('/transportistas/activos', transportistas)
+app.use('/transportistas/totales', transportistas)
+
 
 app.use('/localidades', localidades)
 app.use('/localidades/activas', localidades)
