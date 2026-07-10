@@ -1,114 +1,294 @@
-import { useState } from "react"
 import {
   Box,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
+  Skeleton,
+  Typography,
+  Snackbar,
+  Alert,
 } from "@mui/material"
 
-import TableResumenCard from "../../components/TableResumenCard.jsx"
-import SummaryCard from "../../components/SummaryCard.jsx"
-import TransportistasTotales from "../../components/TransportistasTotales.jsx"
-import AbcIcon from '@mui/icons-material/Abc';
+import DescargaIcon from '@mui/icons-material/ArrowDownward';
+import NuevoIcon from '@mui/icons-material/Add';
 
-const kpi = [
-  { "titulo": "KP1" },
-  { "titulo": "KP2" },
-  { "titulo": "KP3" },
-  { "titulo": "KP4" }
-]
+import { useEffect, useState } from 'react'
+
+import TablaPaginacionContenedor from "../../components/TablaPaginacionContenedor.jsx";
+import TablaTransportistas from "../../components/tablasContenedor/TablaTransportistas.jsx";
+
+import SummaryCard from "../../components/SummaryCard.jsx"
+
+import FiltrosGenerico from "../../components/FiltrosGenerico.jsx"
+import FiltroTransportistas from "../../components/filtros/FiltroTransportistas.jsx"
+
+import cardsTransportistas from "../../components/datos/dataKPITransportistas.jsx";
+
+import ABMTransportistas from "../../components/abm/ABMTransportistas.jsx";
+
+import {
+  obtenerTransportistasTotales,
+  exportarTransportistasCSV
+} from '../../services/api.js';
 
 export default function Transportistas() {
 
-  const fechaActual = new Date().toLocaleDateString("es-AR", {
-    day: "2-digit", month: "2-digit", year: "numeric"
-  })
+    const [loadingKPI, setLoadingKPI] = useState(true)
 
-  const [modalAbierto, setModalAbierto] = useState(false)
-  const [transportistaFiltro, setTransportistaFiltro] = useState("")
-  const [formulario, setFormulario] = useState({
-    nombre: "", apellido: "", tarifa: ""
-  })
+    const [transportistasTotales, setTransportistasTotales] = useState({});
 
-  const handleAbrir = () => setModalAbierto(true)
-  const handleCerrar = () => {
-    setModalAbierto(false)
-    setFormulario({ nombre: "", apellido: "", tarifa: "" })
-  }
-  const handleChange = (e) => {
-    setFormulario({ ...formulario, [e.target.name]: e.target.value })
-  }
-  const handleGuardar = () => {
-    console.log("Nuevo transportista:", { ...formulario, fecha_creacion: fechaActual })
-    handleCerrar()
-  }
+    const [filtros, setFiltros] = useState({
+      nombre: "",
+      dni: "",
+      usuario: "",
+      costo_envio: "",
+      estado: ""
+    });
+
+    const filtrosVacios = {
+      nombre: "",
+      dni: "",
+      usuario: "",
+      costo_envio: "",
+      estado: ""
+    };
+
+    const [filtrosAplicados, setFiltrosAplicados] = useState(filtros);
+
+    const [openABM, setOpenABM] = useState(false);
+    const [transportistaSeleccionado, setTransportistaSeleccionado] = useState(null)
+    
+    const [mensaje, setMensaje] = useState("")
+    const [tipoMensaje, setTipoMensaje] = useState("success")
+
+    const [refreshTabla, setRefreshTabla] = useState(0)
+
+    const [pagina, setPagina] = useState(1);
+    const [filasPorPagina, setFilasPorPagina] = useState(10);
+    const [totalPaginas, setTotalPaginas] = useState(1);
+    const [transportistasMostrados, setTransportistasMostrados] = useState(0)
+
+    const handleNuevo = () => {
+      setTransportistaSeleccionado(null);
+      setOpenABM(true)
+    }
+
+    const handleEditar = (transportista) => {
+      setTransportistaSeleccionado(transportista)
+      setOpenABM(true)
+    }
+
+    const handleClose = () => {
+      setOpenABM(false)
+      setTransportistaSeleccionado(null)
+    }
+
+    const handleFilter = () => {
+      setPagina(1);
+      setFiltrosAplicados({ ...filtros });
+    };
+
+    const handleClear = () => {
+      setFiltros({...filtrosVacios});
+      setFiltrosAplicados({...filtrosVacios});
+      setPagina(1);
+    };
+
+    const handleExportar = async () => {
+      try {
+       await exportarTransportistasCSV(filtros)
+      } catch(error) {
+        console.error(error)
+      }
+    }
+
+    useEffect(() => {
+        const obtenerTotales = async () => {
+          try {
+          setLoadingKPI(true)
+    
+            const transportistasResult = await obtenerTransportistasTotales()
+            setTransportistasTotales(transportistasResult.data[0])
+    
+          } catch (error) {
+            console.error(error)
+          } finally {
+          setLoadingKPI(false)
+          }
+        }
+        obtenerTotales()
+    },[refreshTabla])
+
+    const cards = cardsTransportistas.map(card => ({
+        ...card,
+        cantidad: card.id === "costo_promedio"?
+            Number(transportistasTotales[card.id] || 0).toLocaleString("es-AR", {
+            style: "currency",
+            currency: "ARS",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+          : 
+          Number(transportistasTotales[card.id]) || 0
+      }))
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
 
-      {/* KPI x4 */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2 }}>
-        {kpi.map((e) => (
-          <SummaryCard
-            titulo={e.titulo}
-            cantidad={"0"}
-            descripcion={""}
-            icono={AbcIcon}
+      {/* KPI Transportistas */}
+      <Box 
+      sx={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(4, 1fr)", 
+        gap: 2 
+      }}
+      >
+        {
+        loadingKPI?
+        Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton
+            key={index}
+            variant="rounded"
+            height={112}
           />
-        ))}
+        ))
+        :
+        cards.map((card, index) => (
+          <SummaryCard
+            key={index}
+            titulo={card.titulo}
+            cantidad={card.cantidad}
+            icono={card.icono}
+            color={card.color}
+            height={112}
+          />
+        ))
+        }
       </Box>
 
       {/* Filtros */}
-      {/*<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-        <TransportistasTotales
-          value={transportistaFiltro}
-          onChange={(e) => setTransportistaFiltro(e.target.value)}
+      <FiltrosGenerico 
+      onFilter={handleFilter} 
+      onClear={handleClear}
+      >
+        <FiltroTransportistas 
+        filtros={filtros} 
+        setFiltros={setFiltros} 
         />
-      </Box>*/}
+      </FiltrosGenerico>
 
-      {/* Mostrado + CSV + ABM */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "8fr 2fr 2fr", gap: 2 }}>
-        <h3>Mostrando 111</h3>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <Button>Exportar CSV</Button>.
-          {/* Boton nuevo */}
-          <Button variant="contained" onClick={handleAbrir}>
+      {/* Mostrado... + Botones */}
+      <Box sx={{
+        display:"flex",
+        justifyContent:"space-between",
+        gap:2,
+        alignItems:"center",
+      }}
+      >
+        <Typography sx={{
+          color:"#777"
+        }}>
+          Mostrando {transportistasMostrados} transportistas
+        </Typography>
+        {/* BOTONES */}
+        <Box
+        sx={{
+          display:"flex",
+          gap:2,
+          
+        }}
+        >
+          <Button
+          variant="outlined"
+          onClick={handleExportar}
+          startIcon={<DescargaIcon />}
+          size="small"
+          sx={{
+            borderColor:"#65a30d",
+            color:"#65a30d",
+            background:"#fff",
+            borderRadius:2,
+            textTransform:"none",
+            whiteSpace:"nowrap",
+            px:1.5,
+            height:36,
+            fontSize:13
+          }}>
+            Exportar CSV
+          </Button>
+
+          <Button 
+          variant="contained"
+          onClick={handleNuevo}
+          startIcon={<NuevoIcon />}
+          size="small"
+          sx={{
+            background:"#3b82f6",
+            borderRadius:2,
+            textTransform: "none",
+            whiteSpace:"nowrap",
+            px:1.5,
+            height:36,
+            fontSize:13
+          }}>
             Nuevo Transportista
           </Button>
+ 
+           <ABMTransportistas
+              open={openABM}
+              onClose={handleClose}
+              idTransportista={transportistaSeleccionado}
+              onSuccess={(mensaje)=>{
+                setMensaje(mensaje)
+                setTipoMensaje("success")
+                setRefreshTabla(prev => prev + 1)
+                setOpenABM(false)
+              }}
+            />
+            <Snackbar
+              open={!!mensaje}
+              autoHideDuration={4000}
+              onClose={() => setMensaje("")}
+            >
+              <Alert severity={tipoMensaje}>
+                {mensaje}
+              </Alert>
+            </Snackbar> 
+
         </Box>
       </Box>
 
       {/* Grilla */}
-      <Box>
-        <TableResumenCard />
-        <Box sx={{ display: "grid", gridTemplateColumns: "8fr 4fr", gap: 2 }}>
-          <h3>Filas x pag</h3>
-          <Box sx={{ display: "flex", gap: 4 }}>
-            <p>Pagina 1 de 3</p>
-            <p>ant</p><p>1</p><p>2</p><p>3</p><p>sig</p>
-          </Box>
-        </Box>
-      </Box>
-
-      {/* Modal */}
-      <Dialog open={modalAbierto} onClose={handleCerrar} fullWidth maxWidth="sm">
-        <DialogTitle>Nuevo Transportista</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-          <TextField label="Nombre" name="nombre" value={formulario.nombre} onChange={handleChange} fullWidth />
-          <TextField label="Apellido" name="apellido" value={formulario.apellido} onChange={handleChange} fullWidth />
-          <TextField label="Tarifa ($)" name="tarifa" value={formulario.tarifa} onChange={handleChange} inputProps={{ min: 0, step: "any" }} fullWidth />
-          <TextField label="Fecha de creación" value={fechaActual} fullWidth disabled
-            sx={{ "& .MuiInputBase-input.Mui-disabled": { WebkitTextFillColor: "gray" } }}
+      <Box
+      sx={{
+        backgroundColor:"#fff",
+        borderRadius:2,
+        border:"1px solid #e5e7eb",
+        boxShadow:
+        "0 1px 2px rgba(0,0,0,0.04)"
+      }}>
+        <TablaPaginacionContenedor
+          pagina={pagina}
+          filasPorPagina={filasPorPagina}
+          totalPaginas={totalPaginas}
+          onPaginaChange={setPagina}
+          onFilasPorPaginaChange={(valor) => {
+            setPagina(1);
+            setFilasPorPagina(valor);
+          }}
+        >
+          <TablaTransportistas 
+          cantTransportistas={setTransportistasMostrados}
+          filtros={filtrosAplicados}
+          pagina={pagina}
+          filasPorPagina={filasPorPagina}
+          onTotalPaginasChange={setTotalPaginas}
+          onEdit={handleEditar}
+          refresh={refreshTabla}
+          onDeleteSuccess={() => {
+            setRefreshTabla(prev => prev + 1);
+          }}
           />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCerrar} color="error">Cancelar</Button>
-          <Button onClick={handleGuardar} variant="contained">Guardar</Button>
-        </DialogActions>
-      </Dialog>
+        </TablaPaginacionContenedor>
+      </Box>
 
     </Box>
   )

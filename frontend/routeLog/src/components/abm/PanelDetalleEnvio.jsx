@@ -42,7 +42,10 @@ export default function PanelDetalleEnvio({
 
     useEffect(() => {
         if (envio) {
-            setIdEstado(envio.id_estado)
+            const timeout = setTimeout(() => {
+                setIdEstado(envio.id_estado)
+            }, 0);
+            return () => clearTimeout(timeout);
         }
     }, [envio])
 

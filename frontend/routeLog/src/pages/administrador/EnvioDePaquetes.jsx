@@ -133,7 +133,7 @@ export default function EnvioDePaquetes() {
       }
     }
     obtenerDatos()
-  }, [fechaDesde, fechaHasta])
+  }, [fechaDesde, fechaHasta, refreshTabla])
 
   const cards = cardsEnvios.map(card => ({
     ...card,
@@ -310,6 +310,9 @@ export default function EnvioDePaquetes() {
             onTotalPaginasChange={setTotalPaginas}
             onEdit={handleEditar}
             refresh={refreshTabla}
+            onDeleteSuccess={() => {
+              setRefreshTabla(prev => prev + 1);
+            }}
           />
         </TablaPaginacionContenedor>
       </Box>
