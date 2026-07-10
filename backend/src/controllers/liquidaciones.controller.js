@@ -6,7 +6,7 @@ export  const obtenerLiquidaciones = async (req, res) => {
   {
     const result = await pool.query(
       `SELECT 
-       id, id_paquete, fecha_alta
+       id, fecha_alta, monto_total, cantidad_paquetes
        FROM liquidaciones
        ORDER BY fecha_alta DESC
        `
@@ -46,7 +46,7 @@ export const obtenerLiquidacionesListado = async (req, res) => {
           TO_CHAR(p.fecha, 'DD/MM/YYYY') AS fecha_envio,
           TO_CHAR(liq.fecha_alta, 'DD/MM/YYYY') AS fecha_liquidacion,
           u.nombre_apellido AS transportista,
-          CASE WHEN liq.id IS NOT NULL THEN true ELSE false END AS liquidado,
+          CASE WHEN p.id_liquidacion IS NOT NULL THEN true ELSE false END AS liquidado,
           COALESCE(tar.precio, 0) AS monto
         FROM paquetes p
         JOIN transportistas t ON t.id = p.id_transportista
@@ -54,8 +54,9 @@ export const obtenerLiquidacionesListado = async (req, res) => {
         JOIN tarifas tar ON tar.id = p.id_tarifa
         JOIN direcciones d ON d.id = p.id_direccion
         JOIN localidades l ON l.id = d.id_localidad
-        LEFT JOIN liquidaciones liq ON liq.id_paquete = p.id
-        WHERE 1=1
+        LEFT JOIN liquidaciones liq ON liq.id = p.id_liquidacion
+        WHERE 1=1 
+        AND (p.id_estado = 2 OR p.id_estado = 3)
     `
     const parametros = []
  
@@ -104,7 +105,7 @@ export const obtenerLiquidacionesListado = async (req, res) => {
     if (liquidado === 'true' || liquidado === 'false') {
       const esLiquidado = liquidado === 'true'
       query += `
-        AND (liq.id IS NOT NULL) = ${esLiquidado}
+        AND (p.id_liquidacion IS NOT NULL) = ${esLiquidado}
       `
     }
  
@@ -150,19 +151,22 @@ export const obtenerLiquidacionesTransportistas = async (req, res) => {
     const { desde, hasta } = req.query
 
     const result = await pool.query(`  
-      SELECT 
-          p.id_transportista,
-          COUNT(p.id) AS envios_totales,
-          COALESCE(SUM(t.precio), 0) AS importe_total
-        FROM paquetes p
-        JOIN tarifas t ON p.id_tarifa = t.id
-        WHERE 
-          p.id_estado = 2
-          AND ($1::date IS NULL OR p.fecha >= $1)
-          AND ($2::date IS NULL OR p.fecha <= $2)
-        GROUP BY p.id_transportista
-        ORDER BY p.id_transportista
-    `, [desde, hasta])
+          SELECT 
+              p.id_transportista,
+              u.nombre_apellido AS transportista,
+              COUNT(p.id) AS envios_totales,
+              COALESCE(SUM(tar.precio), 0) AS importe_total
+            FROM paquetes p
+            JOIN transportistas t ON t.id = p.id_transportista
+            JOIN usuarios u ON u.id = t.id_usuario
+            JOIN tarifas tar ON tar.id = p.id_tarifa
+            WHERE 
+              (p.id_estado = 2 OR p.id_estado = 3)
+              AND ($1::date IS NULL OR p.fecha >= $1::date)
+              AND ($2::date IS NULL OR p.fecha <= $2::date)
+            GROUP BY p.id_transportista, u.nombre_apellido
+            ORDER BY u.nombre_apellido
+          `, [desde, hasta])
 
     res.json({
       ok: true,
@@ -193,7 +197,7 @@ export const obtenerLiquidacionesPorTransportista = async (req, res) => {
                 from paquetes p
                 join transportistas t on t.id = p.id_transportista
                 join tarifas tar on tar.id = p.id_tarifa
-                left join liquidaciones liq on liq.id_paquete = p.id
+                left join liquidaciones liq on liq.id = p.id_liquidacion
                 where t.id_usuario = $1
                 and p.fecha between $2 and $3
             ) aux
@@ -264,9 +268,9 @@ export const obtenerLiquidacionesTotales= async (req, res) => {
           tar.precio AS precio
         FROM paquetes p
         JOIN tarifas tar ON p.id_tarifa = tar.id
-        LEFT JOIN liquidaciones liq ON liq.id_paquete = p.id
+        LEFT JOIN liquidaciones liq ON liq.id = p.id_liquidacion
         WHERE 
-          p.id_estado = 2
+          (p.id_estado = 2 OR p.id_estado = 3)
           AND ($1::date IS NULL OR p.fecha >= $1::date)
           AND ($2::date IS NULL OR p.fecha <= $2::date)
       ) aux
