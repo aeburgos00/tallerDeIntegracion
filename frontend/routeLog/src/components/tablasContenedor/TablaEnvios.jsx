@@ -34,6 +34,11 @@ import {
 
 import useDateFilter from "../../hooks/useDateFilter.js";
 
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
+
+
 export default function TablaEnvios ({
   cantEnvios,
   filtros,
@@ -67,12 +72,24 @@ export default function TablaEnvios ({
     setEnvioSeleccionado(null)
   }
 
+  const hoy = dayjs().startOf('day');
+
+  const esEnvioAnterior = (envio) => dayjs(envio.fecha_envio, "DD/MM/YYYY").isBefore(hoy);
+
+  const noPuedeEditar = (envio) => esEnvioAnterior(envio);
+
+  const obtenerMotivoEdicion = (envio) =>
+        esEnvioAnterior(envio)
+          ? "No se pueden modificar envíos anteriores a hoy"
+          : "Modificar envío";
+
   const noPuedeCancelar = (envio) => {
     return (
       ( Number(envio.liquidacion) &&
       Number(envio.liquidacion) !== 0 ) ||
       envio.estado == 'Entregado' ||
-      envio.estado == 'Cancelado'
+      envio.estado == 'Cancelado' ||
+      esEnvioAnterior(envio)
     )
   }
 
@@ -83,6 +100,8 @@ export default function TablaEnvios ({
       return "El envío fue entregado"
     if (row.estado === 'Cancelado')
       return "El envío ya está cancelado"
+    if ( esEnvioAnterior(row) )
+      return "No se puede cancelar envíos anteriores a hoy"
     return "Cancelar envío"
   }
 
@@ -100,8 +119,6 @@ export default function TablaEnvios ({
       setError(true)
     }
   }
-
-  
 
   useEffect(() => {
     const obtenerDatos = async () => {
@@ -210,14 +227,21 @@ export default function TablaEnvios ({
                     <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.tarifa || 0).toLocaleString('es-AR')} </TableCell>
                     <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.liquidacion || 0).toLocaleString('es-AR')} </TableCell>                    
                     <TableCell align="center">
-                        <IconButton
-                        color="primary"
-                        onClick={() => onEdit(item.id_envio)}
+                        <Tooltip 
+                        title={obtenerMotivoEdicion(item)}
                         >
-                            <EditIcon />
-                        </IconButton>
+                        <span>
+                          <IconButton
+                          color="primary"
+                          disabled={noPuedeEditar(item)}
+                          onClick={() => onEdit(item.id_envio)}
+                          >
+                              <EditIcon />
+                          </IconButton>
+                        </span>
+                        </Tooltip>
 
-                       <Tooltip title={obtenerMotivoCancelacion(item)}>
+                        <Tooltip title={obtenerMotivoCancelacion(item)}>
                         <span>
                           <IconButton
                           color="error"

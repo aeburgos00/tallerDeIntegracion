@@ -31,11 +31,8 @@ export default function SubidaDeArchivos() {
   
   const [resultado, setResultado] = useState(null);
   const [loading, setLoading] = useState(false);
-  // const [mensaje, setMensaje] = useState("");
-  // const [tipoMensaje, setTipoMensaje] = useState("success");
   const [mensajeError, setMensajeError] = useState("");
   const [archivo, setArchivo] = useState(null)
-  //const [nombreArchivoProcesado, setNombreArchivoProcesado] = useState("");
 
   const onDrop = (acceptedFiles) => {
     const file = acceptedFiles[0]
@@ -75,23 +72,9 @@ export default function SubidaDeArchivos() {
             setArchivo(null);
             setMensajeError("");
       }
-      //setNombreArchivoProcesado(archivo.name);
-      // setArchivo(null);
-      // setMensajeError("");
-      // setTipoMensaje("success");
-      // setMensaje(
-      //   `Archivo importado correctamente.
-
-      //   • Envíos importados: ${resultado.enviosImportados}
-      //   • Clientes creados: ${resultado.clientesCreados}
-      //   • Direcciones creadas: ${resultado.direccionesCreadas}
-      //   • Tiempo: ${resultado.duracionMs} ms`
-      // );
-
       
     } catch (error) {
-      // setTipoMensaje("error");
-      //setResultado(null);
+
        setResultado({
             ok: false,
             mensaje: "No fue posible conectarse con el servidor.",
