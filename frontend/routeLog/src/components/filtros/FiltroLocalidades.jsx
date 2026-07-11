@@ -1,69 +1,119 @@
 import {
     Box,
     TextField,
-    MenuItem,
+    Autocomplete,
 } from "@mui/material"
+
+import { useEffect, useState } from 'react'
+import {
+    obtenerProvincias,
+    obtenerLocalidades
+} from "../../services/api"
 
 export default function FiltroLocalidades({
     filtros,
     setFiltros
 }) {
 
-    const handleChange = (campo) => (e) => {
-        setFiltros({
-            ...filtros,
-            [campo]: e.target.value
-        });
-    };
+    const [provincias, setProvincias] = useState([])
+    const [localidades, setLocalidades] = useState([])
+
+    useEffect(() => {
+        const cargarCombos = async () => {
+            try {
+                const [provinciasResp, localidadesResp] = await Promise.all([
+                    obtenerProvincias(),
+                    obtenerLocalidades()
+                ])
+                setProvincias(provinciasResp.data ?? [])
+                setLocalidades(localidadesResp.data ?? [])
+            } catch (error) {
+                console.error(error)
+            }
+        }
+        cargarCombos()
+    }, [])
+
+    // Códigos postales únicos derivados de las localidades ya cargadas
+    const codigosPostales = [
+        ...new Set(localidades.map(l => l.codigo_postal).filter(Boolean))
+    ].sort()
+
+    const estadoOpciones = [
+        { label: "Activo", value: "Activo" },
+        { label: "Inactivo", value: "Inactivo" },
+    ]
 
     return (
-        <Box
-            sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                    xs: "1fr",
-                    sm: "1fr 1fr",
-                    lg: "220px 140px 140px 220px"
-                },
-                gap: 2,
-                alignItems: "center",
-            }}>
-            <TextField
+        <Box sx={{
+            display: "grid",
+            gridTemplateColumns: {
+                xs: "1fr",
+                sm: "1fr 1fr",
+                lg: "220px 140px 140px 220px"
+            },
+            gap: 2,
+            alignItems: "center",
+        }}>
+
+            {/* Provincia */}
+            <Autocomplete
                 fullWidth
-                label="Provincia"
-                value={filtros.provincia}
-                onChange={handleChange("provincia")}
-                size="small"
+                options={provincias}
+                value={provincias.find(p => p.nombre === filtros.provincia) ?? null}
+                getOptionLabel={(option) => option.nombre}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(event, value) =>
+                    setFiltros({ ...filtros, provincia: value?.nombre ?? "" })
+                }
+                renderInput={(params) => (
+                    <TextField {...params} label="Provincia" size="small" />
+                )}
             />
 
-            <TextField
+            {/* Localidad */}
+            <Autocomplete
                 fullWidth
-                label="Localidad"
-                value={filtros.localidad}
-                onChange={handleChange("localidad")}
-                size="small"
+                options={localidades}
+                value={localidades.find(l => l.nombre === filtros.localidad) ?? null}
+                getOptionLabel={(option) => option.nombre}
+                isOptionEqualToValue={(option, value) => option.id_loc === value.id_loc}
+                onChange={(event, value) =>
+                    setFiltros({ ...filtros, localidad: value?.nombre ?? "" })
+                }
+                renderInput={(params) => (
+                    <TextField {...params} label="Localidad" size="small" />
+                )}
             />
 
-            <TextField
+            {/* Código Postal */}
+            <Autocomplete
                 fullWidth
-                label="Código Postal"
-                value={filtros.codigoPostal}
-                onChange={handleChange("codigoPostal")}
-                size="small"
+                options={codigosPostales}
+                value={filtros.codigoPostal || null}
+                getOptionLabel={(option) => option}
+                onChange={(event, value) =>
+                    setFiltros({ ...filtros, codigoPostal: value ?? "" })
+                }
+                renderInput={(params) => (
+                    <TextField {...params} label="Código Postal" size="small" />
+                )}
             />
 
-            <TextField
+            {/* Estado */}
+            <Autocomplete
                 fullWidth
-                select
-                label="Estado"
-                value={filtros.estado}
-                onChange={handleChange("estado")}
-                size="small"
-            >
-                <MenuItem value="">Todos</MenuItem>
-                <MenuItem value="ACTIVO">Activo</MenuItem>
-                <MenuItem value="INACTIVO">Inactivo</MenuItem>
-            </TextField>
+                options={estadoOpciones}
+                value={estadoOpciones.find(e => e.value === filtros.estado) ?? null}
+                getOptionLabel={(option) => option.label}
+                isOptionEqualToValue={(option, value) => option.value === value.value}
+                onChange={(event, value) =>
+                    setFiltros({ ...filtros, estado: value?.value ?? "" })
+                }
+                renderInput={(params) => (
+                    <TextField {...params} label="Estado" size="small" />
+                )}
+            />
 
         </Box>
     )

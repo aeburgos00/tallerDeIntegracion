@@ -1,16 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL
 
-/*
-export const obtenerEnviosPorTransportistaId = async (
-    fecha_desde,
-    fecha_hasta
-) => {
-    const response = await fetch(
-        `${API_URL}/envios/transportistas?desde=${fecha_desde}&hasta=${fecha_hasta}`
-    )
-    return response.json()
-}
-*/
 
 export const obtenerEnviosPorTransportistaId = async (
     id_transportista,
@@ -42,6 +31,13 @@ export const cambiarEstadoEnvio = async (id_envio, id_estado) => {
     return response.json()
 }
 
+export const obtenerProximoEnvio = async (id_transportista) => {
+    const response = await fetch(
+        `${API_URL}/envios/proximo/transportista/${id_transportista}`
+    )
+    return response.json()
+}
+
 
 export const obtenerLiquidacionesPorTransportistaId = async (
     id_transportista,
@@ -50,6 +46,13 @@ export const obtenerLiquidacionesPorTransportistaId = async (
 ) => {
     const response = await fetch(
         `${API_URL}/liquidaciones/transportista/${id_transportista}?desde=${desde}&hasta=${hasta}`
+    )
+    return response.json()
+}
+
+export const obtenerHistorialLiquidaciones = async (id_transportista) => {
+    const response = await fetch(
+        `${API_URL}/liquidaciones/historial/transportista/${id_transportista}`
     )
     return response.json()
 }

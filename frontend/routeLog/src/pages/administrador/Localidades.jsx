@@ -29,25 +29,32 @@ import {
   exportarLocalidadesCSV
 } from "../../services/api.js"
 
+const filtrosVacios = {
+  localidad: "",
+  codigoPostal: "",
+  estado: "",
+  provincia: ""
+}
+
 export default function Localidades() {
 
   const [loadingKPI, setLoadingKPI] = useState(true)
   const [totales, setTotales] = useState({})
 
-  const [filtros, setFiltros] = useState({
-    localidad: "",
-    codigoPostal: "",
-    estado: "",
-    provincia: ""
-  });
+  const [filtros, setFiltros] = useState(filtrosVacios)
+  const [filtrosAplicados, setFiltrosAplicados] = useState(filtrosVacios)
 
-  const [openABM, setOpenABM] = useState(false);
+  const [pagina, setPagina] = useState(1)
+  const [filasPorPagina, setFilasPorPagina] = useState(10)
+  const [totalPaginas, setTotalPaginas] = useState(1)
+  const [localidadesMostradas, setLocalidadesMostradas] = useState(0)
+
+  const [openABM, setOpenABM] = useState(false)
   const [localidadSeleccionada, setLocalidadSeleccionada] = useState(null)
 
   const [mensaje, setMensaje] = useState("")
   const [tipoMensaje, setTipoMensaje] = useState("success")
 
-  // un solo contador: lo sube el ABM al guardar, y dispara el refetch de KPIs + tabla
   const [refreshTabla, setRefreshTabla] = useState(0)
 
   const obtenerDatosKPI = async () => {
@@ -87,21 +94,19 @@ export default function Localidades() {
   }
 
   const handleFilter = () => {
-    console.log(filtros);
-  };
+    setPagina(1)
+    setFiltrosAplicados({ ...filtros })
+  }
 
   const handleClear = () => {
-    setFiltros({
-      localidad: "",
-      codigoPostal: "",
-      estado: "",
-      provincia: ""
-    });
-  };
+    setFiltros({ ...filtrosVacios })
+    setFiltrosAplicados({ ...filtrosVacios })
+    setPagina(1)
+  }
 
   const handleExportar = async () => {
     try {
-      await exportarLocalidadesCSV()
+      await exportarLocalidadesCSV(filtrosAplicados)
     } catch (error) {
       console.error(error)
     }
@@ -155,7 +160,7 @@ export default function Localidades() {
       {/* Mostrado + Botones */}
       <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, alignItems: "center" }}>
         <Typography sx={{ color: "#777" }}>
-          Mostrando {totales.total || 0} localidades
+          Mostrando {localidadesMostradas} localidades
         </Typography>
 
         <Box sx={{ display: "flex", gap: 2 }}>
@@ -195,13 +200,27 @@ export default function Localidades() {
         </Box>
       </Box>
 
-      {/* Tabla — trae sus propios datos y maneja baja/toggle internamente */}
+      {/* Tabla */}
       <Box sx={{
         backgroundColor: "#fff", borderRadius: 2, border: "1px solid #e5e7eb",
         boxShadow: "0 1px 2px rgba(0,0,0,0.04)"
       }}>
-        <TablaPaginacionContenedor>
+        <TablaPaginacionContenedor
+          pagina={pagina}
+          filasPorPagina={filasPorPagina}
+          totalPaginas={totalPaginas}
+          onPaginaChange={setPagina}
+          onFilasPorPaginaChange={(valor) => {
+            setPagina(1)
+            setFilasPorPagina(valor)
+          }}
+        >
           <TablaLocalidades
+            filtros={filtrosAplicados}
+            pagina={pagina}
+            filasPorPagina={filasPorPagina}
+            onTotalPaginasChange={setTotalPaginas}
+            cantLocalidades={setLocalidadesMostradas}
             refresh={refreshTabla}
             onEdit={handleEditar}
             onActionSuccess={obtenerDatosKPI}
@@ -209,14 +228,8 @@ export default function Localidades() {
         </TablaPaginacionContenedor>
       </Box>
 
-      <Snackbar
-        open={!!mensaje}
-        autoHideDuration={4000}
-        onClose={() => setMensaje("")}
-      >
-        <Alert severity={tipoMensaje}>
-          {mensaje}
-        </Alert>
+      <Snackbar open={!!mensaje} autoHideDuration={4000} onClose={() => setMensaje("")}>
+        <Alert severity={tipoMensaje}>{mensaje}</Alert>
       </Snackbar>
 
     </Box>

@@ -3,7 +3,7 @@ import { Box, Typography, Skeleton } from "@mui/material"
 export default function MontoDestacadoMobile({ etiqueta, valor, loading }) {
     return (
         <Box sx={{
-            background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+            background: "linear-gradient(135deg, #185fa5 0%, #2563eb 100%)",
             borderRadius: 3,
             boxShadow: "0 4px 12px rgba(59,130,246,0.25)",
             p: 4,

@@ -14,6 +14,8 @@ import { useNavigate } from 'react-router-dom'
 
 import useAuth from '../../hooks/useAuth'
 
+import InfoIcon from "@mui/icons-material/Info"
+
 export default function Perfil() {
 
   const navigate = useNavigate()
@@ -32,7 +34,7 @@ export default function Perfil() {
       {/* Header */}
       <Box
         sx={{
-          backgroundColor: "#185fa5",
+          background: "linear-gradient(135deg, #185fa5 0%, #2563eb 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -94,7 +96,7 @@ export default function Perfil() {
             py: 1,
             color: "#aaa",
           }}>
-          Datos Personales
+          Datos personales
         </Typography>
 
         <Box
@@ -125,7 +127,7 @@ export default function Perfil() {
           <Divider />
 
           <Box>
-            <Typography sx={{ color: "#aaa" }}>Costo Envío</Typography>
+            <Typography sx={{ color: "#aaa" }}>Costo envío</Typography>
             <Typography> {Number(user.costo_envio).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}</Typography>
           </Box>
         </Box>
@@ -144,7 +146,7 @@ export default function Perfil() {
             color: "#aaa",
           }}
         >
-          OPCIONES
+          Opciones
         </Typography>
 
         <Box
@@ -202,6 +204,29 @@ export default function Perfil() {
           Cerrar sesión
         </Button>
       </Box>
+
+      {/* Aviso informativo */}
+      <Box sx={{
+        background: "#eff6ff",
+        borderRadius: 3,
+        border: "1px solid #bfdbfe",
+        p: 2,
+        display: "flex",
+        gap: 1.5,
+        alignItems: "flex-start",
+      }}>
+        <InfoIcon sx={{ fontSize: 18, color: "#3b82f6", flexShrink: 0, mt: 0.2 }} />
+        <Box>
+          <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1e40af", mb: 0.5 }}>
+            Información importante
+          </Typography>
+          <Typography sx={{ fontSize: 12, color: "#1e40af", lineHeight: 1.5 }}>
+            En caso de quere modificar el costo de envio{" "}
+            comunicarse con el administrador.
+          </Typography>
+        </Box>
+      </Box>
+
 
     </Box>
   );
