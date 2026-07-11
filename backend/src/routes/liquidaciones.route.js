@@ -3,7 +3,7 @@ import {
     obtenerLiquidaciones,
     obtenerLiquidacionesListado,
     obtenerLiquidacionesTotales,
-    obtenerLiquidacionesTotalesPagLiq,
+    obtenerLiquidacionesTotalesAdmin,
     obtenerLiquidacionesPorTransportista,
     obtenerLiquidacionesTransportistas,
     obtenerLiquidacionesDashboard
@@ -14,7 +14,7 @@ const router = express.Router();
 router.get('/', obtenerLiquidaciones)
 router.get('/listado', obtenerLiquidacionesListado)
 router.get('/totales', obtenerLiquidacionesTotales)
-router.get('/totalesPliq', obtenerLiquidacionesTotalesPagLiq)
+router.get('/totalesAdmin', obtenerLiquidacionesTotalesAdmin)
 router.get('/transportistas', obtenerLiquidacionesTransportistas)
 router.get('/dashboard', obtenerLiquidacionesDashboard)
 router.get('/transportista/:id', obtenerLiquidacionesPorTransportista)

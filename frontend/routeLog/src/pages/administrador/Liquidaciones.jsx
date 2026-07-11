@@ -15,10 +15,10 @@ import SummaryCard from "../../components/SummaryCard"
 import FiltrosGenerico from "../../components/FiltrosGenerico.jsx"
 import FiltroLiquidaciones from "../../components/filtros/FiltroLiquidaciones.jsx"
 
-import {cardsLiquidacionesAdmin} from "../../components/datos/dataKPILiquidaciones.jsx";
+import {cardsLiquidacionesPagLiq} from "../../components/datos/dataKPILiquidaciones.jsx";
 
 import { 
-  obtenerLiquidacionesTotales, 
+  obtenerLiquidacionesTotalesAdmin, 
 } from "../../services/api.js"
 
 
@@ -40,13 +40,13 @@ export default function Liquidaciones() {
     const obtenerDatos = async () => {
       try {
         setLoadingKPI(true)
-
-        const liqTotResult = await obtenerLiquidacionesTotales(
-          fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
-          fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
-        )
         
-        setLiqTotales(liqTotResult.data[0])
+        const liqTotResult = await obtenerLiquidacionesTotalesAdmin(
+          fechaDesde ? fechaDesde.format("YYYY-MM-DD") : null,
+          fechaHasta ? fechaHasta.format("YYYY-MM-DD") : null
+        )
+
+        setLiqTotales(liqTotResult.data?.[0] || {})
 
       } catch (error) {
         console.error(error)
@@ -54,44 +54,46 @@ export default function Liquidaciones() {
         setLoadingKPI(false)
       }
     }
+
     obtenerDatos()
-  }, [fechaDesde,fechaHasta])
+  }, [fechaDesde, fechaHasta])
 
-  const cards = cardLiquidaciones.map(card => ({
-    ...card,
-    cantidad: card.id === "pct_paquetes_liquidados"?
-              Number(liqTotales[card.id] || 0) + "%"
-              :
-              card.id === "valor_total" || card.id === "valor_liquidado"?
-              Number(liqTotales[card.id] || 0).toLocaleString("es-AR", {
-                style: "currency",
-                currency: "ARS",
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })
-              :
-              Number(liqTotales[card.id] || 0)
-  }))
-
-  const [liqTotales, setLiqTotales] = useState({})
-  const [loading, setLoading] = useState(true)
+  const cards = cardsLiquidacionesPagLiq.map(card => {
+    const esMonetario = card.id === "valor_total" || card.id === "pago_realizado" || card.id === "pago_pendiente"
+ 
+    return {
+      ...card,
+      cantidad: esMonetario
+        ? undefined
+        : card.id === "pct_paquetes_liquidados"
+          ? Number(liqTotales[card.id] || 0) + "%"
+          : Number(liqTotales[card.id] || 0),
+      valor: esMonetario
+        ? Number(liqTotales[card.id] || 0).toLocaleString("es-AR", {
+            style: "currency",
+            currency: "ARS",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        : undefined,
+      descripcion: card.id === "pct_paquetes_liquidados" ? 
+        "De un total de " + Number(liqTotales.cantidad_liquidaciones || 0)
+        : ""
+    }
+  })
 
   const [filtros, setFiltros] = useState({
-    fechaEnvio: null,
-    fechaLiquidacion: null,
+    fecha_alta: null,
     transportista: "",
-    localidad: "",
-    liquidado: "",
+    estado: "",
     montoDesde: "",
     montoHasta: ""
   })
 
   const filtrosVacios = {
-    fechaEnvio: null,
-    fechaLiquidacion: null,
+    fecha_alta: null,
     transportista: "",
-    localidad: "",
-    liquidado: "",
+    estado: "",
     montoDesde: "",
     montoHasta: ""
   }
@@ -103,11 +105,13 @@ export default function Liquidaciones() {
   const [totalPaginas, setTotalPaginas] = useState(1)
   const [liquidacionesMostradas, setLiquidacionesMostradas] = useState(0)
 
-  const { fechaDesde, fechaHasta } = useDateFilter()
 
   const handleFilter = () => {
     setPagina(1)
-    setFiltrosAplicados({ ...filtros })
+    setFiltrosAplicados({ 
+      ...filtros, 
+    fecha_alta: filtros.fecha_alta ? filtros.fecha_alta.format("YYYY-MM-DD") : null 
+  })
   }
 
   const handleClear = () => {
@@ -115,38 +119,6 @@ export default function Liquidaciones() {
     setFiltrosAplicados({ ...filtrosVacios })
     setPagina(1)
   }
-
-  useEffect(() => {
-    const traerDatos = async () => {
-      try {
-        setLoading(true)
-        
-        const result = await obtenerLiquidacionesTotales(
-          fechaDesde ? fechaDesde.format("YYYY-MM-DD") : null,
-          fechaHasta ? fechaHasta.format("YYYY-MM-DD") : null
-        )
-
-        setLiqTotales(result.data?.[0] || {})
-
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    traerDatos()
-  }, [fechaDesde, fechaHasta])
-
-
-  const kpis = cardsLiquidacionesAdmin.map(card => ({
-    ...card,
-    valor: card.id === "pct_paquetes_liquidados"
-      ? Number(liqTotales[card.id] || 0) + "%"
-      : card.id === "cantidad_envios"
-        ? Number(liqTotales[card.id] || 0)
-        : "$" + Number(liqTotales[card.id] || 0).toLocaleString("es-AR")
-  }))
 
   return (
 
@@ -157,21 +129,21 @@ export default function Liquidaciones() {
       gap: 2
     }}
     >
-      {/* KPI x5 */}
+      {/* KPI liquidaciones */}
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
             sm: "1fr 1fr",
-            lg: "repeat(5, 1fr)"
-          },
+            lg: "repeat(auto-fit, minmax(200px, 1fr))"
+            },
           gap: 2
         }}
       >
         {
-          loading ?
-            Array.from({ length: kpis.length }).map((_, index) => (
+          loadingKPI ?
+            Array.from({ length: cards.length }).map((_, index) => (
               <Skeleton
                 key={index}
                 variant="rounded"
@@ -179,11 +151,13 @@ export default function Liquidaciones() {
               />
             ))
           :
-            kpis.map((card, index) => (
+            cards.map((card, index) => (
               <SummaryCard 
                 key={index}
                 titulo={card.titulo}
-                cantidad={card.valor}
+                cantidad={card.cantidad}
+                valor={card.valor}
+                descripcion={card.descripcion}
                 icono={card.icono}
                 color={card.color}
                 height={112}
@@ -209,7 +183,7 @@ export default function Liquidaciones() {
         Mostrando {liquidacionesMostradas} liquidaciones
       </Typography>
 
-      {/* Grilla */}
+      {/* Grilla de Todas las Liquidaciones */}
       <Box
         sx={{
           backgroundColor:"#fff",
@@ -218,6 +192,10 @@ export default function Liquidaciones() {
           boxShadow:
           "0 1px 2px rgba(0,0,0,0.04)"
         }}>
+          {/**
+        <TableResumenCard></TableResumenCard>
+        <h3>Grilla que muestre todas las liquidaciones</h3>  
+        */}
         <TablaPaginacionContenedor
           pagina={pagina}
           filasPorPagina={filasPorPagina}
@@ -237,6 +215,9 @@ export default function Liquidaciones() {
           />
         </TablaPaginacionContenedor>
       </Box>
+          {/*
+            <h3>Grilla que muestre todas las liquidaciones por transportista y semana</h3>
+          */}
     </Box>
   )
 }

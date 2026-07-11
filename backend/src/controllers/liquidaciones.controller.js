@@ -30,33 +30,29 @@ export const obtenerLiquidacionesListado = async (req, res) => {
   const {
     desde,          // fecha envío desde (rango global)
     hasta,          // fecha envío hasta (rango global de la pagina)
-    fechaEnvio,     // fecha envío exacta
-    fechaLiquidacion,
+    fecha_alta,    
     transportista,
-    localidad,
-    liquidado,      // "true" | "false"
+    estado,      
     montoDesde,
     montoHasta
   } = req.query
  
   try {
     let query = `
-      SELECT
-          p.id AS id_envio,
-          TO_CHAR(p.fecha, 'DD/MM/YYYY') AS fecha_envio,
-          TO_CHAR(liq.fecha_alta, 'DD/MM/YYYY') AS fecha_liquidacion,
+      SELECT  
+          l.id,
+          TO_CHAR(l.fecha_alta, 'DD/MM/YYYY') AS fecha_alta,
           u.nombre_apellido AS transportista,
-          CASE WHEN p.id_liquidacion IS NOT NULL THEN true ELSE false END AS liquidado,
-          COALESCE(tar.precio, 0) AS monto
-        FROM paquetes p
-        JOIN transportistas t ON t.id = p.id_transportista
+          l.cantidad_paquetes, 
+          TO_CHAR(l.fecha_desde, 'DD/MM/YYYY') AS fecha_desde, 
+          TO_CHAR(l.fecha_hasta, 'DD/MM/YYYY') AS fecha_hasta,
+          TO_CHAR(l.fecha_cierre, 'DD/MM/YYYY') AS fecha_cierre, 
+          cerrada,
+          monto_total
+        FROM liquidaciones l
+        JOIN transportistas t ON t.id = l.id_transportista
         JOIN usuarios u ON u.id = t.id_usuario
-        JOIN tarifas tar ON tar.id = p.id_tarifa
-        JOIN direcciones d ON d.id = p.id_direccion
-        JOIN localidades l ON l.id = d.id_localidad
-        LEFT JOIN liquidaciones liq ON liq.id = p.id_liquidacion
-        WHERE 1=1 
-        AND (p.id_estado = 2 OR p.id_estado = 3)
+        WHERE 1 = 1 
     `
     const parametros = []
  
@@ -65,27 +61,19 @@ export const obtenerLiquidacionesListado = async (req, res) => {
       parametros.push(hasta)
  
       query += `
-        AND p.fecha BETWEEN $${parametros.length - 1}
+        AND l.fecha_alta BETWEEN $${parametros.length - 1}
                         AND $${parametros.length}
       `
     }
  
-    if (fechaEnvio) {
-      parametros.push(fechaEnvio)
+    if (fecha_alta) {
+      parametros.push(fecha_alta)
  
       query += `
-        AND p.fecha = $${parametros.length}
+        AND l.fecha_alta::date = $${parametros.length}
       `
     }
- 
-    if (fechaLiquidacion) {
-      parametros.push(fechaLiquidacion)
- 
-      query += `
-        AND liq.fecha_alta::date = $${parametros.length}
-      `
-    }
- 
+
     if (transportista) {
       parametros.push(`%${transportista.toUpperCase()}%`)
  
@@ -94,18 +82,10 @@ export const obtenerLiquidacionesListado = async (req, res) => {
       `
     }
  
-    if (localidad) {
-      parametros.push(`%${localidad.toUpperCase()}%`)
- 
+    if (estado === 'true' || estado === 'false') {
+      parametros.push(estado === 'true')
       query += `
-        AND upper(l.nombre) LIKE $${parametros.length}
-      `
-    }
- 
-    if (liquidado === 'true' || liquidado === 'false') {
-      const esLiquidado = liquidado === 'true'
-      query += `
-        AND (p.id_liquidacion IS NOT NULL) = ${esLiquidado}
+        AND l.cerrada = $${parametros.length}
       `
     }
  
@@ -113,7 +93,7 @@ export const obtenerLiquidacionesListado = async (req, res) => {
       parametros.push(Number(montoDesde))
  
       query += `
-        AND tar.precio >= $${parametros.length}
+        AND l.monto_total >= $${parametros.length}
       `
     }
  
@@ -121,12 +101,12 @@ export const obtenerLiquidacionesListado = async (req, res) => {
       parametros.push(Number(montoHasta))
  
       query += `
-        AND tar.precio <= $${parametros.length}
+        AND l.monto_total <= $${parametros.length}
       `
     }
  
     query += `
-      ORDER BY p.fecha DESC
+      ORDER BY l.fecha_alta DESC
     `
  
     const result = await pool.query(query, parametros)
@@ -319,9 +299,9 @@ export const obtenerLiquidacionesPorTransportista = async (req, res) => {
         })
     }
 }
-/** Todos los transportistas juntos (suma) */
 
-export const obtenerLiquidacionesTotalesPagLiq= async (req, res) => {
+/** Todos los transportistas juntos (suma) */
+export const obtenerLiquidacionesTotalesAdmin= async (req, res) => {
   let {
     desde,
     hasta
@@ -333,50 +313,15 @@ export const obtenerLiquidacionesTotalesPagLiq= async (req, res) => {
 
   try {
     const query = `
-      SELECT
-        COALESCE(SUM(aux.precio), 0) AS valor_total,
-
-        COUNT(aux.paq_id) AS cantidad_envios,
-
-        COALESCE(
-          SUM(
-            CASE 
-              WHEN aux.liq_id IS NOT NULL 
-              THEN aux.precio
-              ELSE 0
-            END
-          ), 0
-        ) AS pago_realizado,
-
-        COALESCE(
-          SUM(
-            CASE 
-              WHEN aux.liq_id IS NULL 
-              THEN aux.precio
-              ELSE 0
-            END
-          ), 0
-        ) AS pago_pendiente,
-
-        CASE 
-          WHEN COUNT(aux.paq_id) > 0 THEN
-            ROUND((COUNT(aux.liq_id)::decimal / COUNT(aux.paq_id)) * 100, 2)
-          ELSE 0 
-        END AS pct_paquetes_liquidados
-
-      FROM (
-        SELECT 
-          liq.id AS liq_id, 
-          p.id AS paq_id, 
-          tar.precio AS precio
-        FROM paquetes p
-        JOIN tarifas tar ON p.id_tarifa = tar.id
-        LEFT JOIN liquidaciones liq ON liq.id = p.id_liquidacion
-        WHERE 
-          (p.id_estado = 2 OR p.id_estado = 3)
-          AND ($1::date IS NULL OR p.fecha >= $1::date)
-          AND ($2::date IS NULL OR p.fecha <= $2::date)
-      ) aux
+      SELECT  
+          SUM(monto_total) as valor_total,
+          SUM(CASE WHEN cerrada = true THEN monto_total ELSE 0 END) AS pago_realizado,
+          SUM(CASE WHEN cerrada = false THEN monto_total ELSE 0 END) AS pago_pendiente,
+          ((COUNT(CASE WHEN cerrada = true THEN 1 END) * 100) / NULLIF(COUNT(*), 0) ) AS pct_paquetes_liquidados,
+          COUNT(*) AS cantidad_liquidaciones
+        FROM liquidaciones
+        WHERE ($1::date IS NULL OR fecha_alta >= $1::date)
+          AND ($2::date IS NULL OR fecha_alta <= $2::date)
     `
 
     const result = await pool.query(

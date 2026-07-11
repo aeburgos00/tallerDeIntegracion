@@ -583,6 +583,16 @@ export const obtenerLiquidacionesTotales = async (
   return response.json()
 }
 
+export const obtenerLiquidacionesTotalesAdmin = async (
+  fecha_desde,
+  fecha_hasta
+) => {
+  const response = await fetch(
+    `${API_URL}/liquidaciones/totalesAdmin?desde=${fecha_desde}&hasta=${fecha_hasta}`
+  )
+  return response.json()
+}
+
 export const obtenerLiquidacionesTransportistas = async (desde, hasta) => {
   const response = await fetch(
     `${API_URL}/liquidaciones/transportistas?desde=${desde}&hasta=${hasta}`

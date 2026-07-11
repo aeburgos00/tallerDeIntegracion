@@ -7,7 +7,6 @@ import {
  
 import { useEffect, useState } from 'react'
 import { 
-    obtenerLocalidades,
     obtenerTransportistas
 } from "../../services/api";
  
@@ -21,21 +20,18 @@ export default function FiltroLiquidaciones({
     setFiltros
 }) {
  
-    const [localidades, setLocalidades] = useState([])
     const [transportistas, setTransportistas] = useState([])
  
     useEffect(()=>{
-        const cargarCombos = async() =>{
+        const cargarTransportistas = async() =>{
             try{
-                const localidadesResp = await obtenerLocalidades()
                 const transportistasResp = await obtenerTransportistas()
-                setLocalidades(localidadesResp.data)
                 setTransportistas(transportistasResp.data)
             } catch(error){
                 console.error(error)
             }
         }
-        cargarCombos()
+        cargarTransportistas()
     },[])
  
  
@@ -54,7 +50,7 @@ export default function FiltroLiquidaciones({
         gridTemplateColumns:{
             xs: "1fr",
             sm:"1fr 1fr",
-            lg:"180px 180px 180px 180px 130px 150px 150px"
+            lg:"180px 180px 130px 150px 150px"
         },
         gap:2,
         alignItems:"center",
@@ -62,12 +58,12 @@ export default function FiltroLiquidaciones({
  
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
             <DatePicker
-            label="Fecha Envío"
-            value={filtros.fechaEnvio}
+            label="Fecha Alta"
+            value={filtros.fecha_alta}
             onChange={(newValue) =>
             setFiltros({
                 ...filtros,
-                fechaEnvio: newValue
+                fecha_alta: newValue
             })}
             format="DD/MM/YYYY"
             slotProps={{
@@ -84,31 +80,7 @@ export default function FiltroLiquidaciones({
             }}
             />
          </LocalizationProvider>
- 
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-            <DatePicker
-            label="Fecha Liquidación"
-            value={filtros.fechaLiquidacion}
-            onChange={(newValue) =>
-            setFiltros({
-                ...filtros,
-                fechaLiquidacion: newValue
-            })}
-            format="DD/MM/YYYY"
-            slotProps={{
-                textField: {
-                size: "small"
-                }
-            }}
-            sx={{
-                width: {
-                xs: 100,
-                sm: 140,
-                md: 180
-                }
-            }}
-            />
-         </LocalizationProvider>
+
  
         <TextField
             fullWidth
@@ -133,38 +105,16 @@ export default function FiltroLiquidaciones({
         </TextField>
  
         <TextField
-            fullWidth
-            select
-            label="Localidad"
-            value={filtros.localidad}
-            onChange={handleChange("localidad")}
-            size="small"
-        >
-            <MenuItem value="">
-                Todas
-            </MenuItem>
- 
-            {localidades.map((item) => (
-                <MenuItem
-                    key={item.id}
-                    value={item.nombre}
-                >
-                    {item.nombre}
-                </MenuItem>
-            ))}
-        </TextField>
- 
-        <TextField
         fullWidth
         select
-        label="Liquidado"
-        value={filtros.liquidado}
-        onChange={handleChange("liquidado")}
+        label="Estado"
+        value={filtros.estado}
+        onChange={handleChange("estado")}
         size="small"
         >
             <MenuItem value="">Todos</MenuItem>
-            <MenuItem value="true">Sí</MenuItem>
-            <MenuItem value="false">No</MenuItem>
+            <MenuItem value="true">Cerrada</MenuItem>
+            <MenuItem value="false">Pendiente</MenuItem>
         </TextField>
  
         <TextField
