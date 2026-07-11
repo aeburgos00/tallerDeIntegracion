@@ -49,3 +49,10 @@ export const obtenerLiquidacionesPorTransportistaId = async (
     )
     return response.json()
 }
+
+export const obtenerHistorialLiquidaciones = async (id_transportista) => {
+    const response = await fetch(
+        `${API_URL}/liquidaciones/historial/transportista/${id_transportista}`
+    )
+    return response.json()
+}

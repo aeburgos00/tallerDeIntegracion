@@ -1,6 +1,6 @@
-import { 
-    BottomNavigation,
-    BottomNavigationAction
+import {
+  BottomNavigation,
+  BottomNavigationAction
 } from "@mui/material";
 
 import React from "react";
@@ -30,22 +30,22 @@ const NavbarMobile = () => {
         setValue(newValue);
       }}
     >
-       {menuTransportista.map((e) => {
-          const Icono = e.icono;
-          return (
-            <BottomNavigationAction 
-              key={e.id}
-              label={e.descripcion}
-              icon={<Icono />}
-              component={Link}
-              to={e.ruta}
-            />
-          );
-        })
-        }
+      {menuTransportista.map((e) => {
+        const Icono = e.icono;
+        return (
+          <BottomNavigationAction
+            key={e.id}
+            label={e.descripcion}
+            icon={<Icono />}
+            component={Link}
+            to={e.ruta}
+          />
+        );
+      })
+      }
     </BottomNavigation>
   );
 };
- 
+
 
 export default NavbarMobile

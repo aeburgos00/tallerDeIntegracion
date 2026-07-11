@@ -20,6 +20,7 @@ import cardsEnvios from "../../components/datos/dataKPIEnvios.jsx"
 import { obtenerEnviosPorTransportistaId } from "../../services/apiTransportistas.js"
 
 import KPICardMobile from "../../components/KPICardMobile.jsx"
+import InfoIcon from "@mui/icons-material/Info"
 
 
 const filtrosIniciales = {
@@ -152,6 +153,28 @@ export default function EnviosTransportista() {
           {mensaje}
         </Alert>
       </Snackbar>
+
+      {/* Aviso informativo */}
+      <Box sx={{
+        background: "#eff6ff",
+        borderRadius: 3,
+        border: "1px solid #bfdbfe",
+        p: 2,
+        display: "flex",
+        gap: 1.5,
+        alignItems: "flex-start",
+      }}>
+        <InfoIcon sx={{ fontSize: 18, color: "#3b82f6", flexShrink: 0, mt: 0.2 }} />
+        <Box>
+          <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1e40af", mb: 0.5 }}>
+            Información importante
+          </Typography>
+          <Typography sx={{ fontSize: 12, color: "#1e40af", lineHeight: 1.5 }}>
+            Los pedidos "Entregados" y "Visita fallida" serán tenidos en cuenta para la liquidación.{" "}
+            Los "No visitados" serán reprogramados.
+          </Typography>
+        </Box>
+      </Box>
 
     </Box>
   )

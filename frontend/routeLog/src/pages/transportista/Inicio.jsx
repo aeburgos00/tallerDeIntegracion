@@ -16,6 +16,7 @@ dayjs.locale("es")
 import useAuth from "../../hooks/useAuth"
 import cardsEnvios from "../../components/datos/dataKPIEnvios.jsx"
 import MontoDestacadoMobile from "../../components/MontoDestacadoMobile.jsx"
+import InfoIcon from "@mui/icons-material/Info"
 
 import {
   obtenerEnviosPorTransportistaId,
@@ -78,14 +79,40 @@ export default function Inicio() {
         boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
         p: 3,
         display: "flex",
+        flexWrap: "wrap",          // ← si no entra en una línea, baja
         justifyContent: "space-between",
-        alignItems: "center",
+        alignItems: "flex-start",
+        gap: 0.5,
       }}>
         <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
           Bienvenido {user?.nombre}
         </Typography>
-        <Typography sx={{ fontSize: 13, color: "#6b7280" }}>
+        <Typography sx={{ fontSize: 13, color: "#6b7280", flexShrink: 0 }}>
           {hoy.format("DD/MM/YYYY")}
+        </Typography>
+      </Box>
+
+      {/* Indicador de estado */}
+      <Box sx={{
+        background: "#fff",
+        borderRadius: 3,
+        border: "1px solid #e5e7eb",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        display: "flex",
+        p: 1.5,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 0.8,
+      }}>
+        <Box sx={{
+          width: 8,
+          height: 8,
+          borderRadius: "50%",
+          background: "#22c55e",
+          boxShadow: "0 0 0 3px #dcfce7",
+        }} />
+        <Typography sx={{ fontSize: 12, color: "#22c55e", fontWeight: 600 }}>
+          En línea
         </Typography>
       </Box>
 
@@ -203,6 +230,29 @@ export default function Inicio() {
         loading={loading}
       />
 
+      {/* Aviso informativo */}
+      <Box sx={{
+        background: "#eff6ff",
+        borderRadius: 3,
+        border: "1px solid #bfdbfe",
+        p: 2,
+        display: "flex",
+        gap: 1.5,
+        alignItems: "flex-start",
+      }}>
+        <InfoIcon sx={{ fontSize: 18, color: "#3b82f6", flexShrink: 0, mt: 0.2 }} />
+        <Box>
+          <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1e40af", mb: 0.5 }}>
+            Consejo
+          </Typography>
+          <Typography sx={{ fontSize: 12, color: "#1e40af", lineHeight: 1.5 }}>
+            Planifica tus rutas para optimizar tiempos.{" "}
+
+          </Typography>
+        </Box>
+      </Box>
+
     </Box>
+
   )
 }
