@@ -63,22 +63,15 @@ export default function Liquidaciones() {
  
     return {
       ...card,
-      cantidad: esMonetario
-        ? undefined
-        : card.id === "pct_paquetes_liquidados"
-          ? Number(liqTotales[card.id] || 0) + "%"
-          : Number(liqTotales[card.id] || 0),
-      valor: esMonetario
-        ? Number(liqTotales[card.id] || 0).toLocaleString("es-AR", {
-            style: "currency",
-            currency: "ARS",
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })
-        : undefined,
-      descripcion: card.id === "pct_paquetes_liquidados" ? 
-        "De un total de " + Number(liqTotales.cantidad_liquidaciones || 0)
-        : ""
+      cantidad: card.id === "total_liquidado"?
+              Number(liqTotales[card.id] || 0).toLocaleString("es-AR", {
+                style: "currency",
+                currency: "ARS",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })
+              :
+              Number(liqTotales[card.id] || 0)
     }
   })
 
@@ -102,13 +95,10 @@ export default function Liquidaciones() {
   const [filasPorPagina, setFilasPorPagina] = useState(10)
   const [totalPaginas, setTotalPaginas] = useState(1)
   const [liquidacionesMostradas, setLiquidacionesMostradas] = useState(0)
-
-
+  
   const handleFilter = () => {
     setPagina(1)
-    setFiltrosAplicados({ 
-      ...filtros, 
-  })
+    setFiltrosAplicados({ ...filtros })
   }
 
   const handleClear = () => {
@@ -120,8 +110,8 @@ export default function Liquidaciones() {
   const handleExportar = async () => {
     try {
       await exportarLiquidacionesCSV(
-        fechaDesde ? fechaDesde.format("YYYY-MM-DD") : null, 
-        fechaHasta ? fechaHasta.format("YYYY-MM-DD") : null, 
+        fechaDesde ? fechaDesde.format("YYYY-MM-DD"), 
+        fechaHasta ? fechaHasta.format("YYYY-MM-DD"), 
         filtrosAplicados
       )
     } catch (error){
@@ -145,7 +135,7 @@ export default function Liquidaciones() {
           gridTemplateColumns: {
             xs: "1fr",
             sm: "1fr 1fr",
-            lg: "repeat(auto-fit, minmax(200px, 1fr))"
+            lg: "repeat(4, 1fr)"
             },
           gap: 2
         }}
@@ -165,7 +155,6 @@ export default function Liquidaciones() {
                 key={index}
                 titulo={card.titulo}
                 cantidad={card.cantidad}
-                valor={card.valor}
                 descripcion={card.descripcion}
                 icono={card.icono}
                 color={card.color}
@@ -221,7 +210,7 @@ export default function Liquidaciones() {
         </Button>
       </Box>
       
-      {/* Grilla de Todas las Liquidaciones */}
+      {/* Grilla de Liquidaciones */}
       <Box
         sx={{
           backgroundColor:"#fff",
