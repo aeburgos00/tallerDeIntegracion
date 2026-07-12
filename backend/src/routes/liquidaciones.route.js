@@ -5,6 +5,7 @@ import {
     obtenerLiquidacionesTotales,
     obtenerLiquidacionesPorTransportista,
     obtenerLiquidacionesDashboard,
+    obtenerHistorialLiquidacionesPorTransportista,
     exportarCSV
 } from '../controllers/liquidaciones.controller.js'
 
@@ -16,5 +17,7 @@ router.get('/listado', obtenerLiquidacionesListado)
 router.get('/totales', obtenerLiquidacionesTotales)
 router.get('/dashboard', obtenerLiquidacionesDashboard)
 router.get('/transportista/:id', obtenerLiquidacionesPorTransportista)
+
+router.get('/historial/transportista/:id', obtenerHistorialLiquidacionesPorTransportista)
 
 export default router

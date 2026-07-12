@@ -34,7 +34,11 @@ const colores = {
 }
 
 export default function TablaLocalidades({
+    filtros = {},
+    pagina = 1,
     filasPorPagina = 10,
+    onTotalPaginasChange,
+    cantLocalidades,
     refresh = 0,
     onEdit,
     onActionSuccess
@@ -42,13 +46,9 @@ export default function TablaLocalidades({
 
     const [loading, setLoading] = useState(true)
     const [localidades, setLocalidades] = useState([])
-
-    // refresh interno: se dispara cuando esta MISMA tabla hace una baja o un toggle
     const [refreshAccion, setRefreshAccion] = useState(0)
-
     const [mensaje, setMensaje] = useState("")
     const [error, setError] = useState(false)
-
     const [openEliminar, setOpenEliminar] = useState(false)
     const [localidadSeleccionada, setLocalidadSeleccionada] = useState(null)
 
@@ -56,8 +56,17 @@ export default function TablaLocalidades({
         const obtenerDatos = async () => {
             try {
                 setLoading(true)
-                const result = await obtenerLocalidades()
+                const result = await obtenerLocalidades(filtros)
                 setLocalidades(result.data)
+
+                cantLocalidades?.(result.data.length)
+
+                const totalPaginas = Math.max(
+                    1,
+                    Math.ceil(result.data.length / filasPorPagina)
+                )
+                onTotalPaginasChange?.(totalPaginas)
+
             } catch (error) {
                 console.error(error)
             } finally {
@@ -65,7 +74,12 @@ export default function TablaLocalidades({
             }
         }
         obtenerDatos()
-    }, [refresh, refreshAccion])
+    }, [filtros, refresh, refreshAccion, filasPorPagina, onTotalPaginasChange, cantLocalidades])
+
+    const localidadesPagina = localidades.slice(
+        (pagina - 1) * filasPorPagina,
+        pagina * filasPorPagina
+    )
 
     const handleAbrirDialogo = (localidad) => {
         setLocalidadSeleccionada(localidad)
@@ -84,7 +98,7 @@ export default function TablaLocalidades({
             setError(false)
             handleCerrarDialogo()
             setRefreshAccion(prev => prev + 1)
-            onActionSuccess?.()   // avisa al padre para que refresque los KPIs
+            onActionSuccess?.()
         } catch (error) {
             setMensaje(error?.message || "Error al dar de baja la localidad")
             setError(true)
@@ -121,58 +135,55 @@ export default function TablaLocalidades({
                 </TableHead>
 
                 <TableBody sx={{ backgroundColor: "#fff" }}>
-                    {
-                        loading ?
-                            Array.from(new Array(filasPorPagina)).map((_, index) => (
-                                <TableRow key={index}>
-                                    {Array.from(new Array(8)).map((_, cellIndex) => (
-                                        <TableCell key={cellIndex}>
-                                            <Skeleton variant="text" />
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                            :
-                            localidades.map((item) => (
-                                <TableRow key={item.id_loc} hover>
-                                    <TableCell sx={{ whiteSpace: "nowrap" }}>{item.nombre}</TableCell>
-                                    <TableCell sx={{ whiteSpace: "nowrap" }}>{item.codigo_postal}</TableCell>
-                                    <TableCell sx={{ textWrap: 'nowrap' }}>{item.provincia}</TableCell>
-                                    <TableCell sx={{ textWrap: 'nowrap' }}> $ {Number(item.costo_envio || 0).toLocaleString('es-AR')} </TableCell>
-                                    <TableCell sx={{ whiteSpace: "nowrap" }}>{item.fecha_alta}</TableCell>
-                                    <TableCell sx={{ whiteSpace: "nowrap" }}>{item.fecha_baja || "-"}</TableCell>
-                                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                                        <Chip
-                                            label={item.estado}
-                                            size="small"
-                                            clickable
-                                            onClick={() => handleToggleEstado(item)}
-                                            sx={{
-                                                fontWeight: 600,
-                                                fontSize: 12,
-                                                borderRadius: 1,
-                                                cursor: "pointer",
-                                                background: item.estado === "Activo" ? "#dcfce7" : "#fee2e2",
-                                                color: item.estado === "Activo" ? "#166534" : "#991b1b",
-                                                "&:hover": { opacity: 0.85 }
-                                            }}
-                                        />
+                    {loading
+                        ? Array.from(new Array(filasPorPagina)).map((_, index) => (
+                            <TableRow key={index}>
+                                {Array.from(new Array(8)).map((_, cellIndex) => (
+                                    <TableCell key={cellIndex}>
+                                        <Skeleton variant="text" />
                                     </TableCell>
-                                    <TableCell align="center">
-                                        <IconButton color="primary" onClick={() => onEdit(item)}>
-                                            <EditIcon />
-                                        </IconButton>
-                                        <IconButton color="error" onClick={() => handleAbrirDialogo(item)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                                ))}
+                            </TableRow>
+                        ))
+                        : localidadesPagina.map((item) => (
+                            <TableRow key={item.id_loc} hover>
+                                <TableCell sx={{ whiteSpace: "nowrap" }}>{item.nombre}</TableCell>
+                                <TableCell sx={{ whiteSpace: "nowrap" }}>{item.codigo_postal}</TableCell>
+                                <TableCell sx={{ textWrap: 'nowrap' }}>{item.provincia}</TableCell>
+                                <TableCell sx={{ textWrap: 'nowrap' }}> $ {Number(item.costo_envio || 0).toLocaleString('es-AR')} </TableCell>
+                                <TableCell sx={{ whiteSpace: "nowrap" }}>{item.fecha_alta}</TableCell>
+                                <TableCell sx={{ whiteSpace: "nowrap" }}>{item.fecha_baja || "-"}</TableCell>
+                                <TableCell sx={{ whiteSpace: "nowrap" }}>
+                                    <Chip
+                                        label={item.estado}
+                                        size="small"
+                                        clickable
+                                        onClick={() => handleToggleEstado(item)}
+                                        sx={{
+                                            fontWeight: 600,
+                                            fontSize: 12,
+                                            borderRadius: 1,
+                                            cursor: "pointer",
+                                            background: item.estado === "Activo" ? "#dcfce7" : "#fee2e2",
+                                            color: item.estado === "Activo" ? "#166534" : "#991b1b",
+                                            "&:hover": { opacity: 0.85 }
+                                        }}
+                                    />
+                                </TableCell>
+                                <TableCell align="center">
+                                    <IconButton color="primary" onClick={() => onEdit(item)}>
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton color="error" onClick={() => handleAbrirDialogo(item)}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
+                        ))
                     }
                 </TableBody>
             </Table>
 
-            {/* Dialog y Snackbar: UNA sola vez, fuera del .map() */}
             <Dialog open={openEliminar} onClose={handleCerrarDialogo}>
                 <DialogTitle>Dar de baja localidad</DialogTitle>
                 <DialogContent>
@@ -181,29 +192,19 @@ export default function TablaLocalidades({
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button
-                        variant="outlined"
-                        onClick={handleCerrarDialogo}
-                        sx={{ borderColor: colores.gris, color: colores.azul, borderRadius: 2, textTransform: "none" }}
-                    >
+                    <Button variant="outlined" onClick={handleCerrarDialogo}
+                        sx={{ borderColor: colores.gris, color: colores.azul, borderRadius: 2, textTransform: "none" }}>
                         Volver
                     </Button>
-                    <Button
-                        variant="contained"
-                        color="error"
+                    <Button variant="contained" color="error"
                         sx={{ borderRadius: 2, textTransform: "none" }}
-                        onClick={handleConfirmarEliminar}
-                    >
+                        onClick={handleConfirmarEliminar}>
                         Dar de baja
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            <Snackbar
-                open={!!mensaje}
-                autoHideDuration={4000}
-                onClose={() => setMensaje("")}
-            >
+            <Snackbar open={!!mensaje} autoHideDuration={4000} onClose={() => setMensaje("")}>
                 <Alert severity={error ? "error" : "success"}>
                     {mensaje}
                 </Alert>

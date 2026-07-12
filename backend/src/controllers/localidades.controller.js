@@ -2,8 +2,10 @@ import pool from '../config/db.js'
 import { generarCSV } from '../utils/exportadorCSV.js'
 
 const obtenerLocalidades = async (req, res) => {
+    const { localidad, codigoPostal, provincia, estado } = req.query
+
     try {
-        const result = await pool.query(`
+        let query = `
             SELECT  id id_loc,
                     nombre,
                     codigo_postal,
@@ -13,7 +15,19 @@ const obtenerLocalidades = async (req, res) => {
                     TO_CHAR(fecha_baja,'DD/MM/YYYY') fecha_baja,
                     case when estado is true then 'Activo' else 'Inactivo' end as estado
             FROM localidades
-        `)
+            WHERE 1=1
+        `
+        const valores = []
+        let i = 1
+
+        if (localidad) { query += ` AND nombre ILIKE $${i++}`; valores.push(`%${localidad}%`) }
+        if (codigoPostal) { query += ` AND codigo_postal ILIKE $${i++}`; valores.push(`%${codigoPostal}%`) }
+        if (provincia) { query += ` AND provincia ILIKE $${i++}`; valores.push(`%${provincia}%`) }
+        if (estado) { query += ` AND estado = $${i++}`; valores.push(estado === 'Activo') }
+
+        query += ` ORDER BY nombre ASC`
+
+        const result = await pool.query(query, valores)
 
         res.json({
             ok: true,
@@ -190,10 +204,7 @@ const modificarLocalidad = async (req, res) => {
             AND LOWER(TRIM(provincia)) = LOWER(TRIM($2))
             AND id != $3
         `
-        const duplicado = await pool.query(
-            queryDuplicado,
-            [nombre, provincia, id]
-        )
+        const duplicado = await pool.query(queryDuplicado, [nombre, provincia, id])
 
         if (duplicado.rows.length > 0) {
             return res.status(409).json({
@@ -203,6 +214,15 @@ const modificarLocalidad = async (req, res) => {
         }
 
         await pool.query("BEGIN")
+
+        // Consulto el costo_envio actual ANTES de actualizar
+        const costoActual = await pool.query(
+            `SELECT costo_envio FROM localidades WHERE id = $1`,
+            [id]
+        )
+        const costoAnterior = Number(costoActual.rows[0]?.costo_envio ?? 0)
+        const costoNuevo = Number(costo_envio)
+        const cambioElCosto = costoAnterior !== costoNuevo
 
         const query = `
             UPDATE localidades
@@ -214,36 +234,35 @@ const modificarLocalidad = async (req, res) => {
                 fecha_baja = CASE WHEN $5 = false THEN now() ELSE fecha_baja END
             WHERE id = $6
         `
-        await pool.query(
-            query,
-            [nombre, codigo_postal, provincia, costo_envio, estado, id]
-        )
+        await pool.query(query, [nombre, codigo_postal, provincia, costo_envio, estado, id])
 
-        // Recalculo las tarifas que esta localidad ya tenía
-        await pool.query(
-            `
-            UPDATE tarifas t
-            SET precio = tr.costo_envio * $1
-            FROM transportistas tr
-            WHERE t.id_transportista = tr.id
-            AND t.id_localidad = $2
-            `,
-            [costo_envio, id]
-        )
-
-        await pool.query(
-            `
-            INSERT INTO tarifas (id_transportista, id_localidad, precio)
-            SELECT t.id, $2, t.costo_envio * $1
-            FROM transportistas t
-            WHERE NOT EXISTS (
-                SELECT 1 FROM tarifas tar
-                WHERE tar.id_transportista = t.id
-                AND tar.id_localidad = $2
+        // Solo recalculo tarifas si el costo cambió
+        if (cambioElCosto) {
+            await pool.query(
+                `
+                UPDATE tarifas t
+                SET precio = tr.costo_envio * $1
+                FROM transportistas tr
+                WHERE t.id_transportista = tr.id
+                AND t.id_localidad = $2
+                `,
+                [costoNuevo, id]
             )
-            `,
-            [costo_envio, id]
-        )
+
+            await pool.query(
+                `
+                INSERT INTO tarifas (id_transportista, id_localidad, precio)
+                SELECT t.id, $2, t.costo_envio * $1
+                FROM transportistas t
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM tarifas tar
+                    WHERE tar.id_transportista = t.id
+                    AND tar.id_localidad = $2
+                )
+                `,
+                [costoNuevo, id]
+            )
+        }
 
         await pool.query("COMMIT")
 
@@ -290,17 +309,29 @@ const eliminarLocalidad = async (req, res) => {
 
 
 const exportarCSV = async (req, res) => {
+    const { localidad, codigoPostal, provincia, estado } = req.query
+
     try {
-        const result = await pool.query(`
-      SELECT  nombre,
-              codigo_postal,
-              provincia,
-              costo_envio,
-              TO_CHAR(fecha_alta,'DD/MM/YYYY') fecha_alta,
-              TO_CHAR(fecha_baja,'DD/MM/YYYY') fecha_baja,
-              case when estado is true then 'Activo' else 'Inactivo' end as estado
-      FROM localidades
-    `)
+        let query = `
+            SELECT  nombre,
+                    codigo_postal,
+                    provincia,
+                    costo_envio,
+                    TO_CHAR(fecha_alta,'DD/MM/YYYY') fecha_alta,
+                    TO_CHAR(fecha_baja,'DD/MM/YYYY') fecha_baja,
+                    case when estado is true then 'Activo' else 'Inactivo' end as estado
+            FROM localidades
+            WHERE 1=1
+        `
+        const valores = []
+        let i = 1
+
+        if (localidad) { query += ` AND nombre ILIKE $${i++}`; valores.push(`%${localidad}%`) }
+        if (codigoPostal) { query += ` AND codigo_postal ILIKE $${i++}`; valores.push(`%${codigoPostal}%`) }
+        if (provincia) { query += ` AND provincia ILIKE $${i++}`; valores.push(`%${provincia}%`) }
+        if (estado) { query += ` AND estado = $${i++}`; valores.push(estado === 'Activo') }
+
+        const result = await pool.query(query, valores)
 
         const fields = [
             { label: 'Localidad', value: 'nombre' },

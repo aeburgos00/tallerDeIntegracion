@@ -688,14 +688,14 @@ const modificarEnvio = async (req, res) => {
         WHERE id_transportista = $1
         `
 
-        const tarifa = 
+        const tarifa =
             await pool.query(
                 queryTarifa,
                 [id_transportista]
             )
-        
+
         let id_tarifa = tarifa?.rows[0]?.id || null
-        
+
         const queryUpdate = `
             UPDATE paquetes
             SET
@@ -871,6 +871,43 @@ const cambiarEstadoEnvio = async (req, res) => {
 }
 
 
+const obtenerProximoEnvioPorTransportista = async (req, res) => {
+    const { id } = req.params   // usuarios.id
+
+    try {
+        const query = `
+            SELECT
+                p.id id_envio,
+                TO_CHAR(p.fecha, 'DD/MM/YYYY') fecha_envio,
+                c.nombre_apellido cliente,
+                d.descripcion direccion,
+                l.nombre localidad
+            FROM paquetes p
+            JOIN transportistas t ON t.id = p.id_transportista
+            JOIN clientes c ON c.id = p.id_cliente
+            JOIN direcciones d ON d.id = p.id_direccion AND d.id_cliente = c.id
+            JOIN localidades l ON l.id = d.id_localidad
+            WHERE t.id_usuario = $1
+            AND p.id_estado = 1
+            ORDER BY p.fecha ASC, p.id ASC
+            LIMIT 1
+        `
+        const result = await pool.query(query, [id])
+
+        res.json({
+            ok: true,
+            data: result.rows[0] ?? null
+        })
+    }
+    catch (error) {
+        res.status(500).json({
+            ok: false,
+            error: error.message
+        })
+    }
+}
+
+
 export {
     obtenerEnvios,
     obtenerEnvioPorId,
@@ -882,5 +919,6 @@ export {
     crearEnvio,
     modificarEnvio,
     cancelarEnvio,
-    cambiarEstadoEnvio
+    cambiarEstadoEnvio,
+    obtenerProximoEnvioPorTransportista
 }

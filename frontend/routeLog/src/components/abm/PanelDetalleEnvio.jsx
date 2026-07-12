@@ -126,7 +126,7 @@ export default function PanelDetalleEnvio({
 
             <Snackbar
                 open={!!mensaje}
-                autoHideDuration={4000}
+                autoHideDuration={1500}
                 onClose={() => setMensaje("")}
             >
                 <Alert severity={error ? "error" : "success"}>

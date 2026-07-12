@@ -4,6 +4,8 @@ import {
   Skeleton,
 } from "@mui/material"
 
+import LocationOnIcon from "@mui/icons-material/LocationOn"
+
 import { useEffect, useState } from "react"
 import dayjs from "dayjs"
 import "dayjs/locale/es"
@@ -13,19 +15,20 @@ dayjs.locale("es")
 
 import useAuth from "../../hooks/useAuth"
 import cardsEnvios from "../../components/datos/dataKPIEnvios.jsx"
-import KPICardMobile from "../../components/KPICardMobile.jsx"
 import MontoDestacadoMobile from "../../components/MontoDestacadoMobile.jsx"
+import InfoIcon from "@mui/icons-material/Info"
 
 import {
   obtenerEnviosPorTransportistaId,
-  obtenerLiquidacionesPorTransportistaId
+  obtenerLiquidacionesPorTransportistaId,
+  obtenerProximoEnvio
 } from "../../services/apiTransportistas.js"
 
 export default function Inicio() {
   const { user } = useAuth()
 
   const hoy = dayjs()
-  const lunesDeEstaSemana = dayjs().weekday(0)   // mismo criterio que Liquidaciones.jsx
+  const lunesDeEstaSemana = dayjs().weekday(0)
 
   const cardPendientes = cardsEnvios.find(c => c.id === "pendientes")
   const Icono = cardPendientes?.icono
@@ -33,30 +36,27 @@ export default function Inicio() {
 
   const [loading, setLoading] = useState(true)
   const [pendientesHoy, setPendientesHoy] = useState(0)
-  const [pendientesTotal, setPendientesTotal] = useState(0)
   const [valorSemana, setValorSemana] = useState(0)
+  const [proximoEnvio, setProximoEnvio] = useState(null)
 
   useEffect(() => {
     const obtenerDatos = async () => {
       try {
         setLoading(true)
 
-        const [hoyResult, totalResult, liqResult] = await Promise.all([
+        const [hoyResult, liqResult, proximoResult] = await Promise.all([
           obtenerEnviosPorTransportistaId(user.id, { estado: 1, fechaEnvio: hoy }),
-          obtenerEnviosPorTransportistaId(user.id),
           obtenerLiquidacionesPorTransportistaId(
             user.id,
             lunesDeEstaSemana.format("YYYY-MM-DD"),
             hoy.format("YYYY-MM-DD")
-          )
+          ),
+          obtenerProximoEnvio(user.id)
         ])
 
         setPendientesHoy(hoyResult.data?.length ?? 0)
-
-        const todosLosEnvios = totalResult.data ?? []
-        setPendientesTotal(todosLosEnvios.filter(e => e.id_estado === 1).length)
-
         setValorSemana(liqResult.data?.[0]?.valor_total ?? 0)
+        setProximoEnvio(proximoResult.data ?? null)
 
       } catch (error) {
         console.error(error)
@@ -71,7 +71,52 @@ export default function Inicio() {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
 
-      {/* Bienvenida + pendientes de hoy */}
+      {/* Burbuja 1: Bienvenida */}
+      <Box sx={{
+        background: "#fff",
+        borderRadius: 3,
+        border: "1px solid #e5e7eb",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        p: 3,
+        display: "flex",
+        flexWrap: "wrap",          // ← si no entra en una línea, baja
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 0.5,
+      }}>
+        <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
+          Bienvenido {user?.nombre}
+        </Typography>
+        <Typography sx={{ fontSize: 13, color: "#6b7280", flexShrink: 0 }}>
+          {hoy.format("DD/MM/YYYY")}
+        </Typography>
+      </Box>
+
+      {/* Indicador de estado */}
+      <Box sx={{
+        background: "#fff",
+        borderRadius: 3,
+        border: "1px solid #e5e7eb",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        display: "flex",
+        p: 1.5,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 0.8,
+      }}>
+        <Box sx={{
+          width: 8,
+          height: 8,
+          borderRadius: "50%",
+          background: "#22c55e",
+          boxShadow: "0 0 0 3px #dcfce7",
+        }} />
+        <Typography sx={{ fontSize: 12, color: "#22c55e", fontWeight: 600 }}>
+          En línea
+        </Typography>
+      </Box>
+
+      {/* Burbuja 2: Resumen del día */}
       <Box sx={{
         background: "#fff",
         borderRadius: 3,
@@ -80,19 +125,9 @@ export default function Inicio() {
         p: 3,
         display: "flex",
         flexDirection: "column",
-        gap: 3,
+        gap: 2,
       }}>
-
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
-            Bienvenido {user?.nombre}
-          </Typography>
-          <Typography sx={{ fontSize: 13 }}>
-            {hoy.format("DD/MM/YYYY")}
-          </Typography>
-        </Box>
-
-        <Typography sx={{ fontSize: 13, color: "#9ca3af", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>
+        <Typography sx={{ fontSize: 13, color: "#9ca3af", fontWeight: 600, letterSpacing: 0.5 }}>
           Resumen del día
         </Typography>
 
@@ -127,6 +162,67 @@ export default function Inicio() {
         </Box>
       </Box>
 
+      {/* Burbuja 3: Próxima entrega */}
+      <Box sx={{
+        background: "#fff",
+        borderRadius: 3,
+        border: "1px solid #e5e7eb",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        p: 3,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}>
+        <Typography sx={{ fontSize: 13, color: "#9ca3af", fontWeight: 600, letterSpacing: 0.5 }}>
+          Próxima entrega
+        </Typography>
+
+        {loading ? (
+          <Skeleton variant="rounded" height={80} />
+        ) : proximoEnvio ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+
+            {/* Texto a la izquierda */}
+            <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+              <Typography sx={{ fontSize: 13, color: "#9ca3af" }}>
+                {proximoEnvio.fecha_envio}
+              </Typography>
+              <Typography sx={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>
+                {proximoEnvio.cliente}
+              </Typography>
+              <Typography sx={{ fontSize: 14, color: "#374151" }}>
+                {proximoEnvio.direccion}
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.3 }}>
+                <LocationOnIcon sx={{ fontSize: 14, color: "#9ca3af" }} />
+                <Typography sx={{ fontSize: 12, color: "#9ca3af" }}>
+                  {proximoEnvio.localidad}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Ícono a la derecha */}
+            <Box sx={{
+              width: 72,
+              height: 72,
+              borderRadius: 2,
+              border: "2px solid #9ca3af",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}>
+              <LocationOnIcon sx={{ fontSize: 36, color: "#9ca3af" }} />
+            </Box>
+
+          </Box>
+        ) : (
+          <Typography sx={{ fontSize: 14, color: "#9ca3af", textAlign: "center" }}>
+            No hay entregas pendientes
+          </Typography>
+        )}
+      </Box>
+
       {/* Total a liquidar en la semana */}
       <MontoDestacadoMobile
         etiqueta="Total a liquidar esta semana"
@@ -134,6 +230,29 @@ export default function Inicio() {
         loading={loading}
       />
 
+      {/* Aviso informativo */}
+      <Box sx={{
+        background: "#eff6ff",
+        borderRadius: 3,
+        border: "1px solid #bfdbfe",
+        p: 2,
+        display: "flex",
+        gap: 1.5,
+        alignItems: "flex-start",
+      }}>
+        <InfoIcon sx={{ fontSize: 18, color: "#3b82f6", flexShrink: 0, mt: 0.2 }} />
+        <Box>
+          <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1e40af", mb: 0.5 }}>
+            Consejo
+          </Typography>
+          <Typography sx={{ fontSize: 12, color: "#1e40af", lineHeight: 1.5 }}>
+            Planifica tus rutas para optimizar tiempos.{" "}
+
+          </Typography>
+        </Box>
+      </Box>
+
     </Box>
+
   )
 }
