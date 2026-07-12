@@ -43,9 +43,8 @@ export default function FiltroLiquidaciones({
     sx={{
         display:"grid",
         gridTemplateColumns:{
-            xs: "1fr",
-            sm:"1fr 1fr",
-            lg:"180px 130px 150px 150px"
+            xs: "220px",
+            lg:"220px 220px"
         },
         gap:2,
         alignItems:"center",
@@ -65,7 +64,7 @@ export default function FiltroLiquidaciones({
             {transportistas.map((item) => (
                 <MenuItem
                     key={item.id}
-                    value={item.nombre}
+                    value={item.id}
                 >
                     {item.nombre}
                 </MenuItem>
@@ -81,8 +80,8 @@ export default function FiltroLiquidaciones({
         size="small"
         >
             <MenuItem value="">Todos</MenuItem>
-            <MenuItem value="true">Cerrada</MenuItem>
-            <MenuItem value="false">Abierta</MenuItem>
+            <MenuItem value="ABIERTA">Abierta</MenuItem>
+            <MenuItem value="CERRADA">Cerrada</MenuItem>
         </TextField>
  
         <TextField
