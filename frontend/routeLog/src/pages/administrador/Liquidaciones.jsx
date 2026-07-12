@@ -58,10 +58,7 @@ export default function Liquidaciones() {
     obtenerDatos()
   }, [fechaDesde, fechaHasta])
 
-  const cards = cardLiquidaciones.map(card => {
-    const esMonetario = card.id === "valor_total" || card.id === "pago_realizado" || card.id === "pago_pendiente"
- 
-    return {
+  const cards = cardLiquidaciones.map(card => ({
       ...card,
       cantidad: card.id === "total_liquidado"?
               Number(liqTotales[card.id] || 0).toLocaleString("es-AR", {
@@ -73,7 +70,7 @@ export default function Liquidaciones() {
               :
               Number(liqTotales[card.id] || 0)
     }
-  })
+  ))
 
   const [filtros, setFiltros] = useState({
     transportista: "",
@@ -110,8 +107,8 @@ export default function Liquidaciones() {
   const handleExportar = async () => {
     try {
       await exportarLiquidacionesCSV(
-        fechaDesde ? fechaDesde.format("YYYY-MM-DD"), 
-        fechaHasta ? fechaHasta.format("YYYY-MM-DD"), 
+        fechaDesde.format("YYYY-MM-DD"),
+        fechaHasta.format("YYYY-MM-DD"),
         filtrosAplicados
       )
     } catch (error){
