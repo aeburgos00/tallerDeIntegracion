@@ -539,7 +539,7 @@ export const exportarEnviosCSV = async (
 
 //==================== LIQUIDACIONES ====================
 
-export const obtenerLiquidacionesListado = async (
+export const obtenerLiquidaciones = async (
   fecha_desde,
   fecha_hasta,
   filtros
@@ -566,7 +566,7 @@ export const obtenerLiquidacionesListado = async (
   });
  
   const response = await fetch(
-    `${API_URL}/liquidaciones/listado?${params.toString()}`
+    `${API_URL}/liquidaciones?${params.toString()}`
       )
   return response.json()
 }
