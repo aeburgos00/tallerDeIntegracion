@@ -1,21 +1,21 @@
 import express from 'express'
 import {
+    obtenerLiquidaciones,
     obtenerLiquidacionesTotales,
     obtenerLiquidacionesPorTransportista,
     obtenerLiquidacionesDashboard,
-    obtenerHistorialLiquidacionesPorTransportista
+    obtenerHistorialLiquidacionesPorTransportista,
+    exportarCSV
 } from '../controllers/liquidaciones.controller.js'
 
 const router = express.Router();
 
-router.get('/', obtenerLiquidacionesTotales)
-
+router.get('/', obtenerLiquidaciones)
+router.get('/exportar-csv', exportarCSV)
 router.get('/totales', obtenerLiquidacionesTotales)
-
 router.get('/dashboard', obtenerLiquidacionesDashboard)
 
 router.get('/transportista/:id', obtenerLiquidacionesPorTransportista)
-
 router.get('/historial/transportista/:id', obtenerHistorialLiquidacionesPorTransportista)
 
 export default router

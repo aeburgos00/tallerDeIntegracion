@@ -1,15 +1,13 @@
-import TotalEnviosIcon from '@mui/icons-material/Inventory';
-import ValorTotalIcon from '@mui/icons-material/MonetizationOnOutlined';
-import EnviosLiquidadosIcon from "@mui/icons-material/LocalShipping";
-import ValorLiquidadoIcon from '@mui/icons-material/PriceCheckOutlined';
-import PorcentajeIcon from '@mui/icons-material/Percent';
+import TotalLiqIcon from '@mui/icons-material/ReceiptLong';
+import LiqCerradasIcon from '@mui/icons-material/Task';
+import LiqAbiertasIcon from '@mui/icons-material/RequestPage';
+import TransporistasIcon from "@mui/icons-material/LocalShipping";
 
-const cardLiquidaciones = [
-{id:"total_envios", icono: TotalEnviosIcon, titulo: "Total envíos", color:"#3b82f6"},
-{id:"valor_total", icono: ValorTotalIcon, titulo: "Valor total de envíos", color:"#3b82f6"},
-{id:"envios_liquidados", icono: EnviosLiquidadosIcon, titulo: "Envíos liquidados", color:"#65a30d", colorTorta:"#65a30d"},
-{id:"valor_liquidado", icono: ValorLiquidadoIcon, titulo: "Valor liquidado", color:"#65a30d", colorTorta:"#65a30d"},
-{id:"pct_paquetes_liquidados", icono: PorcentajeIcon, titulo: "% Envíos liquidados", color:"#f59e0b"},
+export const cardLiquidaciones = [
+{id:"total_liquidado", icono: TotalLiqIcon, titulo: "Total liquidado", color:"#3b82f6"},
+{id:"liq_cerradas", icono: LiqCerradasIcon, titulo: "Liquidaciones cerradas", color:"#65a30d"},
+{id:"liq_abiertas", icono: LiqAbiertasIcon, titulo: "Liquidaciones abiertas", color:"#ef4444"},
+{id:"transportistas_en_periodo", icono: TransporistasIcon, titulo: "Transportistas en periodo", color:"#713dfe", }
 ];
 
 export default cardLiquidaciones;

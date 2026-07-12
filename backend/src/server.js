@@ -49,8 +49,10 @@ app.use('/envios/transportistas', envios)
 app.use('/envios/totales', envios)
 app.use('/envios/recientes', envios)
 
-app.use('/liquidaciones', liquidaciones)
-app.use('/liquidaciones/totales', liquidaciones)
+app.use('/liquidaciones',liquidaciones)
+app.use('/liquidaciones/dashboard', liquidaciones)
+app.use('/liquidaciones/totales',liquidaciones)
+app.use('/liquidaciones/transportista',liquidaciones)
 
 app.use('/estados', estados)
 
@@ -58,7 +60,6 @@ app.use('/clientes', clientes)
 
 app.use('/direcciones', direcciones)
 app.use('/direcciones/cliente/localidad', direcciones)
-
 app.use('/tarifas', tarifas)
 app.use('/tarifas/transportista/localidad', tarifas)
 
@@ -70,4 +71,3 @@ app.use('/provincias', provincias)
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`)
 })
-

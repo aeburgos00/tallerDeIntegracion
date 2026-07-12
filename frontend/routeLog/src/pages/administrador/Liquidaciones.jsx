@@ -1,18 +1,30 @@
 import {
   Box,
+  Button,
   Skeleton,
+  Typography,
 } from "@mui/material"
 
-import { useEffect, useState } from 'react'
+import DescargaIcon from '@mui/icons-material/ArrowDownward';
 
-import TableResumenCard from "../../components/TableResumenCard.jsx"
+import TablaPaginacionContenedor from "../../components/TablaPaginacionContenedor.jsx"
+import TablaLiquidaciones from "../../components/tablasContenedor/TablaLiquidaciones.jsx"
 import SummaryCard from "../../components/SummaryCard"
 
-import cardLiquidaciones from "../../components/datos/dataKPILiquidaciones.jsx";
+import FiltrosGenerico from "../../components/FiltrosGenerico.jsx"
+import FiltroLiquidaciones from "../../components/filtros/FiltroLiquidaciones.jsx"
 
-import useDateFilter from '../../hooks/useDateFilter.js'
+import {cardLiquidaciones} from "../../components/datos/dataKPILiquidaciones.jsx";
 
-import { obtenerLiquidacionesTotales } from "../../services/api.js";
+import { 
+  obtenerLiquidacionesTotales, 
+  exportarLiquidacionesCSV
+} from "../../services/api.js"
+
+
+import { useEffect, useState } from "react"
+
+import useDateFilter from "../../hooks/useDateFilter"
 
 export default function Liquidaciones() {
   const [loadingKPI, setLoadingKPI] = useState(true)
@@ -28,13 +40,13 @@ export default function Liquidaciones() {
     const obtenerDatos = async () => {
       try {
         setLoadingKPI(true)
-
-        const liqTotResult = await obtenerLiquidacionesTotales(
-          fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
-          fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
-        )
         
-        setLiqTotales(liqTotResult.data[0])
+        const liqTotResult = await obtenerLiquidacionesTotales(
+          fechaDesde ? fechaDesde.format("YYYY-MM-DD") : null,
+          fechaHasta ? fechaHasta.format("YYYY-MM-DD") : null
+        )
+
+        setLiqTotales(liqTotResult.data?.[0] || {})
 
       } catch (error) {
         console.error(error)
@@ -42,15 +54,16 @@ export default function Liquidaciones() {
         setLoadingKPI(false)
       }
     }
-    obtenerDatos()
-  }, [fechaDesde,fechaHasta])
 
-  const cards = cardLiquidaciones.map(card => ({
-    ...card,
-    cantidad: card.id === "pct_paquetes_liquidados"?
-              Number(liqTotales[card.id] || 0) + "%"
-              :
-              card.id === "valor_total" || card.id === "valor_liquidado"?
+    obtenerDatos()
+  }, [fechaDesde, fechaHasta])
+
+  const cards = cardLiquidaciones.map(card => {
+    const esMonetario = card.id === "valor_total" || card.id === "pago_realizado" || card.id === "pago_pendiente"
+ 
+    return {
+      ...card,
+      cantidad: card.id === "total_liquidado"?
               Number(liqTotales[card.id] || 0).toLocaleString("es-AR", {
                 style: "currency",
                 currency: "ARS",
@@ -59,10 +72,55 @@ export default function Liquidaciones() {
               })
               :
               Number(liqTotales[card.id] || 0)
-  }))
+    }
+  })
+
+  const [filtros, setFiltros] = useState({
+    transportista: "",
+    estado: "",
+    montoDesde: "",
+    montoHasta: ""
+  })
+
+  const filtrosVacios = {
+    transportista: "",
+    estado: "",
+    montoDesde: "",
+    montoHasta: ""
+  }
+ 
+  const [filtrosAplicados, setFiltrosAplicados] = useState(filtros)
+  
+  const [pagina, setPagina] = useState(1)
+  const [filasPorPagina, setFilasPorPagina] = useState(10)
+  const [totalPaginas, setTotalPaginas] = useState(1)
+  const [liquidacionesMostradas, setLiquidacionesMostradas] = useState(0)
+  
+  const handleFilter = () => {
+    setPagina(1)
+    setFiltrosAplicados({ ...filtros })
+  }
+
+  const handleClear = () => {
+    setFiltros({ ...filtrosVacios })
+    setFiltrosAplicados({ ...filtrosVacios })
+    setPagina(1)
+  }
+
+  const handleExportar = async () => {
+    try {
+      await exportarLiquidacionesCSV(
+        fechaDesde ? fechaDesde.format("YYYY-MM-DD"), 
+        fechaHasta ? fechaHasta.format("YYYY-MM-DD"), 
+        filtrosAplicados
+      )
+    } catch (error){
+      console.error(error)
+    } 
+  }
 
   return (
-    //Contenedor total
+
     <Box
     sx={{
       display:"flex",
@@ -70,81 +128,116 @@ export default function Liquidaciones() {
       gap: 2
     }}
     >
-      {/* KPI Liquidaciones */}
-      <Box 
-      sx={{
-        display:"grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "1fr 1fr",
-          lg: "repeat(5, 1fr)"
-        },
-        gap:2
-      }}
+      {/* KPI liquidaciones */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "1fr 1fr",
+            lg: "repeat(4, 1fr)"
+            },
+          gap: 2
+        }}
       >
         {
-        loadingKPI?
-        Array.from({ length: 5 }).map((_, index) => (
-          <Skeleton
-            key={index}
-            variant="rounded"
-            height={112}
-          />
-        ))
-        :
-        cards.map((card, index) => (
-          <SummaryCard
-            key={index}
-            titulo={card.titulo}
-            cantidad={card.cantidad}
-            descripcion={card.descripcion}
-            icono={card.icono}
-            color={card.color}
-            height={112}
-          />
-        ))
+          loadingKPI ?
+            Array.from({ length: cards.length }).map((_, index) => (
+              <Skeleton
+                key={index}
+                variant="rounded"
+                height={112}
+              />
+            ))
+          :
+            cards.map((card, index) => (
+              <SummaryCard 
+                key={index}
+                titulo={card.titulo}
+                cantidad={card.cantidad}
+                descripcion={card.descripcion}
+                icono={card.icono}
+                color={card.color}
+                height={112}
+              />
+            ))
         }
-        
       </Box>
-
       {/* Filtros */}
-      <Box sx={{background:"#ff2233"}}>
-      <h2>
-        Filtros
-      </h2>
-      </Box>
+      <FiltrosGenerico
+          onFilter={handleFilter}
+          onClear={handleClear}
+       >
+          <FiltroLiquidaciones
+            filtros={filtros}
+            setFiltros={setFiltros}
+          />
+      </FiltrosGenerico>
 
+      {/* Mostrando x liquidaciones... */}
+      {/* Boton Exportar CSV */}
 
-      {/* Grilla */}
-      <Box>
-        {/* Grilla */}
-        <TableResumenCard></TableResumenCard>
-        <h3>Grilla que muestre todas las liquidaciones</h3>
-        {/* Filtros y paginacion */}
-        <Box sx={{
-          display:"grid",
-          gridTemplateColumns: "8fr 4fr",
-          gap:2
-        }}
-        >
-          <h3>Filas x pag</h3>
-          <Box
+      <Box sx={{
+        display:"flex",
+        justifyContent:"space-between",
+        gap:2,
+        alignItems:"center",
+      }}
+      >
+      <Typography sx={{
+        color:"#777"
+      }}>
+        Mostrando {liquidacionesMostradas} liquidaciones
+      </Typography>
+
+        <Button 
+          variant="outlined"
+          onClick={handleExportar}
+          startIcon={<DescargaIcon />}
+          size="small"
           sx={{
-            display:"flex",
-            gap:4,
-          }}
-          >
-            <p>Pagina 1 de 3</p>
-            <p> ant </p>
-            <p> 1 </p>
-            <p> 2 </p>
-            <p> 3 </p>
-            <p> sig </p>
-          </Box>
-        </Box>
+            borderColor:"#65a30d",
+            color:"#65a30d",
+            background:"#fff",
+            borderRadius:2, 
+            textTransform:"none",
+            whiteSpace:"nowrap",
+            px:1.5,
+            height:36, 
+            fontsize:13
+          }}>
+            Exportar CSV
+        </Button>
       </Box>
-      <h3>Grilla que muestre todas las liquidaciones por transportista y semana</h3>
-
+      
+      {/* Grilla de Liquidaciones */}
+      <Box
+        sx={{
+          backgroundColor:"#fff",
+          borderRadius:2,
+          border:"1px solid #e5e7eb",
+          boxShadow:
+          "0 1px 2px rgba(0,0,0,0.04)"
+        }}>
+        <TablaPaginacionContenedor
+          pagina={pagina}
+          filasPorPagina={filasPorPagina}
+          totalPaginas={totalPaginas}
+          onPaginaChange={setPagina}
+          onFilasPorPaginaChange={(valor) => {
+            setPagina(1)
+            setFilasPorPagina(valor)
+          }}
+        >
+          <TablaLiquidaciones
+            filtros={filtrosAplicados}
+            pagina={pagina}
+            filasPorPagina={filasPorPagina}
+            cantLiquidaciones={setLiquidacionesMostradas}
+            onTotalPaginasChange={setTotalPaginas}
+          />
+        </TablaPaginacionContenedor>
+      </Box>
     </Box>
   )
 }
