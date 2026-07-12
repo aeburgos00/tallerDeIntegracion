@@ -99,24 +99,6 @@ export default function SummaryCard({
           {cantidad}
         </Typography>
 
-        {/* VALOR MONETARIO */}
-        <Typography
-        sx={{
-          fontSize: {
-            xs: 24,
-            md: 24
-          },
-          fontWeight: 700,
-          lineHeight: 1.1,
-          color: "#111827",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis"
-        }}
-        >
-          {valor}
-        </Typography>
-
         {/* DESCRIPCIÓN */}
          {descripcion && (
 
