@@ -11,7 +11,7 @@ import {
  
 import { useEffect, useState } from 'react'
  
-import { obtenerLiquidacionesListado } from '../../services/api.js'
+import { obtenerLiquidaciones } from '../../services/api.js'
 import useDateFilter from '../../hooks/useDateFilter.js'
  
 export default function TablaLiquidaciones({
@@ -31,7 +31,7 @@ export default function TablaLiquidaciones({
             try {
                 setLoading(true)
  
-                const result = await obtenerLiquidacionesListado(
+                const result = await obtenerLiquidaciones(
                     fechaDesde ? fechaDesde.format("YYYY-MM-DD") : null,
                     fechaHasta ? fechaHasta.format("YYYY-MM-DD") : null,
                     filtros
@@ -74,29 +74,23 @@ export default function TablaLiquidaciones({
         <TableContainer 
         sx={{
             width: "100%",
-            maxHeight: 500,
-            overflowY: "auto",
             overflowX: "auto",
         }}>
             <Table size="small"
-            stickyHeader
             sx={{
                 minWidth: 900
             }}>
-                
-                {/* HEADER */}
                 <TableHead sx={{ backgroundColor:"#F0EEE8" }}> 
                     <TableRow>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Transportista</TableCell>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Semana</TableCell>
-                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Cantidad de Envíos</TableCell>
-                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Cierre</TableCell>
+                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Cant. envíos</TableCell>
+                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Monto total</TableCell>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Estado</TableCell>
-                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Monto</TableCell>
+                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Cierre</TableCell>
                     </TableRow>
                 </TableHead>
  
-                {/* BODY */}
                 <TableBody sx={{ backgroundColor:"#fff" }}>
                 {
                 loading ? 
@@ -119,18 +113,18 @@ export default function TablaLiquidaciones({
                 ):
                 liquidacionesPagina.map((item) => (
                     <TableRow key={item.id} hover>
-                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.transportista} ({item.usuario}) </TableCell>
-                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.fecha_desde?.slice(0, 5)} al {item.fecha_hasta} </TableCell>
-                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.cantidad_paquetes} </TableCell>
-                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.fecha_cierre ? item.fecha_cierre : "-"} </TableCell>
-                        <TableCell align="center">
+                        <TableCell sx={{whiteSpace: "nowrap"}}>{item.transportista}</TableCell>
+                        <TableCell sx={{whiteSpace: "nowrap"}} align="center" >{item.semana}</TableCell>
+                        <TableCell sx={{textWrap:'nowrap'}} align="center">{item.cant_envios}</TableCell>
+                        <TableCell sx={{textWrap:'nowrap'}} align="center">$ {Number(item.monto_total || 0).toLocaleString('es-AR')} </TableCell>
+                        <TableCell sx={{textWrap:'nowrap'}} align="center">
                             <Chip
-                                label={item.cerrada ? "Cerrada" : "Abierta"}
-                                color={item.cerrada ? "success" : "default"}
+                                label={item.cerrada === 'CERRADA' ? "Cerrada" : "Abierta"}
+                                color={item.cerrada === 'CERRADA' ? "success" : "default"}
                                 size="small"
                             />
                         </TableCell>
-                        <TableCell align="center" sx={{ whiteSpace: "nowrap"}}> $ {Number(item.monto_total || 0).toLocaleString('es-AR')} </TableCell>
+                        <TableCell sx={{textWrap:'nowrap'}} align="center">{item.fecha_cierre}</TableCell>    
                     </TableRow>
                 ))
                 }
