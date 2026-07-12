@@ -1,58 +1,35 @@
 import pool from '../config/db.js'
 import { generarCSV} from '../utils/exportadorCSV.js'
 
-/** Consulta default a la tabla liquidaciones */
-export  const obtenerLiquidaciones = async (req, res) => {
-  try 
-  {
-    const result = await pool.query(
-      `SELECT 
-       id, fecha_alta, monto_total, cantidad_paquetes
-       FROM liquidaciones
-       ORDER BY fecha_alta DESC
-       `
-    )
-     res.json({
-      ok: true,
-      data: result.rows
-    })
-  } 
-  catch (error)
-  {
-    res.status(500).json({
-      ok: false,
-      error: error.message
-    })
-  }
-}
-
-/** Listado detallado de liquidaciones por envío, con filtros dinámicos.*/
-export const obtenerLiquidacionesListado = async (req, res) => {
+export const obtenerLiquidaciones = async (req, res) => {
   const {
-    desde,          // fecha envío desde (rango global)
-    hasta,          // fecha envío hasta (rango global de la pagina)
+    desde,
+    hasta,
     transportista,
-    estado,      
+    estado,
     montoDesde,
     montoHasta
   } = req.query
  
   try {
     let query = `
-      SELECT  
-          l.id,
-          u.nombre_apellido AS transportista,
-          u.usuario,
-          l.cantidad_paquetes, 
-          TO_CHAR(l.fecha_desde, 'DD/MM/YYYY') AS fecha_desde, 
-          TO_CHAR(l.fecha_hasta, 'DD/MM/YYYY') AS fecha_hasta,
-          TO_CHAR(l.fecha_cierre, 'DD/MM/YYYY') AS fecha_cierre, 
-          cerrada,
-          monto_total
-        FROM liquidaciones l
-        JOIN transportistas t ON t.id = l.id_transportista
-        JOIN usuarios u ON u.id = t.id_usuario
-        WHERE 1 = 1 
+      select  
+        u.nombre_apellido || ' (' || u.usuario || ')' "transportista",
+        TO_CHAR(liq.fecha_desde,'DD/MM/YYYY') || '-' || TO_CHAR(liq.fecha_hasta,'DD/MM/YYYY')  "semana",
+        liq.cantidad_paquetes "cant_envios",
+        liq.monto_total "monto_total",
+        CASE WHEN liq.cerrada is true
+            THEN 'Cerrada'
+            ELSE 'Abierta'
+        END "estado",
+        CASE WHEN liq.fecha_cierre is null
+            THEN '-'
+            ELSE TO_CHAR(liq.fecha_cierre,'DD/MM/YYYY')
+        END "fecha_cierre"
+      from  liquidaciones liq
+      join  usuarios u on u.id = tr.id_usuario
+      join  transportistas tr on liq.id_transportista = tr.id
+      where 1=1
     `
     const parametros = []
  
@@ -63,28 +40,27 @@ export const obtenerLiquidacionesListado = async (req, res) => {
       query += `
         AND l.fecha_desde <= $${parametros.length} 
         AND l.fecha_hasta >= $${parametros.length - 1} 
-      `
-      /** Que la fecha seleccionada se encuentre en el rango
-       * fecha_desde sea menor o igual a la fecha hasta seleccionada (filtro) => parametros.length
-       * fecha_hasta sea mayor o igual a la fecha desde seleccionada (filtro) => parametros.length - 1
-        */
+      `;
     }
-      
-
 
     if (transportista) {
-      parametros.push(`%${transportista.toUpperCase()}%`)
- 
+      parametros.push(transportista);
+
       query += `
-        AND upper(u.nombre_apellido) LIKE $${parametros.length}
-      `
+          AND liq.id_transportista = $${parametros.length}
+      `;
     }
  
-    if (estado === 'true' || estado === 'false') {
-      parametros.push(estado === 'true')
+    if (estado) {
+      parametros.push(estado);
+
       query += `
-        AND l.cerrada = $${parametros.length}
-      `
+          AND $${parametros.length} = 
+          CASE  WHEN liq.cerrada is true
+                THEN 'CERRADA'
+                ELSE 'ABIERTA'
+          END
+      `;
     }
  
     if (montoDesde) {
@@ -104,9 +80,9 @@ export const obtenerLiquidacionesListado = async (req, res) => {
     }
  
     query += `
-      ORDER BY l.fecha_desde ASC
+      ORDER BY l.fecha_desde DESC
     `
- 
+    
     const result = await pool.query(query, parametros)
  
     res.json({
@@ -181,8 +157,6 @@ export const obtenerLiquidacionesDashboard = async (req, res) => {
     }
 }
 
-/** Obtener liquidaciones de un transportista puntual */
-//Aca busca y muestra el total a liquidar, sin importar si fue cerrada o no la liq
 export const obtenerLiquidacionesPorTransportista = async (req, res) => {
     const { id } = req.params
     const { desde, hasta } = req.query
@@ -212,7 +186,6 @@ export const obtenerLiquidacionesPorTransportista = async (req, res) => {
     }
 }
 
-/** Todos los transportistas juntos (suma) */
 export const obtenerLiquidacionesTotales = async (req, res) => {
   let {
     desde,
@@ -225,22 +198,28 @@ export const obtenerLiquidacionesTotales = async (req, res) => {
 
   try {
     const query = `
-      SELECT  
-          SUM(monto_total) as valor_total,
-          SUM(CASE WHEN cerrada = true THEN monto_total ELSE 0 END) AS pago_realizado,
-          SUM(CASE WHEN cerrada = false THEN monto_total ELSE 0 END) AS pago_pendiente,
-          ((COUNT(CASE WHEN cerrada = true THEN 1 END) * 100) / NULLIF(COUNT(*), 0) ) AS pct_paquetes_liquidados,
-          COUNT(*) AS cantidad_liquidaciones
-        FROM liquidaciones
+      select
+            coalesce(sum(liq.monto_total),0) as total_liquidado,
+            coalesce(sum(
+                case 
+                    when liq.cerrada is true
+                    then 1
+                    else 0
+                end
+                ),0 ) as liq_cerradas,
+            coalesce(sum(
+                case 
+                    when liq.cerrada is false
+                    then 1
+                    else 0
+                end
+                ),0) as liq_abiertas,
+            coalesce(count(distinct liq.id_transportista), 0) as transportistas_en_periodo
+            from liquidaciones liq
         WHERE ($1::date IS NULL OR fecha_hasta >= $1::date)
           AND ($2::date IS NULL OR fecha_desde <= $2::date)
     `
-    /** $1 es desde, $2 es hasta
-     * fecha_hasta debe ser mayor o igual a la fecha desde
-     * fecha_desde debe ser menor o igual a la fecha hasta 
-     * Esto para que lo que está dentro de los KPI coincida con lo que se filtra
-     */
-
+    
     const result = await pool.query(
       query,
       [desde, hasta]
@@ -270,48 +249,57 @@ export const exportarCSV = async (req, res) => {
   } = req.query
 
   try {
-    let query =  `
-      SELECT 
-          u.nombre_apellido AS transportista, 
-          u.usuario,
-          l.cantidad_paquetes,
-          TO_CHAR (l.fecha_desde, 'DD/MM/YYYY') AS fecha_desde,
-          TO_CHAR (l.fecha_hasta, 'DD/MM/YYYY') AS fecha_hasta,
-          TO_CHAR (l.fecha_cierre, 'DD/MM/YYYY') AS fecha_cierre,
-          l.cerrada, 
-          l.monto_total
-        FROM liquidaciones l
-        JOIN transportistas t ON t.id = l.id_transportista
-        JOIN usuarios u ON u.id = t.id_usuario
-        WHERE 1=1
+    let query = `
+      select  
+        u.nombre_apellido || ' (' || u.usuario || ')' "transportista",
+        TO_CHAR(liq.fecha_desde,'DD/MM/YYYY') || '-' || TO_CHAR(liq.fecha_hasta,'DD/MM/YYYY')  "semana",
+        liq.cantidad_paquetes "cant_envios",
+        liq.monto_total "monto_total",
+        CASE WHEN liq.cerrada is true
+            THEN 'Cerrada'
+            ELSE 'Abierta'
+        END "estado",
+        CASE WHEN liq.fecha_cierre is null
+            THEN '-'
+            ELSE TO_CHAR(liq.fecha_cierre,'DD/MM/YYYY')
+        END "fecha_cierre"
+      from  liquidaciones liq
+      join  usuarios u on u.id = tr.id_usuario
+      join  transportistas tr on liq.id_transportista = tr.id
+      where 1=1
     `
     const parametros = []
-
-    if(desde && hasta){
+ 
+    if (desde && hasta) {
       parametros.push(desde)
       parametros.push(hasta)
-
+ 
       query += `
-        AND l.fecha_desde <= $${parametros.length}
-        AND l.fecha_hasta >= $${parametros.length - 1}
-      `
+        AND l.fecha_desde <= $${parametros.length} 
+        AND l.fecha_hasta >= $${parametros.length - 1} 
+      `;
     }
 
-    if(transportista) {
-      parametros.push(`%${transportista.toUpperCase()}%`)
+    if (transportista) {
+      parametros.push(transportista);
 
       query += `
-        AND upper(u.nombre_apellido) LIKE $${parametros.length}
-      `
+          AND liq.id_transportista = $${parametros.length}
+      `;
     }
+ 
+    if (estado) {
+      parametros.push(estado);
 
-    if (estado === 'true' || estado === 'false') {
-      parametros.push(estado === 'true')
       query += `
-        AND l.cerrada = $${parametros.length}
-      `
+          AND $${parametros.length} = 
+          CASE  WHEN liq.cerrada is true
+                THEN 'CERRADA'
+                ELSE 'ABIERTA'
+          END
+      `;
     }
-
+ 
     if (montoDesde) {
       parametros.push(Number(montoDesde))
  
@@ -327,30 +315,28 @@ export const exportarCSV = async (req, res) => {
         AND l.monto_total <= $${parametros.length}
       `
     }
-
+ 
     query += `
-      ORDER BY l.fecha_desde ASC
+      ORDER BY l.fecha_desde DESC
     `
 
     const result = await pool.query(query, parametros)
 
     const fields = [
-      {label : 'Transportista', value: 'transportista'}, 
-      { label: 'Semana Desde', value: 'fecha_desde' },
-      { label: 'Semana Hasta', value: 'fecha_hasta' },
-      {label : 'Cantidad de Envíos', value: 'cantidad_paquetes'},
-      { label: 'Fecha Cierre', value: 'fecha_cierre' },
+      { label: 'Transportista', value: 'transportista' },
+      { label: 'Semana', value: 'semana' },
+      { label: 'Cant. envíos', value: 'cant_envios' },
+      { label: 'Monto total', value: 'monto_total' },
       { label: 'Estado', value: 'estado' },
-      { label: 'Monto', value: 'monto_total' }
+      { label: 'Fecha cierre', value: 'fecha_cierre' }
     ]
 
     const datosCSV = result.rows.map(item => ({
       ...item, 
-      transportista: item.usuario ? `${item.transportista} (${item.usuario})` : item.transportista,
-      estado: item.cerrada ? 'Cerrada' : 'Abierta', 
       monto_total: Number(item.monto_total || 0).toLocaleString('es-AR', {
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2})
+        maximumFractionDigits: 2
+      })
   }))
 
   const csv = generarCSV(datosCSV, fields)
