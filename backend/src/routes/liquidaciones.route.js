@@ -1,7 +1,6 @@
 import express from 'express'
 import {
     obtenerLiquidaciones,
-    obtenerLiquidacionesListado,
     obtenerLiquidacionesTotales,
     obtenerLiquidacionesPorTransportista,
     obtenerLiquidacionesDashboard,
@@ -13,11 +12,10 @@ const router = express.Router();
 
 router.get('/', obtenerLiquidaciones)
 router.get('/exportar-csv', exportarCSV)
-router.get('/listado', obtenerLiquidacionesListado)
 router.get('/totales', obtenerLiquidacionesTotales)
 router.get('/dashboard', obtenerLiquidacionesDashboard)
-router.get('/transportista/:id', obtenerLiquidacionesPorTransportista)
 
+router.get('/transportista/:id', obtenerLiquidacionesPorTransportista)
 router.get('/historial/transportista/:id', obtenerHistorialLiquidacionesPorTransportista)
 
 export default router
