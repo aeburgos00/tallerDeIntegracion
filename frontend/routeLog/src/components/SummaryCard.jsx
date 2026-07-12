@@ -8,7 +8,6 @@ export default function SummaryCard({
   //CONTENIDO
   titulo,
   cantidad,
-  valor,
   descripcion,
   //VISUAL
   icono,
