@@ -1,12 +1,11 @@
 import {
   Box,
+  Button,
   Skeleton,
-  FormControl, 
-  InputLabel, 
-  Select, 
-  MenuItem,
   Typography,
 } from "@mui/material"
+
+import DescargaIcon from '@mui/icons-material/ArrowDownward';
 
 import TablaPaginacionContenedor from "../../components/TablaPaginacionContenedor.jsx"
 import TablaLiquidaciones from "../../components/tablasContenedor/TablaLiquidaciones.jsx"
@@ -15,10 +14,11 @@ import SummaryCard from "../../components/SummaryCard"
 import FiltrosGenerico from "../../components/FiltrosGenerico.jsx"
 import FiltroLiquidaciones from "../../components/filtros/FiltroLiquidaciones.jsx"
 
-import {cardsLiquidacionesPagLiq} from "../../components/datos/dataKPILiquidaciones.jsx";
+import {cardLiquidaciones} from "../../components/datos/dataKPILiquidaciones.jsx";
 
 import { 
-  obtenerLiquidacionesTotalesAdmin, 
+  obtenerLiquidacionesTotales, 
+  exportarLiquidacionesCSV
 } from "../../services/api.js"
 
 
@@ -41,7 +41,7 @@ export default function Liquidaciones() {
       try {
         setLoadingKPI(true)
         
-        const liqTotResult = await obtenerLiquidacionesTotalesAdmin(
+        const liqTotResult = await obtenerLiquidacionesTotales(
           fechaDesde ? fechaDesde.format("YYYY-MM-DD") : null,
           fechaHasta ? fechaHasta.format("YYYY-MM-DD") : null
         )
@@ -58,7 +58,7 @@ export default function Liquidaciones() {
     obtenerDatos()
   }, [fechaDesde, fechaHasta])
 
-  const cards = cardsLiquidacionesPagLiq.map(card => {
+  const cards = cardLiquidaciones.map(card => {
     const esMonetario = card.id === "valor_total" || card.id === "pago_realizado" || card.id === "pago_pendiente"
  
     return {
@@ -83,7 +83,6 @@ export default function Liquidaciones() {
   })
 
   const [filtros, setFiltros] = useState({
-    fecha_alta: null,
     transportista: "",
     estado: "",
     montoDesde: "",
@@ -91,7 +90,6 @@ export default function Liquidaciones() {
   })
 
   const filtrosVacios = {
-    fecha_alta: null,
     transportista: "",
     estado: "",
     montoDesde: "",
@@ -110,7 +108,6 @@ export default function Liquidaciones() {
     setPagina(1)
     setFiltrosAplicados({ 
       ...filtros, 
-    fecha_alta: filtros.fecha_alta ? filtros.fecha_alta.format("YYYY-MM-DD") : null 
   })
   }
 
@@ -118,6 +115,18 @@ export default function Liquidaciones() {
     setFiltros({ ...filtrosVacios })
     setFiltrosAplicados({ ...filtrosVacios })
     setPagina(1)
+  }
+
+  const handleExportar = async () => {
+    try {
+      await exportarLiquidacionesCSV(
+        fechaDesde ? fechaDesde.format("YYYY-MM-DD") : null, 
+        fechaHasta ? fechaHasta.format("YYYY-MM-DD") : null, 
+        filtrosAplicados
+      )
+    } catch (error){
+      console.error(error)
+    } 
   }
 
   return (
@@ -176,13 +185,42 @@ export default function Liquidaciones() {
           />
       </FiltrosGenerico>
 
-      {/* Mostrado... */}
+      {/* Mostrando x liquidaciones... */}
+      {/* Boton Exportar CSV */}
+
+      <Box sx={{
+        display:"flex",
+        justifyContent:"space-between",
+        gap:2,
+        alignItems:"center",
+      }}
+      >
       <Typography sx={{
         color:"#777"
       }}>
         Mostrando {liquidacionesMostradas} liquidaciones
       </Typography>
 
+        <Button 
+          variant="outlined"
+          onClick={handleExportar}
+          startIcon={<DescargaIcon />}
+          size="small"
+          sx={{
+            borderColor:"#65a30d",
+            color:"#65a30d",
+            background:"#fff",
+            borderRadius:2, 
+            textTransform:"none",
+            whiteSpace:"nowrap",
+            px:1.5,
+            height:36, 
+            fontsize:13
+          }}>
+            Exportar CSV
+        </Button>
+      </Box>
+      
       {/* Grilla de Todas las Liquidaciones */}
       <Box
         sx={{
@@ -192,10 +230,6 @@ export default function Liquidaciones() {
           boxShadow:
           "0 1px 2px rgba(0,0,0,0.04)"
         }}>
-          {/**
-        <TableResumenCard></TableResumenCard>
-        <h3>Grilla que muestre todas las liquidaciones</h3>  
-        */}
         <TablaPaginacionContenedor
           pagina={pagina}
           filasPorPagina={filasPorPagina}
@@ -215,9 +249,6 @@ export default function Liquidaciones() {
           />
         </TablaPaginacionContenedor>
       </Box>
-          {/*
-            <h3>Grilla que muestre todas las liquidaciones por transportista y semana</h3>
-          */}
     </Box>
   )
 }

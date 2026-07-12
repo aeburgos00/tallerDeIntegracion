@@ -3,29 +3,16 @@ import ValorTotalIcon from '@mui/icons-material/MonetizationOnOutlined';
 import EnviosLiquidadosIcon from "@mui/icons-material/LocalShipping";
 import ValorLiquidadoIcon from '@mui/icons-material/PriceCheckOutlined';
 import PorcentajeIcon from '@mui/icons-material/Percent';
-import EnviosIcon from '@mui/icons-material/LocalShippingOutlined';
-import PagoRealizadoIcon from '@mui/icons-material/AttachMoneyOutlined';
-import PagoPendienteIcon from '@mui/icons-material/AccountBalanceOutlined';
-
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
-
+import PagoPendienteIcon from '@mui/icons-material/AccountBalanceOutlined';
 
 export const cardLiquidaciones = [
-{id:"total_envios", icono: TotalEnviosIcon, titulo: "Total envíos", color:"#3b82f6"},
-{id:"valor_total", icono: ValorTotalIcon, titulo: "Valor total de envíos", color:"#3b82f6"},
-{id:"envios_liquidados", icono: EnviosLiquidadosIcon, titulo: "Envíos liquidados", color:"#65a30d", colorTorta:"#65a30d"},
-{id:"valor_liquidado", icono: ValorLiquidadoIcon, titulo: "Valor liquidado", color:"#65a30d", colorTorta:"#65a30d"},
-{id:"pct_paquetes_liquidados", icono: PorcentajeIcon, titulo: "% Envíos liquidados", color:"#f59e0b"},
-];
-
-export const cardsLiquidacionesPagLiq = [
 {id:"cantidad_liquidaciones", icono: ReceiptLongIcon, titulo: "Total liquidaciones", color:"#3b82f6"},
 {id:"valor_total", icono: ValorTotalIcon, titulo: "Valor total de liquidaciones", color:"#f59e0b"},
 {id:"pago_realizado", icono: PriceCheckIcon, titulo: "Pago realizado", color:"#65a30d"},
 {id:"pago_pendiente", icono: PagoPendienteIcon, titulo: "Pago pendiente", color:"#718096"},
-{id:"pct_paquetes_liquidados", icono: PorcentajeIcon, titulo: "% Envíos liquidados", color:"#713dfe"},
+{id:"pct_paquetes_liquidados", icono: PorcentajeIcon, titulo: "% Liquidaciones cerradas", color:"#713dfe"},
 ];
 
 export default cardLiquidaciones;

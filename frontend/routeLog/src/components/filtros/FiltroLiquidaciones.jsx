@@ -10,11 +10,6 @@ import {
     obtenerTransportistas
 } from "../../services/api";
  
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import "dayjs/locale/es";
- 
 export default function FiltroLiquidaciones({
     filtros,
     setFiltros
@@ -50,38 +45,11 @@ export default function FiltroLiquidaciones({
         gridTemplateColumns:{
             xs: "1fr",
             sm:"1fr 1fr",
-            lg:"180px 180px 130px 150px 150px"
+            lg:"180px 130px 150px 150px"
         },
         gap:2,
         alignItems:"center",
-    }}>
- 
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-            <DatePicker
-            label="Fecha Alta"
-            value={filtros.fecha_alta}
-            onChange={(newValue) =>
-            setFiltros({
-                ...filtros,
-                fecha_alta: newValue
-            })}
-            format="DD/MM/YYYY"
-            slotProps={{
-                textField: {
-                size: "small"
-                }
-            }}
-            sx={{
-                width: {
-                xs: 100,
-                sm: 140,
-                md: 180
-                }
-            }}
-            />
-         </LocalizationProvider>
-
- 
+    }}> 
         <TextField
             fullWidth
             select
@@ -114,7 +82,7 @@ export default function FiltroLiquidaciones({
         >
             <MenuItem value="">Todos</MenuItem>
             <MenuItem value="true">Cerrada</MenuItem>
-            <MenuItem value="false">Pendiente</MenuItem>
+            <MenuItem value="false">Abierta</MenuItem>
         </TextField>
  
         <TextField

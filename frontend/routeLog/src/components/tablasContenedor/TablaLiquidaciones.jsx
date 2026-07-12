@@ -37,13 +37,13 @@ export default function TablaLiquidaciones({
                     filtros
                 )
  
-                setLiquidaciones(result.data)
+                setLiquidaciones(result.data || [])
  
-                cantLiquidaciones?.(result.data.length)
+                cantLiquidaciones?.((result.data || []).length)
  
                 const totalPaginas = Math.max(
                     1,
-                    Math.ceil(result.data.length / filasPorPagina)
+                    Math.ceil((result.data || []).length / filasPorPagina)
                 )
  
                 onTotalPaginasChange?.(totalPaginas)
@@ -87,11 +87,9 @@ export default function TablaLiquidaciones({
                 {/* HEADER */}
                 <TableHead sx={{ backgroundColor:"#F0EEE8" }}> 
                     <TableRow>
-                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Alta</TableCell>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Transportista</TableCell>
-                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Cantidad de Paquetes</TableCell>
-                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Desde</TableCell>
-                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Hasta</TableCell>
+                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Semana</TableCell>
+                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Cantidad de Envíos</TableCell>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Cierre</TableCell>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Estado</TableCell>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Monto</TableCell>
@@ -104,7 +102,7 @@ export default function TablaLiquidaciones({
                 loading ? 
                 Array.from(new Array(filasPorPagina)).map((_, index) => (
                     <TableRow key={index}>
-                        {Array.from(new Array(8)).map((_, cellIndex) => (
+                        {Array.from(new Array(6)).map((_, cellIndex) => (
                             <TableCell key={cellIndex}>
                                 <Skeleton variant="text" />
                             </TableCell>
@@ -114,27 +112,25 @@ export default function TablaLiquidaciones({
                 :
                 liquidacionesPagina.length === 0 ? (
                     <TableRow>
-                        <TableCell colSpan={8} align="center">
+                        <TableCell colSpan={6} align="center">
                             No hay liquidaciones para mostrar
                         </TableCell>
                     </TableRow>
                 ):
                 liquidacionesPagina.map((item) => (
                     <TableRow key={item.id} hover>
-                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.fecha_alta} </TableCell>
-                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.transportista} </TableCell>
+                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.transportista} ({item.usuario}) </TableCell>
+                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.fecha_desde?.slice(0, 5)} al {item.fecha_hasta} </TableCell>
                         <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.cantidad_paquetes} </TableCell>
-                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.fecha_desde} </TableCell>
-                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.fecha_hasta} </TableCell>
                         <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> {item.fecha_cierre ? item.fecha_cierre : "-"} </TableCell>
                         <TableCell align="center">
                             <Chip
-                                label={item.cerrada ? "Cerrada" : "Pendiente"}
+                                label={item.cerrada ? "Cerrada" : "Abierta"}
                                 color={item.cerrada ? "success" : "default"}
                                 size="small"
                             />
                         </TableCell>
-                        <TableCell align="center" sx={{ whiteSpace: "nowrap" }}> $ {Number(item.monto_total || 0).toLocaleString('es-AR')} </TableCell>
+                        <TableCell align="center" sx={{ whiteSpace: "nowrap"}}> $ {Number(item.monto_total || 0).toLocaleString('es-AR')} </TableCell>
                     </TableRow>
                 ))
                 }

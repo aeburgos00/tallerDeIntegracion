@@ -1,4 +1,5 @@
 import pool from '../config/db.js'
+import { generarCSV} from '../utils/exportadorCSV.js'
 
 /** Consulta default a la tabla liquidaciones */
 export  const obtenerLiquidaciones = async (req, res) => {
@@ -30,7 +31,6 @@ export const obtenerLiquidacionesListado = async (req, res) => {
   const {
     desde,          // fecha envío desde (rango global)
     hasta,          // fecha envío hasta (rango global de la pagina)
-    fecha_alta,    
     transportista,
     estado,      
     montoDesde,
@@ -41,8 +41,8 @@ export const obtenerLiquidacionesListado = async (req, res) => {
     let query = `
       SELECT  
           l.id,
-          TO_CHAR(l.fecha_alta, 'DD/MM/YYYY') AS fecha_alta,
           u.nombre_apellido AS transportista,
+          u.usuario,
           l.cantidad_paquetes, 
           TO_CHAR(l.fecha_desde, 'DD/MM/YYYY') AS fecha_desde, 
           TO_CHAR(l.fecha_hasta, 'DD/MM/YYYY') AS fecha_hasta,
@@ -61,18 +61,16 @@ export const obtenerLiquidacionesListado = async (req, res) => {
       parametros.push(hasta)
  
       query += `
-        AND l.fecha_alta BETWEEN $${parametros.length - 1}
-                        AND $${parametros.length}
+        AND l.fecha_desde <= $${parametros.length} 
+        AND l.fecha_hasta >= $${parametros.length - 1} 
       `
+      /** Que la fecha seleccionada se encuentre en el rango
+       * fecha_desde sea menor o igual a la fecha hasta seleccionada (filtro) => parametros.length
+       * fecha_hasta sea mayor o igual a la fecha desde seleccionada (filtro) => parametros.length - 1
+        */
     }
- 
-    if (fecha_alta) {
-      parametros.push(fecha_alta)
- 
-      query += `
-        AND l.fecha_alta::date = $${parametros.length}
-      `
-    }
+      
+
 
     if (transportista) {
       parametros.push(`%${transportista.toUpperCase()}%`)
@@ -106,7 +104,7 @@ export const obtenerLiquidacionesListado = async (req, res) => {
     }
  
     query += `
-      ORDER BY l.fecha_alta DESC
+      ORDER BY l.fecha_desde ASC
     `
  
     const result = await pool.query(query, parametros)
@@ -122,87 +120,6 @@ export const obtenerLiquidacionesListado = async (req, res) => {
       error: error.message
     })
   }
-}
-
-/** Obtener listado agrupado: Envíos e importe total para cada transportista */
-export const obtenerLiquidacionesTransportistas = async (req, res) => {
-  try {
-
-    const { desde, hasta } = req.query
-
-    const result = await pool.query(`  
-          SELECT 
-              p.id_transportista,
-              u.nombre_apellido AS transportista,
-              COUNT(p.id) AS envios_totales,
-              COALESCE(SUM(tar.precio), 0) AS importe_total
-            FROM paquetes p
-            JOIN transportistas t ON t.id = p.id_transportista
-            JOIN usuarios u ON u.id = t.id_usuario
-            JOIN tarifas tar ON tar.id = p.id_tarifa
-            WHERE 
-              (p.id_estado = 2 OR p.id_estado = 3)
-              AND ($1::date IS NULL OR p.fecha >= $1::date)
-              AND ($2::date IS NULL OR p.fecha <= $2::date)
-            GROUP BY p.id_transportista, u.nombre_apellido
-            ORDER BY u.nombre_apellido
-          `, [desde, hasta])
-
-    res.json({
-      ok: true,
-      data: result.rows
-    })
-
-  } catch (error) {
-    res.status(500).json({
-      ok: false,
-      error: error.message
-    })
-  }
-}
-
-export const obtenerLiquidacionesTotales = async (req, res) => {
-    const {
-        desde,
-        hasta
-    } = req.query
-
-    try {
-        const query = `
-            select
-                count(aux.paquete) total_envios,
-                coalesce(sum(aux.valor),0) as valor_total,
-                count(aux.liquidacion) envios_liquidados,
-                coalesce(sum(aux.valor_liq),0) as valor_liquidado,
-                case when count(aux.paquete) > 0 then
-                    (count(aux.liquidacion)::decimal  / count(aux.paquete))::numeric(6,2)
-                    else 0 
-                end as pct_paquetes_liquidados
-            from (
-                select p.id as paquete, tar.precio as valor, liq.id as liquidacion, liq.monto_total valor_liq
-                from paquetes p
-                join tarifas tar on p.id_tarifa = tar.id
-                left join liquidaciones liq on liq.id = p.id_liquidacion
-                where p.fecha between $1 and $2
-            ) aux
-        `
-
-        const result = await pool.query(
-            query,
-            [desde, hasta]
-        )
-
-        res.json({
-            ok: true,
-            data: result.rows
-        })
-    }
-    catch (error) {
-        res.status(500).json({
-            ok: false,
-            error: error.message
-        })
-    }
 }
 
 export const obtenerLiquidacionesDashboard = async (req, res) => {
@@ -301,7 +218,7 @@ export const obtenerLiquidacionesPorTransportista = async (req, res) => {
 }
 
 /** Todos los transportistas juntos (suma) */
-export const obtenerLiquidacionesTotalesAdmin= async (req, res) => {
+export const obtenerLiquidacionesTotales = async (req, res) => {
   let {
     desde,
     hasta
@@ -320,9 +237,14 @@ export const obtenerLiquidacionesTotalesAdmin= async (req, res) => {
           ((COUNT(CASE WHEN cerrada = true THEN 1 END) * 100) / NULLIF(COUNT(*), 0) ) AS pct_paquetes_liquidados,
           COUNT(*) AS cantidad_liquidaciones
         FROM liquidaciones
-        WHERE ($1::date IS NULL OR fecha_alta >= $1::date)
-          AND ($2::date IS NULL OR fecha_alta <= $2::date)
+        WHERE ($1::date IS NULL OR fecha_hasta >= $1::date)
+          AND ($2::date IS NULL OR fecha_desde <= $2::date)
     `
+    /** $1 es desde, $2 es hasta
+     * fecha_hasta debe ser mayor o igual a la fecha desde
+     * fecha_desde debe ser menor o igual a la fecha hasta 
+     * Esto para que lo que está dentro de los KPI coincida con lo que se filtra
+     */
 
     const result = await pool.query(
       query,
@@ -338,6 +260,116 @@ export const obtenerLiquidacionesTotalesAdmin= async (req, res) => {
     res.status(500).json({
       ok: false,
       error: error.message
+    })
+  }
+}
+
+export const exportarCSV = async (req, res) => {
+  const {
+    desde, 
+    hasta, 
+    transportista,
+    estado, 
+    montoDesde,
+    montoHasta
+  } = req.query
+
+  try {
+    let query =  `
+      SELECT 
+          u.nombre_apellido AS transportista, 
+          u.usuario,
+          l.cantidad_paquetes,
+          TO_CHAR (l.fecha_desde, 'DD/MM/YYYY') AS fecha_desde,
+          TO_CHAR (l.fecha_hasta, 'DD/MM/YYYY') AS fecha_hasta,
+          TO_CHAR (l.fecha_cierre, 'DD/MM/YYYY') AS fecha_cierre,
+          l.cerrada, 
+          l.monto_total
+        FROM liquidaciones l
+        JOIN transportistas t ON t.id = l.id_transportista
+        JOIN usuarios u ON u.id = t.id_usuario
+        WHERE 1=1
+    `
+    const parametros = []
+
+    if(desde && hasta){
+      parametros.push(desde)
+      parametros.push(hasta)
+
+      query += `
+        AND l.fecha_desde <= $${parametros.length}
+        AND l.fecha_hasta >= $${parametros.length - 1}
+      `
+    }
+
+    if(transportista) {
+      parametros.push(`%${transportista.toUpperCase()}%`)
+
+      query += `
+        AND upper(u.nombre_apellido) LIKE $${parametros.length}
+      `
+    }
+
+    if (estado === 'true' || estado === 'false') {
+      parametros.push(estado === 'true')
+      query += `
+        AND l.cerrada = $${parametros.length}
+      `
+    }
+
+    if (montoDesde) {
+      parametros.push(Number(montoDesde))
+ 
+      query += `
+        AND l.monto_total >= $${parametros.length}
+      `
+    }
+ 
+    if (montoHasta) {
+      parametros.push(Number(montoHasta))
+ 
+      query += `
+        AND l.monto_total <= $${parametros.length}
+      `
+    }
+
+    query += `
+      ORDER BY l.fecha_desde ASC
+    `
+
+    const result = await pool.query(query, parametros)
+
+    const fields = [
+      {label : 'Transportista', value: 'transportista'}, 
+      { label: 'Semana Desde', value: 'fecha_desde' },
+      { label: 'Semana Hasta', value: 'fecha_hasta' },
+      {label : 'Cantidad de Envíos', value: 'cantidad_paquetes'},
+      { label: 'Fecha Cierre', value: 'fecha_cierre' },
+      { label: 'Estado', value: 'estado' },
+      { label: 'Monto', value: 'monto_total' }
+    ]
+
+    const datosCSV = result.rows.map(item => ({
+      ...item, 
+      transportista: item.usuario ? `${item.transportista} (${item.usuario})` : item.transportista,
+      estado: item.cerrada ? 'Cerrada' : 'Abierta', 
+      monto_total: Number(item.monto_total || 0).toLocaleString('es-AR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2})
+  }))
+
+  const csv = generarCSV(datosCSV, fields)
+  const csvConBOM = '\uFEFF' + csv
+
+  res.header('Content-Type', 'text/csv; charset=utf-8')
+  res.attachment('liquidaciones_${Date.now()}.csv')
+
+  return res.send(csvConBOM)
+
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json ({
+      message: 'Error exportando CSV'
     })
   }
 }

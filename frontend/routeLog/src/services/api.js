@@ -560,6 +560,15 @@ export const obtenerLiquidacionesListado = async (
   return response.json()
 }
 
+export const obtenerLiquidacionesTotales = async (
+  fecha_desde,
+  fecha_hasta
+) => {
+  const response = await fetch(
+    `${API_URL}/liquidaciones/totales?desde=${fecha_desde}&hasta=${fecha_hasta}`
+  )
+  return response.json()
+}
 
 export const obtenerLiquidacionesDashboard = async (
   fecha_desde,
@@ -571,41 +580,55 @@ export const obtenerLiquidacionesDashboard = async (
   return response.json()
 }
 
-
-
-export const obtenerLiquidacionesTotales = async (
-  fecha_desde,
-  fecha_hasta
-) => {
-  const response = await fetch(
-    `${API_URL}/liquidaciones/totales?desde=${fecha_desde}&hasta=${fecha_hasta}`
-  )
-  return response.json()
-}
-
-export const obtenerLiquidacionesTotalesAdmin = async (
-  fecha_desde,
-  fecha_hasta
-) => {
-  const response = await fetch(
-    `${API_URL}/liquidaciones/totalesAdmin?desde=${fecha_desde}&hasta=${fecha_hasta}`
-  )
-  return response.json()
-}
-
-export const obtenerLiquidacionesTransportistas = async (desde, hasta) => {
-  const response = await fetch(
-    `${API_URL}/liquidaciones/transportistas?desde=${desde}&hasta=${hasta}`
-  )
-  return response.json()
-}
-
 export const obtenerLiquidacionesPorTransportista = async (id, desde, hasta) => {
   const response = await fetch(
     `${API_URL}/liquidaciones/transportista/${id}?desde=${desde}&hasta=${hasta}`
   )
   return response.json()
 }
+
+export const exportarLiquidacionesCSV = async (
+  fecha_desde, 
+  fecha_hasta, 
+  filtros 
+) => {
+
+  const params = new URLSearchParams();
+ 
+  if (fecha_desde) {
+    params.append("desde", fecha_desde);
+  }
+ 
+  if (fecha_hasta) {
+    params.append("hasta", fecha_hasta);
+  }
+ 
+  Object.entries(filtros).forEach(([key, value]) => {
+    if (
+        value !== null &&
+        value !== undefined &&
+        value !== ""
+    ) {
+        params.append(key, value);
+    }
+  });
+ 
+  const response = await fetch(
+    `${API_URL}/liquidaciones/exportar-csv?${params.toString()}`,
+    { method: 'GET' }
+  )
+  const hoy = new Date();
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'liquidaciones_' + hoy.toLocaleDateString('es-AR') + '.csv'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+
+} 
 
 //==================== PROVINCIAS ====================
 
