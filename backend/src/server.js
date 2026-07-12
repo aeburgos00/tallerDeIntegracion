@@ -50,6 +50,7 @@ app.use('/envios/totales', envios)
 app.use('/envios/recientes', envios)
 
 app.use('/liquidaciones',liquidaciones)
+app.use('/liquidaciones/dashboard', liquidaciones)
 app.use('/liquidaciones/totales',liquidaciones)
 app.use('/liquidaciones/transportista',liquidaciones)
 
