@@ -2,7 +2,6 @@ import express from 'express'
 import cors from 'cors'
 
 import authRoutes from './routes/auth.route.js'
-
 import transportistas from './routes/transportistas.route.js'
 import liquidaciones from './routes/liquidaciones.route.js'
 import localidades from './routes/localidades.route.js'
@@ -50,9 +49,9 @@ app.use('/envios/transportistas', envios)
 app.use('/envios/totales', envios)
 app.use('/envios/recientes', envios)
 
-app.use('/liquidaciones', liquidaciones)
-app.use('/liquidaciones/totales', liquidaciones)
-app.use('/liquidaciones/transportistas', liquidaciones)
+app.use('/liquidaciones',liquidaciones)
+app.use('/liquidaciones/totales',liquidaciones)
+app.use('/liquidaciones/transportista',liquidaciones)
 
 app.use('/estados', estados)
 
