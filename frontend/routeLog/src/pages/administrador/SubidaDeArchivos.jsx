@@ -11,6 +11,7 @@ import {
 import ArchivoIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import FlechaIcon from '@mui/icons-material/ArrowCircleUpRounded';
+import DownloadIcon from '@mui/icons-material/Download'
 
 import CardExitosaArchivo from "../../components/cards/CardExitosaArchivo.jsx"
 import CardErrorArchivo from "../../components/cards/CardErrorArchivo.jsx"
@@ -18,7 +19,10 @@ import CardErrorArchivo from "../../components/cards/CardErrorArchivo.jsx"
 import { useDropzone } from 'react-dropzone'
 import { useState } from 'react'
 
-import { subirArchivoEnvios } from "../../services/api.js"
+import { 
+  subirArchivoEnvios,
+  descargarPlantillaEnvios
+ } from "../../services/api.js"
 
 const colores = {
   primario: "#3b82f6",
@@ -86,6 +90,24 @@ export default function SubidaDeArchivos() {
     }
   };
 
+  const handleDescargarPlantilla = async () => {
+    try {
+      const blob = await descargarPlantillaEnvios();
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "plantilla_envios.csv";
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Box
     sx={{
@@ -108,38 +130,61 @@ export default function SubidaDeArchivos() {
           sx={{
             display:"flex",
             alignItems:"center",
-            gap:2,
+            justifyContent:"space-between",
             p:3,
           }}
           >
-           <Box sx={{
-              backgroundColor:colores.background,
-              p:1.5,
-              borderRadius:2,              
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-           }}>
-            <ArchivoIcon sx={{
-              color:colores.primario,
-              fontSize:32
-            }}/>
-           </Box>
+            <Box
+            sx={{
+              display:"flex",
+              alignItems:"center",
+              gap:2,
+            }}
+            >
+            <Box sx={{
+                backgroundColor:colores.background,
+                p:1.5,
+                borderRadius:2,              
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+            }}>
+              <ArchivoIcon sx={{
+                color:colores.primario,
+                fontSize:32
+              }}/>
+            </Box>
 
-           <Box>
-              <Typography sx={{
-                fontSize:20,
-                fontWeight: 700,
-                color:colores.textos
-              }}>Subir archivo</Typography>
-              
-              <Typography sx={{
-                fontSize: 14,
-                color: colores.textosSec
-              }}>Seleccione el archivo a subir</Typography>
-           </Box>
+            <Box>
+                <Typography sx={{
+                  fontSize:20,
+                  fontWeight: 700,
+                  color:colores.textos
+                }}>Subir archivo</Typography>
+                
+                <Typography sx={{
+                  fontSize: 14,
+                  color: colores.textosSec
+                }}>Seleccione el archivo a subir</Typography>
+            </Box>
+
+            </Box>
+
+            <Button
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            onClick={handleDescargarPlantilla}
+            sx={{
+                background:colores.primario,
+                borderRadius:2,
+                textTransform: "none"
+            }}
+            >
+              Descargar plantilla
+            </Button>
 
           </Box>
+          
 
           <Divider sx={{mx:3}} />
           
@@ -258,6 +303,7 @@ export default function SubidaDeArchivos() {
                       : "Subir archivo"
               }
             </Button>
+
           </Box>
 
       </Box>

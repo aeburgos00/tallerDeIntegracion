@@ -13,6 +13,7 @@ const theme = createTheme({
       yellow: '#f59e0b',
       red: '#ef4444',
       purple: '#713dfe',
+      orange: '#ef9227'
     }
   },
 

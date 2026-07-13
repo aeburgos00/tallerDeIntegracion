@@ -27,8 +27,8 @@ export const obtenerLiquidaciones = async (req, res) => {
             ELSE TO_CHAR(liq.fecha_cierre,'DD/MM/YYYY')
         END "fecha_cierre"
       from  liquidaciones liq
-      join  usuarios u on u.id = tr.id_usuario
       join  transportistas tr on liq.id_transportista = tr.id
+      join  usuarios u on u.id = tr.id_usuario
       where 1=1
     `
     const parametros = []
@@ -38,8 +38,8 @@ export const obtenerLiquidaciones = async (req, res) => {
       parametros.push(hasta)
  
       query += `
-        AND l.fecha_desde <= $${parametros.length} 
-        AND l.fecha_hasta >= $${parametros.length - 1} 
+        AND liq.fecha_desde <= $${parametros.length} 
+        AND liq.fecha_hasta >= $${parametros.length - 1} 
       `;
     }
 
@@ -67,7 +67,7 @@ export const obtenerLiquidaciones = async (req, res) => {
       parametros.push(Number(montoDesde))
  
       query += `
-        AND l.monto_total >= $${parametros.length}
+        AND liq.monto_total >= $${parametros.length}
       `
     }
  
@@ -75,14 +75,14 @@ export const obtenerLiquidaciones = async (req, res) => {
       parametros.push(Number(montoHasta))
  
       query += `
-        AND l.monto_total <= $${parametros.length}
+        AND liq.monto_total <= $${parametros.length}
       `
     }
  
     query += `
-      ORDER BY l.fecha_desde DESC
+      ORDER BY liq.fecha_desde DESC
     `
-    
+
     const result = await pool.query(query, parametros)
  
     res.json({
@@ -264,8 +264,8 @@ export const exportarCSV = async (req, res) => {
             ELSE TO_CHAR(liq.fecha_cierre,'DD/MM/YYYY')
         END "fecha_cierre"
       from  liquidaciones liq
-      join  usuarios u on u.id = tr.id_usuario
       join  transportistas tr on liq.id_transportista = tr.id
+      join  usuarios u on u.id = tr.id_usuario
       where 1=1
     `
     const parametros = []
@@ -275,8 +275,8 @@ export const exportarCSV = async (req, res) => {
       parametros.push(hasta)
  
       query += `
-        AND l.fecha_desde <= $${parametros.length} 
-        AND l.fecha_hasta >= $${parametros.length - 1} 
+        AND liq.fecha_desde <= $${parametros.length} 
+        AND liq.fecha_hasta >= $${parametros.length - 1} 
       `;
     }
 
@@ -304,7 +304,7 @@ export const exportarCSV = async (req, res) => {
       parametros.push(Number(montoDesde))
  
       query += `
-        AND l.monto_total >= $${parametros.length}
+        AND liq.monto_total >= $${parametros.length}
       `
     }
  
@@ -312,12 +312,12 @@ export const exportarCSV = async (req, res) => {
       parametros.push(Number(montoHasta))
  
       query += `
-        AND l.monto_total <= $${parametros.length}
+        AND liq.monto_total <= $${parametros.length}
       `
     }
  
     query += `
-      ORDER BY l.fecha_desde DESC
+      ORDER BY liq.fecha_desde DESC
     `
 
     const result = await pool.query(query, parametros)

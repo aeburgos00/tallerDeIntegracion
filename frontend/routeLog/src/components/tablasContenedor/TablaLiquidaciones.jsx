@@ -13,6 +13,11 @@ import { useEffect, useState } from 'react'
  
 import { obtenerLiquidaciones } from '../../services/api.js'
 import useDateFilter from '../../hooks/useDateFilter.js'
+
+const colores = {
+    Cerrada : "#65a30d",
+    Abierta : "#ef9227"
+}
  
 export default function TablaLiquidaciones({
     filtros,
@@ -119,8 +124,14 @@ export default function TablaLiquidaciones({
                         <TableCell sx={{textWrap:'nowrap'}} align="center">$ {Number(item.monto_total || 0).toLocaleString('es-AR')} </TableCell>
                         <TableCell sx={{textWrap:'nowrap'}} align="center">
                             <Chip
-                                label={item.cerrada === 'CERRADA' ? "Cerrada" : "Abierta"}
-                                color={item.cerrada === 'CERRADA' ? "success" : "default"}
+                                label={item.estado}
+                                sx={{
+                                    color: colores[item.estado],
+                                    fontWeight: 700,
+                                    backgroundColor: `${colores[item.estado]}15`,
+                                    borderRadius: 999,
+                                    minWidth: 110,
+                                }}
                                 size="small"
                             />
                         </TableCell>

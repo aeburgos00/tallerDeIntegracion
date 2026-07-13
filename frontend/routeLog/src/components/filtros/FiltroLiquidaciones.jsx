@@ -44,7 +44,7 @@ export default function FiltroLiquidaciones({
         display:"grid",
         gridTemplateColumns:{
             xs: "220px",
-            lg:"220px 220px"
+            lg:"220px 220px 180px 180px"
         },
         gap:2,
         alignItems:"center",

@@ -115,6 +115,10 @@ const obtenerEnvios = async (req, res) => {
                 AND $${parametros.length} = ( case when liq.id is not null then tar.precio else 0 end)
             `;
         }
+
+        query += `
+            ORDER BY P.FECHA DESC
+        `;
                 
         const result = await pool.query(
             query,
