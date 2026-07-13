@@ -12,6 +12,10 @@ router.post(
     subirArchivo
 );
 
+router.get("/plantilla-envios", (req, res) => {
+    res.download("./public/plantilla_envios.csv");
+});
+
 export default router;
 
 

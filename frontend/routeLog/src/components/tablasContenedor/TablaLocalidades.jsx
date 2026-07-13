@@ -33,6 +33,11 @@ const colores = {
     gris: "#9ca3af",
 }
 
+const coloresEstados = {
+    "Activo" : "#65a30d",
+    "Inactivo" : "#ef4444"
+}
+
 export default function TablaLocalidades({
     filtros = {},
     pagina = 1,
@@ -153,22 +158,22 @@ export default function TablaLocalidades({
                                 <TableCell sx={{ textWrap: 'nowrap' }}> $ {Number(item.costo_envio || 0).toLocaleString('es-AR')} </TableCell>
                                 <TableCell sx={{ whiteSpace: "nowrap" }}>{item.fecha_alta}</TableCell>
                                 <TableCell sx={{ whiteSpace: "nowrap" }}>{item.fecha_baja || "-"}</TableCell>
-                                <TableCell sx={{ whiteSpace: "nowrap" }}>
-                                    <Chip
-                                        label={item.estado}
-                                        size="small"
-                                        clickable
-                                        onClick={() => handleToggleEstado(item)}
-                                        sx={{
-                                            fontWeight: 600,
-                                            fontSize: 12,
-                                            borderRadius: 1,
-                                            cursor: "pointer",
-                                            background: item.estado === "Activo" ? "#dcfce7" : "#fee2e2",
-                                            color: item.estado === "Activo" ? "#166534" : "#991b1b",
-                                            "&:hover": { opacity: 0.85 }
-                                        }}
-                                    />
+                                <TableCell sx={{textWrap:'nowrap'}} align="center">
+                                  <Chip
+                                    label={item.estado}
+                                    clickable
+                                    onClick={() => handleToggleEstado(item)}
+                                    sx={{
+                                        color: coloresEstados[item.estado],
+                                        fontWeight: 700,
+                                        backgroundColor: `${coloresEstados[item.estado]}15`,
+                                        borderRadius: 999,
+                                        minWidth: 110,
+                                        cursor: "pointer",
+                                        "&:hover": { opacity: 0.85 }
+                                    }}
+                                    size="small"
+                                  />
                                 </TableCell>
                                 <TableCell align="center">
                                     <IconButton color="primary" onClick={() => onEdit(item)}>

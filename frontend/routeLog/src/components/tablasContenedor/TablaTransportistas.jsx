@@ -16,11 +16,17 @@ import {
   Button,
   Snackbar,
   Alert,
+  Chip,
 } from "@mui/material";
 
 const colores = {
   azul: "#3b82f6",
   gris: "#9ca3af",
+}
+
+const coloresEstados = {
+    "Activo" : "#65a30d",
+    "Inactivo" : "#ef4444"
 }
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -188,7 +194,19 @@ export default function TablaTransportistas ({
                     <TableCell sx={{textWrap:'nowrap'}}>{item.correo}</TableCell>
                     <TableCell sx={{textWrap:'nowrap'}} align="center">{item.fecha_alta}</TableCell>
                     <TableCell sx={{textWrap:'nowrap'}} align="center">{item.fecha_baja || "-"}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.estado}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}} align="center">
+                      <Chip
+                          label={item.estado}
+                          sx={{
+                              color: coloresEstados[item.estado],
+                              fontWeight: 700,
+                              backgroundColor: `${coloresEstados[item.estado]}15`,
+                              borderRadius: 999,
+                              minWidth: 110,
+                          }}
+                          size="small"
+                      />
+                    </TableCell>
                     <TableCell sx={{textWrap:'nowrap'}}> 
                         {Number(item.costo_envio || 0).toLocaleString("es-AR", {
                             style: "currency",

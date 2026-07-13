@@ -16,6 +16,7 @@ import {
   Button,
   Snackbar,
   Alert,
+  Chip,
 } from "@mui/material";
 
 const colores = {
@@ -38,6 +39,13 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 
+const coloresEstados = {
+    "Pendiente" : "#3b82f6" ,
+    "Entregado" : "#65a30d",
+    "Visita Fallida" : "#ef4444",
+    "No Visitado" : "#f59e0b",
+    "Cancelado" : "#333"
+}
 
 export default function TablaEnvios ({
   cantEnvios,
@@ -223,7 +231,19 @@ export default function TablaEnvios ({
                     <TableCell sx={{textWrap:'nowrap'}}>{item.direccion}</TableCell>
                     <TableCell sx={{textWrap:'nowrap'}}>{item.localidad}</TableCell>
                     <TableCell sx={{textWrap:'nowrap'}}>{item.transportista}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}>{item.estado}</TableCell>
+                    <TableCell sx={{textWrap:'nowrap'}} align="center">
+                        <Chip
+                            label={item.estado}
+                            sx={{
+                                color: coloresEstados[item.estado],
+                                fontWeight: 700,
+                                backgroundColor: `${coloresEstados[item.estado]}15`,
+                                borderRadius: 999,
+                                minWidth: 110,
+                            }}
+                            size="small"
+                        />
+                    </TableCell>
                     <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.tarifa || 0).toLocaleString('es-AR')} </TableCell>
                     <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.liquidacion || 0).toLocaleString('es-AR')} </TableCell>                    
                     <TableCell align="center">

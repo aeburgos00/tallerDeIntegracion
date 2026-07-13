@@ -65,6 +65,8 @@ app.use('/tarifas/transportista/localidad', tarifas)
 
 app.use('/archivos', archivos)
 app.use('/archivos/envios', archivos)
+app.use('/archivos/plantilla-envios', archivos)
+
 
 app.use('/provincias', provincias)
 

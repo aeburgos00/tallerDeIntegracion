@@ -667,3 +667,15 @@ export const subirArchivoEnvios = async (formData) => {
 
   return data;
 };
+
+export const descargarPlantillaEnvios = async () => {
+    const response = await fetch(`${API_URL}/archivos/plantilla-envios`);
+
+    if (!response.ok) {
+      throw new Error("No se pudo descargar la plantilla de envios");
+    }
+
+    return await response.blob();
+};
+
+
