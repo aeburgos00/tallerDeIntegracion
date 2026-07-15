@@ -83,7 +83,7 @@ const obtenerEnvios = async (req, res) => {
                 AND p.id_estado = $${parametros.length}
             `;
         }
-        
+
         if (localidad) {
             parametros.push(`%${localidad.toUpperCase()}%`);
 
@@ -119,7 +119,7 @@ const obtenerEnvios = async (req, res) => {
         query += `
             ORDER BY P.FECHA DESC
         `;
-                
+
         const result = await pool.query(
             query,
             parametros
@@ -460,7 +460,7 @@ const exportarCSV = async (req, res) => {
                 AND p.id_estado = $${parametros.length}
             `;
         }
-        
+
         if (localidad) {
             parametros.push(`%${localidad.toUpperCase()}%`);
 
@@ -492,7 +492,7 @@ const exportarCSV = async (req, res) => {
                 AND $${parametros.length} = ( case when liq.id is not null then tar.precio else 0 end)
             `;
         }
-                
+
         const result = await pool.query(
             query,
             parametros
@@ -849,17 +849,30 @@ const cambiarEstadoEnvio = async (req, res) => {
             })
         }
 
-        const result = await pool.query(
-            `UPDATE paquetes SET id_estado = $1 WHERE id = $2 RETURNING id`,
-            [id_estado, id]
+        // Verifico que la fecha del paquete no sea pasada
+        const paquete = await pool.query(
+            `SELECT fecha FROM paquetes WHERE id = $1`,
+            [id]
         )
 
-        if (result.rowCount === 0) {
+        if (paquete.rows.length === 0) {
             return res.status(404).json({
                 ok: false,
                 error: "Envío no encontrado"
             })
         }
+
+        if (paquete.rows[0].fecha < new Date().toISOString().split('T')[0]) {
+            return res.status(400).json({
+                ok: false,
+                error: "Pedido con fecha pasada, no puede ser modificado"
+            })
+        }
+
+        const result = await pool.query(
+            `UPDATE paquetes SET id_estado = $1 WHERE id = $2 RETURNING id`,
+            [id_estado, id]
+        )
 
         res.json({
             ok: true,
@@ -876,7 +889,7 @@ const cambiarEstadoEnvio = async (req, res) => {
 
 
 const obtenerProximoEnvioPorTransportista = async (req, res) => {
-    const { id } = req.params   // usuarios.id
+    const { id } = req.params
 
     try {
         const query = `
@@ -893,6 +906,7 @@ const obtenerProximoEnvioPorTransportista = async (req, res) => {
             JOIN localidades l ON l.id = d.id_localidad
             WHERE t.id_usuario = $1
             AND p.id_estado = 1
+            AND p.fecha >= (NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires')::date
             ORDER BY p.fecha ASC, p.id ASC
             LIMIT 1
         `
