@@ -9,6 +9,10 @@ import {
 
 import { useEffect, useState } from "react";
 
+import dayjs from "dayjs"
+import customParseFormat from "dayjs/plugin/customParseFormat"
+dayjs.extend(customParseFormat)
+
 import FormularioABM from "../../layouts/FormularioABM";
 
 import { obtenerEstados } from "../../services/api";
@@ -27,6 +31,10 @@ export default function PanelDetalleEnvio({
     const [guardando, setGuardando] = useState(false)
     const [mensaje, setMensaje] = useState("")
     const [error, setError] = useState(false)
+
+    const esFechaPasada = envio?.fecha_envio
+        ? dayjs(envio.fecha_envio, "DD/MM/YYYY").isBefore(dayjs().startOf("day"))
+        : false
 
     useEffect(() => {
         const cargarEstados = async () => {
@@ -86,6 +94,7 @@ export default function PanelDetalleEnvio({
             onClose={onClose}
             onSave={handleGuardar}
             loading={guardando}
+            disabledSave={esFechaPasada}
         >
             <Box component="form">
                 <Grid container spacing={2}>
@@ -106,7 +115,6 @@ export default function PanelDetalleEnvio({
                         <TextField fullWidth disabled label="Fecha Envío" value={envio.fecha_envio || ""} />
                     </Grid>
 
-
                     <Grid size={{ xs: 12 }}>
                         <Autocomplete
                             fullWidth
@@ -115,11 +123,20 @@ export default function PanelDetalleEnvio({
                             getOptionLabel={(option) => option.descripcion}
                             isOptionEqualToValue={(option, value) => option.id === value.id}
                             onChange={(event, value) => setIdEstado(value?.id ?? null)}
+                            disabled={esFechaPasada}
                             renderInput={(params) => (
                                 <TextField {...params} fullWidth required label="Estado" />
                             )}
                         />
                     </Grid>
+
+                    {esFechaPasada && (
+                        <Grid size={{ xs: 12 }}>
+                            <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                                Pedido con fecha pasada, no puede ser modificado.
+                            </Alert>
+                        </Grid>
+                    )}
 
                 </Grid>
             </Box>

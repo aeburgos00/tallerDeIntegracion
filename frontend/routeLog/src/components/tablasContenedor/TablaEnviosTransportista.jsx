@@ -14,10 +14,16 @@ const colEstado = {
     4: { bg: "#dbeafe", color: "#1e40af" },
 }
 
-export default function TablaEnviosTransportista({ envios, onVerMas }) {
+export default function TablaEnviosTransportista({ envios, pagina = 1, filasPorPagina = 10, onVerMas }) {
+
+    const enviosPagina = envios.slice(
+        (pagina - 1) * filasPorPagina,
+        pagina * filasPorPagina
+    )
+
     return (
         <Box>
-            {envios.map((envio) => {
+            {enviosPagina.map((envio) => {
                 const estilo = colEstado[envio.id_estado] ?? { bg: "#f3f4f6", color: "#374151" }
 
                 return (

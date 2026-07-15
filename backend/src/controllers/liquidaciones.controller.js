@@ -1,5 +1,5 @@
 import pool from '../config/db.js'
-import { generarCSV} from '../utils/exportadorCSV.js'
+import { generarCSV } from '../utils/exportadorCSV.js'
 
 export const obtenerLiquidaciones = async (req, res) => {
   const {
@@ -10,7 +10,7 @@ export const obtenerLiquidaciones = async (req, res) => {
     montoDesde,
     montoHasta
   } = req.query
- 
+
   try {
     let query = `
       select  
@@ -32,11 +32,11 @@ export const obtenerLiquidaciones = async (req, res) => {
       where 1=1
     `
     const parametros = []
- 
+
     if (desde && hasta) {
       parametros.push(desde)
       parametros.push(hasta)
- 
+
       query += `
         AND liq.fecha_desde <= $${parametros.length} 
         AND liq.fecha_hasta >= $${parametros.length - 1} 
@@ -50,7 +50,7 @@ export const obtenerLiquidaciones = async (req, res) => {
           AND liq.id_transportista = $${parametros.length}
       `;
     }
- 
+
     if (estado) {
       parametros.push(estado);
 
@@ -62,34 +62,34 @@ export const obtenerLiquidaciones = async (req, res) => {
           END
       `;
     }
- 
+
     if (montoDesde) {
       parametros.push(Number(montoDesde))
- 
+
       query += `
         AND liq.monto_total >= $${parametros.length}
       `
     }
- 
+
     if (montoHasta) {
       parametros.push(Number(montoHasta))
- 
+
       query += `
         AND liq.monto_total <= $${parametros.length}
       `
     }
- 
+
     query += `
       ORDER BY liq.fecha_desde DESC
     `
 
     const result = await pool.query(query, parametros)
- 
+
     res.json({
       ok: true,
       data: result.rows
     })
- 
+
   } catch (error) {
     res.status(500).json({
       ok: false,
@@ -99,13 +99,13 @@ export const obtenerLiquidaciones = async (req, res) => {
 }
 
 export const obtenerLiquidacionesDashboard = async (req, res) => {
-    const {
-        desde,
-        hasta
-    } = req.query
+  const {
+    desde,
+    hasta
+  } = req.query
 
-    try {
-        const query = `
+  try {
+    const query = `
             select
             coalesce(sum(aux.precio),0) as valor_total,
             coalesce(
@@ -139,30 +139,30 @@ export const obtenerLiquidacionesDashboard = async (req, res) => {
             ) aux
         `
 
-        const result = await pool.query(
-            query,
-            [desde, hasta]
-        )
+    const result = await pool.query(
+      query,
+      [desde, hasta]
+    )
 
-        res.json({
-            ok: true,
-            data: result.rows
-        })
-    }
-    catch (error) {
-        res.status(500).json({
-            ok: false,
-            error: error.message
-        })
-    }
+    res.json({
+      ok: true,
+      data: result.rows
+    })
+  }
+  catch (error) {
+    res.status(500).json({
+      ok: false,
+      error: error.message
+    })
+  }
 }
 
 export const obtenerLiquidacionesPorTransportista = async (req, res) => {
-    const { id } = req.params
-    const { desde, hasta } = req.query
+  const { id } = req.params
+  const { desde, hasta } = req.query
 
-    try {
-        const query = `
+  try {
+    const query = `
             SELECT
                 coalesce(sum(liq.monto_total), 0) as valor_total
             FROM liquidaciones liq
@@ -171,19 +171,19 @@ export const obtenerLiquidacionesPorTransportista = async (req, res) => {
             AND liq.fecha_desde >= $2
             AND liq.fecha_hasta <= $3
         `
-        const result = await pool.query(query, [id, desde, hasta])
+    const result = await pool.query(query, [id, desde, hasta])
 
-        res.json({
-            ok: true,
-            data: result.rows
-        })
-    }
-    catch (error) {
-        res.status(500).json({
-            ok: false,
-            error: error.message
-        })
-    }
+    res.json({
+      ok: true,
+      data: result.rows
+    })
+  }
+  catch (error) {
+    res.status(500).json({
+      ok: false,
+      error: error.message
+    })
+  }
 }
 
 export const obtenerLiquidacionesTotales = async (req, res) => {
@@ -219,12 +219,12 @@ export const obtenerLiquidacionesTotales = async (req, res) => {
         WHERE ($1::date IS NULL OR fecha_hasta >= $1::date)
           AND ($2::date IS NULL OR fecha_desde <= $2::date)
     `
-    
+
     const result = await pool.query(
       query,
       [desde, hasta]
     )
-    
+
     res.json({
       ok: true,
       data: result.rows
@@ -240,10 +240,10 @@ export const obtenerLiquidacionesTotales = async (req, res) => {
 
 export const exportarCSV = async (req, res) => {
   const {
-    desde, 
-    hasta, 
+    desde,
+    hasta,
     transportista,
-    estado, 
+    estado,
     montoDesde,
     montoHasta
   } = req.query
@@ -269,11 +269,11 @@ export const exportarCSV = async (req, res) => {
       where 1=1
     `
     const parametros = []
- 
+
     if (desde && hasta) {
       parametros.push(desde)
       parametros.push(hasta)
- 
+
       query += `
         AND liq.fecha_desde <= $${parametros.length} 
         AND liq.fecha_hasta >= $${parametros.length - 1} 
@@ -287,7 +287,7 @@ export const exportarCSV = async (req, res) => {
           AND liq.id_transportista = $${parametros.length}
       `;
     }
- 
+
     if (estado) {
       parametros.push(estado);
 
@@ -299,23 +299,23 @@ export const exportarCSV = async (req, res) => {
           END
       `;
     }
- 
+
     if (montoDesde) {
       parametros.push(Number(montoDesde))
- 
+
       query += `
         AND liq.monto_total >= $${parametros.length}
       `
     }
- 
+
     if (montoHasta) {
       parametros.push(Number(montoHasta))
- 
+
       query += `
         AND liq.monto_total <= $${parametros.length}
       `
     }
- 
+
     query += `
       ORDER BY liq.fecha_desde DESC
     `
@@ -332,34 +332,34 @@ export const exportarCSV = async (req, res) => {
     ]
 
     const datosCSV = result.rows.map(item => ({
-      ...item, 
+      ...item,
       monto_total: Number(item.monto_total || 0).toLocaleString('es-AR', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       })
-  }))
+    }))
 
-  const csv = generarCSV(datosCSV, fields)
-  const csvConBOM = '\uFEFF' + csv
+    const csv = generarCSV(datosCSV, fields)
+    const csvConBOM = '\uFEFF' + csv
 
-  res.header('Content-Type', 'text/csv; charset=utf-8')
-  res.attachment('liquidaciones_${Date.now()}.csv')
+    res.header('Content-Type', 'text/csv; charset=utf-8')
+    res.attachment('liquidaciones_${Date.now()}.csv')
 
-  return res.send(csvConBOM)
+    return res.send(csvConBOM)
 
   } catch (error) {
     console.error(error)
-    return res.status(500).json ({
+    return res.status(500).json({
       message: 'Error exportando CSV'
     })
   }
 }
 
 export const obtenerHistorialLiquidacionesPorTransportista = async (req, res) => {
-    const { id } = req.params
+  const { id } = req.params
 
-    try {
-        const query = `
+  try {
+    const query = `
             SELECT
                 liq.id,
                 liq.monto_total,
@@ -374,17 +374,47 @@ export const obtenerHistorialLiquidacionesPorTransportista = async (req, res) =>
             AND liq.cerrada = true
             ORDER BY liq.fecha_desde DESC
         `
-        const result = await pool.query(query, [id])
+    const result = await pool.query(query, [id])
 
-        res.json({
-            ok: true,
-            data: result.rows
-        })
-    }
-    catch (error) {
-        res.status(500).json({
-            ok: false,
-            error: error.message
-        })
-    }
+    res.json({
+      ok: true,
+      data: result.rows
+    })
+  }
+  catch (error) {
+    res.status(500).json({
+      ok: false,
+      error: error.message
+    })
+  }
+}
+
+export const obtenerLiquidacionTentativaPorTransportista = async (req, res) => {
+  const { id } = req.params
+  const { desde, hasta } = req.query
+
+  try {
+    const query = `
+            SELECT
+                coalesce(sum(tar.precio), 0) as valor_total
+            FROM paquetes p
+            JOIN transportistas t ON t.id = p.id_transportista
+            JOIN tarifas tar ON tar.id = p.id_tarifa
+            WHERE t.id_usuario = $1
+            AND p.fecha BETWEEN $2 AND $3
+            AND p.id_estado IN (2, 3)
+        `
+    const result = await pool.query(query, [id, desde, hasta])
+
+    res.json({
+      ok: true,
+      data: result.rows
+    })
+  }
+  catch (error) {
+    res.status(500).json({
+      ok: false,
+      error: error.message
+    })
+  }
 }

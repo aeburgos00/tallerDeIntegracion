@@ -21,6 +21,7 @@ import InfoIcon from "@mui/icons-material/Info"
 import {
   obtenerEnviosPorTransportistaId,
   obtenerLiquidacionesPorTransportistaId,
+  obtenerLiquidacionTentativa,
   obtenerProximoEnvio
 } from "../../services/apiTransportistas.js"
 
@@ -46,7 +47,7 @@ export default function Inicio() {
 
         const [hoyResult, liqResult, proximoResult] = await Promise.all([
           obtenerEnviosPorTransportistaId(user.id, { estado: 1, fechaEnvio: hoy }),
-          obtenerLiquidacionesPorTransportistaId(
+          obtenerLiquidacionTentativa(
             user.id,
             lunesDeEstaSemana.format("YYYY-MM-DD"),
             hoy.format("YYYY-MM-DD")
@@ -225,7 +226,7 @@ export default function Inicio() {
 
       {/* Total a liquidar en la semana */}
       <MontoDestacadoMobile
-        etiqueta="Total a liquidar esta semana"
+        etiqueta="Total tentativo a liquidar esta semana"
         valor={valorSemana}
         loading={loading}
       />

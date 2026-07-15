@@ -24,7 +24,8 @@ dayjs.locale("es")
 import useAuth from "../../hooks/useAuth"
 import {
   obtenerLiquidacionesPorTransportistaId,
-  obtenerHistorialLiquidaciones
+  obtenerHistorialLiquidaciones,
+  obtenerLiquidacionTentativa
 } from "../../services/apiTransportistas"
 
 import MontoDestacadoMobile from "../../components/MontoDestacadoMobile.jsx"
@@ -40,12 +41,12 @@ export default function LiquidacionesMob() {
   const [valorTotal, setValorTotal] = useState(0)
   const [historial, setHistorial] = useState([])
 
-  // Carga el total del período seleccionado
+  // Carga el total del período seleccionado (Tentativo)
   useEffect(() => {
     const obtenerDatos = async () => {
       try {
         setLoading(true)
-        const result = await obtenerLiquidacionesPorTransportistaId(
+        const result = await obtenerLiquidacionTentativa(
           user.id,
           fechaDesde.format("YYYY-MM-DD"),
           fechaHasta.format("YYYY-MM-DD")
@@ -123,7 +124,7 @@ export default function LiquidacionesMob() {
 
         }}>
           <Typography sx={{ fontSize: 12, color: "#9ca3af", fontWeight: 600, mb: 1.5 }}>
-            Período a consultar
+            Período a consultar (monto tentativo)
           </Typography>
 
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
@@ -160,7 +161,7 @@ export default function LiquidacionesMob() {
 
         {/* Monto del período */}
         <MontoDestacadoMobile
-          etiqueta="Total a liquidar"
+          etiqueta="Total tentativo a liquidar"
           valor={valorTotal}
           loading={loading}
         />

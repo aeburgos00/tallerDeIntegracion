@@ -22,7 +22,6 @@ import { obtenerEnviosPorTransportistaId } from "../../services/apiTransportista
 import KPICardMobile from "../../components/KPICardMobile.jsx"
 import InfoIcon from "@mui/icons-material/Info"
 
-
 const filtrosIniciales = {
   fechaEnvio: null,
   cliente: "",
@@ -38,6 +37,10 @@ export default function EnviosTransportista() {
   const [envios, setEnvios] = useState([])
   const [enviosTotales, setEnviosTotales] = useState({})
   const [filtros, setFiltros] = useState(filtrosIniciales)
+
+  const [pagina, setPagina] = useState(1)
+  const [filasPorPagina, setFilasPorPagina] = useState(10)
+  const [totalPaginas, setTotalPaginas] = useState(1)
 
   const [openPanel, setOpenPanel] = useState(false)
   const [envioSeleccionado, setEnvioSeleccionado] = useState(null)
@@ -59,6 +62,10 @@ export default function EnviosTransportista() {
         visitas_fallidas: data.filter(e => e.id_estado === 3).length,
         no_visitados: data.filter(e => e.id_estado === 4).length,
       })
+
+      setTotalPaginas(Math.max(1, Math.ceil(data.length / filasPorPagina)))
+      setPagina(1)
+
     } catch (error) {
       console.error(error)
     } finally {
@@ -69,6 +76,11 @@ export default function EnviosTransportista() {
   useEffect(() => {
     if (user?.id) obtenerDatos(filtros)
   }, [user])
+
+  useEffect(() => {
+    setTotalPaginas(Math.max(1, Math.ceil(envios.length / filasPorPagina)))
+    setPagina(1)
+  }, [filasPorPagina, envios.length])
 
   const handleFilter = () => obtenerDatos(filtros)
 
@@ -101,6 +113,7 @@ export default function EnviosTransportista() {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pb: 4 }}>
 
+      {/* KPIs */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
         {loadingKPI
           ? Array.from({ length: 5 }).map((_, i) => (
@@ -118,25 +131,42 @@ export default function EnviosTransportista() {
           ))}
       </Box>
 
+      {/* Filtros */}
       <FiltrosGenerico onFilter={handleFilter} onClear={handleClear}>
         <FiltroEnvios filtros={filtros} setFiltros={setFiltros} />
       </FiltrosGenerico>
 
       <Typography sx={{ color: "#777", fontSize: 13, textAlign: "center" }}>
-        Mostrando {cards[0].cantidad} envíos
+        Mostrando {Math.min(filasPorPagina, envios.length - (pagina - 1) * filasPorPagina)} de {envios.length} envíos
       </Typography>
 
+      {/* Tabla */}
       <Box sx={{
         backgroundColor: "#fff",
         borderRadius: 2,
         border: "1px solid #e5e7eb",
         boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
       }}>
-        <TablaPaginacionContenedor>
-          <TablaEnviosTransportista envios={envios} onVerMas={handleVerMas} />
+        <TablaPaginacionContenedor
+          pagina={pagina}
+          filasPorPagina={filasPorPagina}
+          totalPaginas={totalPaginas}
+          onPaginaChange={setPagina}
+          onFilasPorPaginaChange={(valor) => {
+            setPagina(1)
+            setFilasPorPagina(valor)
+          }}
+        >
+          <TablaEnviosTransportista
+            envios={envios}
+            pagina={pagina}
+            filasPorPagina={filasPorPagina}
+            onVerMas={handleVerMas}
+          />
         </TablaPaginacionContenedor>
       </Box>
 
+      {/* Panel detalle */}
       <PanelDetalleEnvio
         open={openPanel}
         onClose={() => setOpenPanel(false)}

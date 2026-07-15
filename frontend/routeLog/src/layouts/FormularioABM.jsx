@@ -17,7 +17,8 @@ export default function FormularioABM({
   onClose,
   onSave,
   children,
-  loading
+  loading,
+  disabledSave
 }) {
   return (
     <Dialog
@@ -27,56 +28,56 @@ export default function FormularioABM({
       fullWidth
     >
       <DialogTitle
-      sx={{
-        display:"flex",
-        justifyContent:"center",
-        alignItems:"center",
-        background:colores.azul,
-        color:"#fff",
-        py: 2,
-      }}>
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: colores.azul,
+          color: "#fff",
+          py: 2,
+        }}>
         {titulo}
       </DialogTitle>
-      
+
       <DialogContent
-      sx={{
-      p: 3,
-      "&.MuiDialogContent-root": {
-        paddingTop: 3
-      }
-      }}
+        sx={{
+          p: 3,
+          "&.MuiDialogContent-root": {
+            paddingTop: 3
+          }
+        }}
       >
         {children}
       </DialogContent>
 
       <DialogActions
-      sx={{
-        p: 2,
-        pt:0,
-        gap: 1.5
-      }}
-      >
-        <Button 
-        variant="outlined"
-        onClick={onClose}
         sx={{
-          borderColor:colores.gris,
-          color:colores.azul,
-          borderRadius:2,
-          textTransform:"none",
-        }}>
+          p: 2,
+          pt: 0,
+          gap: 1.5
+        }}
+      >
+        <Button
+          variant="outlined"
+          onClick={onClose}
+          sx={{
+            borderColor: colores.gris,
+            color: colores.azul,
+            borderRadius: 2,
+            textTransform: "none",
+          }}>
           Cancelar
         </Button>
 
         <Button
           variant="contained"
           onClick={onSave}
-          disabled={loading}
-        sx={{
-          background:colores.azul,
-          borderRadius:2,
-          textTransform: "none"
-        }}>
+          disabled={loading || disabledSave}
+          sx={{
+            background: colores.azul,
+            borderRadius: 2,
+            textTransform: "none"
+          }}>
           {loading ? "Guardando..." : "Guardar"}
         </Button>
       </DialogActions>
