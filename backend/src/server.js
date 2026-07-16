@@ -20,9 +20,11 @@ const app = express()
 app.use(cors(
   {
     origin: [
-      'http://localhost:5173',
-      'https://tallerdeintegracionroutelog.vercel.app/'
-    ]
+      process.env.FRONT_URL,
+      process.env.FRONT_URL_PROD
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
   }
 ))
 
@@ -36,37 +38,22 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes)
 
 app.use('/transportistas', transportistas)
-app.use('/transportistas/activos', transportistas)
-app.use('/transportistas/totales', transportistas)
-
 
 app.use('/localidades', localidades)
-app.use('/localidades/activas', localidades)
-app.use('/localidades/totales', localidades)
 
 app.use('/envios', envios)
-app.use('/envios/transportistas', envios)
-app.use('/envios/totales', envios)
-app.use('/envios/recientes', envios)
 
 app.use('/liquidaciones',liquidaciones)
-app.use('/liquidaciones/dashboard', liquidaciones)
-app.use('/liquidaciones/totales',liquidaciones)
-app.use('/liquidaciones/transportista',liquidaciones)
 
 app.use('/estados', estados)
 
 app.use('/clientes', clientes)
 
 app.use('/direcciones', direcciones)
-app.use('/direcciones/cliente/localidad', direcciones)
+
 app.use('/tarifas', tarifas)
-app.use('/tarifas/transportista/localidad', tarifas)
 
 app.use('/archivos', archivos)
-app.use('/archivos/envios', archivos)
-app.use('/archivos/plantilla-envios', archivos)
-
 
 app.use('/provincias', provincias)
 
