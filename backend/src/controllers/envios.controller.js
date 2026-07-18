@@ -711,7 +711,7 @@ const modificarEnvio = async (req, res) => {
         const paqueteResult =
             await pool.query(
                 queryUpdate,
-                [fecha_envio, id_transportista, id_estado, id_tarifa, id, monto_liq]
+                [fecha_envio, id_transportista, id_estado, id_tarifa, id]
             )
         
         await pool.query("COMMIT")
