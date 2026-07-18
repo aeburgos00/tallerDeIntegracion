@@ -395,16 +395,28 @@ export const obtenerLiquidacionTentativaPorTransportista = async (req, res) => {
 
   try {
     const query = `
-            SELECT
-                coalesce(sum(tar.precio), 0) as valor_total
-            FROM paquetes p
-            JOIN transportistas t ON t.id = p.id_transportista
-            JOIN tarifas tar ON tar.id = p.id_tarifa
-            WHERE t.id_usuario = $1
-            AND p.fecha BETWEEN $2 AND $3
-            AND p.id_estado IN (2, 3)
-        `
+      SELECT
+        coalesce(sum(a.ImporteLiquidar), 0) as valor_total
+      FROM (
+        SELECT
+          p.Fecha AS FechaEntrega,
+          d.Descripcion AS DireccionDeEntrega,
+          max(tar.precio) AS ImporteLiquidar
+        FROM paquetes p
+        INNER JOIN direcciones d ON p.id_direccion = d.id
+        INNER JOIN clientes c ON d.id_cliente = c.id
+        INNER JOIN localidades l ON d.id_localidad = l.id
+        INNER JOIN transportistas t ON p.id_transportista = t.id
+        INNER JOIN usuarios u ON u.id = t.id_usuario
+        INNER JOIN tarifas tar ON tar.id = p.id_tarifa
+        WHERE t.id_usuario = $1
+          AND p.fecha BETWEEN $2 AND $3
+          AND p.id_estado IN (2, 3)
+        GROUP BY p.Fecha, d.Descripcion
+      ) a
+    `
     const result = await pool.query(query, [id, desde, hasta])
+    console.log(result)
 
     res.json({
       ok: true,
@@ -412,6 +424,7 @@ export const obtenerLiquidacionTentativaPorTransportista = async (req, res) => {
     })
   }
   catch (error) {
+    console.log(error)
     res.status(500).json({
       ok: false,
       error: error.message
