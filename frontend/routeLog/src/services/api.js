@@ -401,7 +401,7 @@ export const obtenerEnvios = async (
   return response.json()
 }
 
-export const obtenerEnviosPorTransportista = async (
+export const obtenerEnviosPorTransportistas = async (
   fecha_desde,
   fecha_hasta
 ) => {
@@ -662,7 +662,7 @@ export const subirArchivoEnvios = async (formData) => {
   const data = await response.json();
 
   if (!response.ok) {
-      throw new Error(data.error);
+      throw data;
   }
 
   return data;

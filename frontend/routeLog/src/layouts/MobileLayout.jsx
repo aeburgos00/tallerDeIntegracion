@@ -11,11 +11,12 @@ export default function MobileLayout() {
       minHeight: "100vh",
       backgroundColor: '#F0EEE8',
       pb: 8,
+      gap:2
     }}>
 
       {/* Header fijo */}
       <Box sx={{
-        position: "fixed",
+        position: "sticky",
         top: 0,
         left: 0,
         right: 0,
@@ -51,9 +52,8 @@ export default function MobileLayout() {
           </Typography>
         </Box>
       </Box>
-
       {/* Contenido — con padding top para no quedar tapado por el header */}
-      <Box sx={{ pt: "56px", px: 2 }}>
+      <Box sx={{ p: 2 }}>
         <Outlet />
       </Box>
 

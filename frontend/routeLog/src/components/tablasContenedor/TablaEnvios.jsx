@@ -178,11 +178,13 @@ export default function TablaEnvios ({
     sx={{
         width: "100%",
         overflowX: "auto",
+        overflowY: "auto",
+        maxHeight: 568
     }}>
         <Table
         size="small"
         sx={{
-          minWidth: 900
+          minWidth: 900,
         }}>
             <TableHead
             sx={{
@@ -197,7 +199,6 @@ export default function TablaEnvios ({
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Transportista</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Estado</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Tarifa</TableCell>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>Liquidación</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Acciones</TableCell>
                 </TableRow>
             </TableHead>
@@ -210,7 +211,7 @@ export default function TablaEnvios ({
             loading? 
             Array.from(new Array(filasPorPagina)).map((_, index) => (
                 <TableRow key={index}>
-                  {Array.from(new Array(10)).map((_, cellIndex) => (
+                  {Array.from(new Array(9)).map((_, cellIndex) => (
                     <TableCell key={cellIndex}>
                       <Skeleton
                         variant="text"
@@ -219,6 +220,14 @@ export default function TablaEnvios ({
                   ))}
                 </TableRow>
               ))
+            :
+            enviosPagina.length === 0 ? (
+                    <TableRow>
+                        <TableCell colSpan={9} align="center">
+                            No hay envíos para mostrar
+                        </TableCell>
+                    </TableRow>
+            )
             :
             enviosPagina.map((item) => (
                  <TableRow
@@ -244,8 +253,7 @@ export default function TablaEnvios ({
                             size="small"
                         />
                     </TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.tarifa || 0).toLocaleString('es-AR')} </TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.liquidacion || 0).toLocaleString('es-AR')} </TableCell>                    
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}> $ {Number(item.tarifa || 0).toLocaleString('es-AR')} </TableCell>                 
                     <TableCell align="center">
                         <Tooltip 
                         title={obtenerMotivoEdicion(item)}

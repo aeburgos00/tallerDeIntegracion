@@ -86,7 +86,7 @@ export default function FiltroLiquidaciones({
  
         <TextField
         fullWidth
-        label="Monto desde"
+        label="Monto Desde"
         value={filtros.montoDesde}
         onChange={handleChange("montoDesde")}
         size="small"
@@ -103,7 +103,7 @@ export default function FiltroLiquidaciones({
  
         <TextField
         fullWidth
-        label="Monto hasta"
+        label="Monto Hasta"
         value={filtros.montoHasta}
         onChange={handleChange("montoHasta")}
         size="small"

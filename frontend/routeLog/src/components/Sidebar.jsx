@@ -48,7 +48,7 @@ export default function Sidebar()
           borderRight: "1px solid #e5e7eb",
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden"
+          overflow: "hidden",
         }
       }}
     >

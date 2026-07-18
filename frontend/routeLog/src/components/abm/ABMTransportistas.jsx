@@ -297,7 +297,6 @@ export default function ABMTransportistas({
                 onChange={handleChange("estado")}
                 size="small"
             >
-                <MenuItem value="">Todos</MenuItem>
                 <MenuItem value="Activo">Activo</MenuItem>
                 <MenuItem value="Inactivo">Inactivo</MenuItem>
             </TextField>

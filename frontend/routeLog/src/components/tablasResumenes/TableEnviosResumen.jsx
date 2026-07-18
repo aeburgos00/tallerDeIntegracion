@@ -60,6 +60,7 @@ export default function TableEnviosResumen() {
         borderRadius: 3,
         width: "100%",
         overflowX: "auto",
+        maxHeight: 182
     }}>
         <Table size="small" 
         sx={{
@@ -70,7 +71,7 @@ export default function TableEnviosResumen() {
                 backgroundColor:"#F0EEE8",
             }}>
                 <TableRow>
-                    <TableCell align="center" sx={{textWrap:'nowrap'}}>ID envío</TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}>ID Envío</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Envío</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Cliente</TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>Dirección</TableCell>
@@ -99,13 +100,21 @@ export default function TableEnviosResumen() {
                 </TableRow>
               ))
             :
+            envios.length === 0 ? (
+                    <TableRow>
+                        <TableCell colSpan={7} align="center">
+                            No hay envíos para mostrar
+                        </TableCell>
+                    </TableRow>
+            )
+            :
             envios.map((item) => (
                  <TableRow
                 key={item.idEnvio}
                 hover
                 >
-                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.id_envio}</TableCell>
-                    <TableCell sx={{whiteSpace: "nowrap"}} >{item.fecha_envio}</TableCell>
+                    <TableCell align="center" sx={{whiteSpace: "nowrap"}} >{item.id_envio}</TableCell>
+                    <TableCell align="center" sx={{whiteSpace: "nowrap"}} >{item.fecha_envio}</TableCell>
                     <TableCell sx={{textWrap:'nowrap'}}>{item.cliente}</TableCell>
                     <TableCell sx={{
                             maxWidth: 220,
@@ -114,7 +123,7 @@ export default function TableEnviosResumen() {
                             whiteSpace: "nowrap"
                                 }} >{item.direccion}</TableCell>
                     <TableCell sx={{textWrap:'nowrap'}}>{item.transportista}</TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}> $ {Number(item.tarifa || 0).toLocaleString('es-AR')} </TableCell>
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}> $ {Number(item.tarifa || 0).toLocaleString('es-AR')} </TableCell>
                     <TableCell align="center" sx={{textWrap:'nowrap'}}>
                         <Chip size="small"
                             label={item.estado}

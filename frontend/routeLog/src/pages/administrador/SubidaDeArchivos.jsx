@@ -78,13 +78,12 @@ export default function SubidaDeArchivos() {
       }
       
     } catch (error) {
+        setResultado(error);
 
-       setResultado({
-            ok: false,
-            mensaje: "No fue posible conectarse con el servidor.",
-            errores: []
-        });
-      setMensajeError(error?.message ?? "Ocurrió un error al importar el archivo.");
+        setMensajeError(
+          error.mensaje ?? "Ocurrió un error al importar el archivo."
+        );
+
     } finally {
       setLoading(false);
     }
@@ -160,7 +159,7 @@ export default function SubidaDeArchivos() {
                   fontSize:20,
                   fontWeight: 700,
                   color:colores.textos
-                }}>Subir archivo</Typography>
+                }}>Subir Archivo</Typography>
                 
                 <Typography sx={{
                   fontSize: 14,
@@ -180,7 +179,7 @@ export default function SubidaDeArchivos() {
                 textTransform: "none"
             }}
             >
-              Descargar plantilla
+              Descargar Plantilla
             </Button>
 
           </Box>
@@ -300,7 +299,7 @@ export default function SubidaDeArchivos() {
               {
                   loading
                       ? "Procesando..."
-                      : "Subir archivo"
+                      : "Subir Archivo"
               }
             </Button>
 
@@ -349,13 +348,13 @@ export default function SubidaDeArchivos() {
           <Typography sx={{
             fontSize: 14,
             color: colores.primario
-          }} >• csv - Plantilla de Envios de Paquetes
+          }} >• .csv - Plantilla de Envios de Paquetes
           </Typography>
 
           <Typography sx={{
             fontSize: 14,
             color: colores.primario
-          }} >• Tamaño máximo por archivo: 5MB
+          }} >• Tamaño Máximo por Archivo: 5MB
           </Typography>
 
         </Box>

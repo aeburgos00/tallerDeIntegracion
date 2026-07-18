@@ -5,7 +5,8 @@ import {
     InputAdornment,
     Autocomplete,
     Snackbar,
-    Alert
+    Alert,
+    MenuItem
 } from "@mui/material";
 
 import { useEffect, useState } from "react";
@@ -235,6 +236,24 @@ export default function ABMLocalidades({
                             }}
                         />
                     </Grid>
+
+                    {idLocalidad && (
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <TextField
+                            fullWidth
+                            select
+                            required
+                            label="Estado"
+                            value={formulario.estado}
+                            onChange={handleChange("estado")}
+                            size="small"
+                        >
+                            <MenuItem value="true">Activo</MenuItem>
+                            <MenuItem value="false">Inactivo</MenuItem>
+                        </TextField>
+                        </Grid>
+                    )}
+
                 </Grid>
             </Box>
 

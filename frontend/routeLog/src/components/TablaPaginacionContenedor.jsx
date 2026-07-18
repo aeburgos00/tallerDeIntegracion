@@ -20,8 +20,10 @@ export default function TablaPaginacionContenedor({
         <Box
             sx={{
                 backgroundColor: "#fff",
-                borderRadius: 2,
-                overflow: "hidden"
+                borderRadius: 3,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
             }}
         >
             {/* Tabla */}
@@ -36,7 +38,7 @@ export default function TablaPaginacionContenedor({
                     justifyContent: "space-between",
                     alignItems: "center",
                     p: 2,
-                    borderTop: "1px solid #e5e7eb"
+                    borderTop: "1px solid #e5e7eb",
                 }}
             >
                 <Box
@@ -47,7 +49,7 @@ export default function TablaPaginacionContenedor({
                     }}
                 >
                     <Typography>
-                        Filas por página
+                        Filas por Página
                     </Typography>
 
                     <Select

@@ -13,7 +13,7 @@ import {
 
 import { useEffect, useState } from 'react'
 
-import {obtenerEnviosPorTransportista} from '../../services/api.js'
+import {obtenerEnviosPorTransportistas} from '../../services/api.js'
 
 import useDateFilter from '../../hooks/useDateFilter.js'
 
@@ -33,7 +33,7 @@ export default function TableTransportistasResumen() {
             try {
                 setLoading(true)
 
-                const result = await obtenerEnviosPorTransportista(
+                const result = await obtenerEnviosPorTransportistas(
                     fechaDesde? fechaDesde.format('YYYY-MM-DD'): null,
                     fechaHasta? fechaHasta.format('YYYY-MM-DD'): null
                 );
@@ -53,10 +53,11 @@ export default function TableTransportistasResumen() {
         borderRadius: 3,
         width: "100%",
         overflowX: "auto",
+        maxHeight: 182
     }}>
         <Table size="small"
          sx={{
-          minWidth: 650
+          minWidth: 650,
         }}>
             <TableHead 
             sx={{
@@ -91,6 +92,14 @@ export default function TableTransportistasResumen() {
                 </TableRow>
               ))
             :
+            data.length === 0 ? (
+                    <TableRow>
+                        <TableCell colSpan={7} align="center">
+                            No hay envíos para mostrar
+                        </TableCell>
+                    </TableRow>
+            )
+            :
             data.map((item) => (
                  <TableRow
                 key={item.transportista}
@@ -124,8 +133,8 @@ export default function TableTransportistasResumen() {
                             "& .MuiLinearProgress-bar": {
                             borderRadius: 999,
                             backgroundColor: 
-                                item.Cumplimiento > 70 ? "#639922" : 
-                                    item.Cumplimiento > 35 ? "#EF9F27" : "#D23B3B"  
+                                item.Cumplimiento > 67 ? "#639922" : 
+                                    item.Cumplimiento > 34 ? "#EF9F27" : "#D23B3B"  
                             }
                         }}
                         />

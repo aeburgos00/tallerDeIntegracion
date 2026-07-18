@@ -16,6 +16,7 @@ import {
     Button,
     Snackbar,
     Alert,
+    Tooltip
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -25,7 +26,6 @@ import { useEffect, useState } from 'react'
 import {
     obtenerLocalidades,
     eliminarLocalidad,
-    cambiarEstadoLocalidad
 } from '../../services/api.js'
 
 const colores = {
@@ -110,17 +110,16 @@ export default function TablaLocalidades({
         }
     }
 
-    const handleToggleEstado = async (localidad) => {
-        try {
-            await cambiarEstadoLocalidad(localidad.id_loc)
-            setMensaje("Estado actualizado correctamente")
-            setError(false)
-            setRefreshAccion(prev => prev + 1)
-            onActionSuccess?.()
-        } catch (error) {
-            setMensaje(error?.message || "Error al cambiar el estado")
-            setError(true)
-        }
+    const noPuedeCancelar = (row) => {
+        return (
+        row.estado === "Inactivo"
+        )
+    }
+
+    const obtenerMotivoCancelacion = (row) => {
+        if (row.estado  === "Inactivo")
+            return "La localidad ya está dada de baja"
+        return "Dar de baja"
     }
 
     return (
@@ -155,22 +154,18 @@ export default function TablaLocalidades({
                                 <TableCell sx={{ whiteSpace: "nowrap" }}>{item.nombre}</TableCell>
                                 <TableCell sx={{ whiteSpace: "nowrap" }}>{item.codigo_postal}</TableCell>
                                 <TableCell sx={{ textWrap: 'nowrap' }}>{item.provincia}</TableCell>
-                                <TableCell sx={{ textWrap: 'nowrap' }}> $ {Number(item.costo_envio || 0).toLocaleString('es-AR')} </TableCell>
-                                <TableCell sx={{ whiteSpace: "nowrap" }}>{item.fecha_alta}</TableCell>
-                                <TableCell sx={{ whiteSpace: "nowrap" }}>{item.fecha_baja || "-"}</TableCell>
+                                <TableCell align="center" sx={{ textWrap: 'nowrap' }}> $ {Number(item.costo_envio || 0).toLocaleString('es-AR')} </TableCell>
+                                <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>{item.fecha_alta}</TableCell>
+                                <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>{item.fecha_baja || "-"}</TableCell>
                                 <TableCell sx={{textWrap:'nowrap'}} align="center">
                                   <Chip
                                     label={item.estado}
-                                    clickable
-                                    onClick={() => handleToggleEstado(item)}
                                     sx={{
                                         color: coloresEstados[item.estado],
                                         fontWeight: 700,
                                         backgroundColor: `${coloresEstados[item.estado]}15`,
                                         borderRadius: 999,
                                         minWidth: 110,
-                                        cursor: "pointer",
-                                        "&:hover": { opacity: 0.85 }
                                     }}
                                     size="small"
                                   />
@@ -179,9 +174,14 @@ export default function TablaLocalidades({
                                     <IconButton color="primary" onClick={() => onEdit(item)}>
                                         <EditIcon />
                                     </IconButton>
-                                    <IconButton color="error" onClick={() => handleAbrirDialogo(item)}>
-                                        <DeleteIcon />
-                                    </IconButton>
+
+                                    <Tooltip title={obtenerMotivoCancelacion(item)}>
+                                        <span>
+                                            <IconButton color="error" disabled={noPuedeCancelar(item)} onClick={() => handleAbrirDialogo(item)}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </span>
+                                    </Tooltip>
                                 </TableCell>
                             </TableRow>
                         ))
@@ -189,7 +189,10 @@ export default function TablaLocalidades({
                 </TableBody>
             </Table>
 
-            <Dialog open={openEliminar} onClose={handleCerrarDialogo}>
+            <Dialog 
+            open={openEliminar} 
+            onClose={handleCerrarDialogo}
+            >
                 <DialogTitle>Dar de baja localidad</DialogTitle>
                 <DialogContent>
                     <DialogContentText>

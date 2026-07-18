@@ -20,7 +20,6 @@ import InfoIcon from "@mui/icons-material/Info"
 
 import {
   obtenerEnviosPorTransportistaId,
-  obtenerLiquidacionesPorTransportistaId,
   obtenerLiquidacionTentativa,
   obtenerProximoEnvio
 } from "../../services/apiTransportistas.js"

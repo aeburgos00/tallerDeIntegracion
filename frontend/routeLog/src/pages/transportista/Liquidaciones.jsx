@@ -23,7 +23,6 @@ dayjs.locale("es")
 
 import useAuth from "../../hooks/useAuth"
 import {
-  obtenerLiquidacionesPorTransportistaId,
   obtenerHistorialLiquidaciones,
   obtenerLiquidacionTentativa
 } from "../../services/apiTransportistas"
@@ -96,9 +95,8 @@ export default function LiquidacionesMob() {
         <Box sx={{
           width: 36,
           height: 36,
-          borderRadius: 2,
-          background: "#3b82f620",
           borderRadius: 3,
+          background: "#3b82f620",
           border: "1px solid #e5e7eb",
           p: 3,
           display: "flex",

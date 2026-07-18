@@ -5,10 +5,10 @@ import NoVisitadosIcon from '@mui/icons-material/PendingOutlined';
 import FallidosIcon from '@mui/icons-material/CancelOutlined';
 
 const  cardsEnvios = [
-{id:"total", icono: TotalIcon, titulo: "Total envíos", color:"#3b82f6", colorTorta:"#ffffff"},
+{id:"total", icono: TotalIcon, titulo: "Total Envíos", color:"#3b82f6", colorTorta:"#ffffff"},
 {id:"entregados", icono: EntregadosIcon, titulo: "Entregados", color:"#65a30d", colorTorta:"#65a30d"},
-{id:"no_visitados", icono: NoVisitadosIcon, titulo: "No visitados", color:"#f59e0b", colorTorta:"#f59e0b"},
-{id:"visitas_fallidas", icono: FallidosIcon, titulo: "Visitas fallidas", color:"#ef4444", colorTorta:"#ef4444"},
+{id:"no_visitados", icono: NoVisitadosIcon, titulo: "No Visitados", color:"#f59e0b", colorTorta:"#f59e0b"},
+{id:"visitas_fallidas", icono: FallidosIcon, titulo: "Visitas Fallidas", color:"#ef4444", colorTorta:"#ef4444"},
 {id:"pendientes", icono: PendientesIcon, titulo: "Pendientes", color:"#713dfe", colorTorta:"#3b82f6"},
 ];
 
