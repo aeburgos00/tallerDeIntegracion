@@ -88,7 +88,6 @@ export const procesarArchivoEnvios = async (rutaArchivo) => {
         };
 
     } catch (error) {
-        console.error(error)
         if (transaccionAbierta) {
             await client.query("ROLLBACK");
         }

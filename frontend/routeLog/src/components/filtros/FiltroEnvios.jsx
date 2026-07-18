@@ -58,7 +58,7 @@ export default function FiltroEnvios({
         gridTemplateColumns:{
             xs: "1fr",
             sm:"1fr 1fr",
-            lg:"150px 180px 180px 180px 180px 130px 120px 120px"
+            lg:"150px 180px 180px 180px 180px 130px 120px"
         },
         gap:2,
         alignItems:"center",
@@ -184,7 +184,7 @@ export default function FiltroEnvios({
         }}
         />
 
-        <TextField
+        {/* <TextField
         fullWidth
         label="Liquidación"
         value={filtros.liquidacion}
@@ -199,7 +199,7 @@ export default function FiltroEnvios({
             )
             }
         }}
-        />
+        /> */}
 
     </Box>
   )

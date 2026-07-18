@@ -231,9 +231,10 @@ const modificarLocalidad = async (req, res) => {
                 provincia = $3,
                 costo_envio = $4,
                 estado = $5,
-                fecha_baja = CASE WHEN $5 = false THEN now() ELSE fecha_baja END
+                fecha_baja = CASE WHEN $5 = false THEN now() ELSE null END
             WHERE id = $6
         `
+        
         await pool.query(query, [nombre, codigo_postal, provincia, costo_envio, estado, id])
 
         // Solo recalculo tarifas si el costo cambió

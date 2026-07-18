@@ -161,8 +161,9 @@ export default function EnvioDePaquetes() {
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            sm: "1fr 1fr",
-            lg: "repeat(6, 1fr)"
+            sm: "repeat(2,1fr)",
+            md: "repeat(3,1fr)",
+            xl: "repeat(6,1fr)"
           },
           gap: 2
         }}
@@ -205,9 +206,16 @@ export default function EnvioDePaquetes() {
       {/* Mostrado... + Botones */}
       <Box sx={{
         display: "flex",
+        flexDirection: {
+          xs: "column",
+          md: "row",
+        },
+        alignItems: {
+          xs: "stretch",
+          md: "center",
+        },
         justifyContent: "space-between",
         gap: 2,
-        alignItems: "center",
       }}
       >
         <Typography sx={{
@@ -220,7 +228,11 @@ export default function EnvioDePaquetes() {
           sx={{
             display: "flex",
             gap: 2,
-
+            flexWrap: "wrap",
+            justifyContent: {
+              xs: "stretch",
+              sm: "flex-end"
+            }
           }}
         >
           <Button
@@ -237,7 +249,11 @@ export default function EnvioDePaquetes() {
               whiteSpace: "nowrap",
               px: 1.5,
               height: 36,
-              fontSize: 13
+              fontSize: 13,
+              width: {
+                xs: "100%",
+                sm: "auto"
+              }
             }}>
             Exportar CSV
           </Button>
@@ -254,7 +270,11 @@ export default function EnvioDePaquetes() {
               whiteSpace: "nowrap",
               px: 1.5,
               height: 36,
-              fontSize: 13
+              fontSize: 13,
+              width: {
+                xs: "100%",
+                sm: "auto"
+              }
             }}>
             Nuevo Envío
           </Button>
@@ -273,6 +293,10 @@ export default function EnvioDePaquetes() {
           <Snackbar
             open={!!mensaje}
             autoHideDuration={4000}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center"
+            }}
             onClose={() => setMensaje("")}
           >
             <Alert severity={tipoMensaje}>
@@ -286,11 +310,16 @@ export default function EnvioDePaquetes() {
       {/* Grilla */}
       <Box
         sx={{
-          backgroundColor: "#fff",
+          overflow: "hidden",
           borderRadius: 2,
           border: "1px solid #e5e7eb",
           boxShadow:
-            "0 1px 2px rgba(0,0,0,0.04)"
+            "0 1px 2px rgba(0,0,0,0.04)",
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            lg: "1fr"
+          },
         }}>
         <TablaPaginacionContenedor
           pagina={pagina}

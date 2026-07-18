@@ -172,7 +172,7 @@ export default function TablaTransportistas ({
             loading? 
             Array.from(new Array(filasPorPagina)).map((_, index) => (
                 <TableRow key={index}>
-                  {Array.from(new Array(9)).map((_, cellIndex) => (
+                  {Array.from(new Array(10)).map((_, cellIndex) => (
                     <TableCell key={cellIndex}>
                       <Skeleton
                         variant="text"
@@ -207,7 +207,7 @@ export default function TablaTransportistas ({
                           size="small"
                       />
                     </TableCell>
-                    <TableCell sx={{textWrap:'nowrap'}}> 
+                    <TableCell align="center" sx={{textWrap:'nowrap'}}> 
                         {Number(item.costo_envio || 0).toLocaleString("es-AR", {
                             style: "currency",
                             currency: "ARS",

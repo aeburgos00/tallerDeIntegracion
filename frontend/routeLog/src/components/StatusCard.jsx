@@ -59,14 +59,24 @@ export default function StatusCard() {
     const total = cardsEnvios.filter(c => c.id === "total")[0].cantidad;
 
     const subTotales = 
-    cardsEnvios.filter(d => d.id !== "total")
-    .map(
-      c => (
-        {name: c.titulo, value: c.cantidad, color: c.colorTorta}
+      total === 0? 
+      [
+        {
+          name: "No hay envíos para mostrar",
+          value: 1,
+          color: "#555",
+        },
+      ]
+      :
+      cardsEnvios
+      .filter(d => d.id !== "total")
+      .map(
+        c => (
+          {name: c.titulo, value: c.cantidad, color: c.colorTorta}
+        )
       )
-    )
-    .sort( (a, b) => b.value - a.value )
-    ;
+      .sort( (a, b) => b.value - a.value );
+
 
   return (
       loading?
@@ -97,7 +107,7 @@ export default function StatusCard() {
             textAlign: "center",
             }}
         >
-            Estado de envíos
+            Estado de Envíos
       </Typography>
 
       {/* CONTENIDO */}
@@ -118,7 +128,7 @@ export default function StatusCard() {
             width: 180,
             height: 180,
             position: "relative",
-            mx: "auto"
+            mx: "auto",
           }}
         >
           <ResponsiveContainer>
@@ -134,12 +144,14 @@ export default function StatusCard() {
                 endAngle={450}
                 stroke="none"
               >
-                {subTotales.map((entry) => (
+                {
+                subTotales.map((entry) => (
                   <Cell
                     key={entry.name}
                     fill={entry.color}
                   />
-                ))}
+                ))
+                }
               </Pie>
 
             </PieChart>
@@ -225,16 +237,20 @@ export default function StatusCard() {
                   {item.name}
                 </Typography>
               </Box>
-
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  flexShrink: 0
-                }}
-              >
-                {item.value}
-              </Typography>
+              
+              {
+              total !== 0 && (
+                <Typography
+                  sx={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    flexShrink: 0
+                  }}
+                >
+                  {item.value}
+                </Typography>
+              )}
+              
             </Box>
           ))}
         </Box>

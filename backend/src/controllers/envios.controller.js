@@ -27,16 +27,15 @@ const obtenerEnvios = async (req, res) => {
                     l.nombre localidad,
                     u.nombre_apellido transportista,
                     e.descripcion estado,
-                    tar.precio tarifa,
-                    case when liq.id is not null then tar.precio else 0 end as liquidacion
+                    tar.precio tarifa
             from paquetes p
-            join transportistas t on p.id_transportista = t.id
-            join usuarios u on u.id = t.id_usuario
+            left join transportistas t on p.id_transportista = t.id
+            left join usuarios u on u.id = t.id_usuario
             join clientes c on c.id = p.id_cliente
             join direcciones d on d.id = p.id_direccion and d.id_cliente = c.id
             join localidades l on l.id = d.id_localidad
             join estados e on e.id = p.id_estado
-            join tarifas tar on tar.id = p.id_tarifa
+            left join tarifas tar on tar.id = p.id_tarifa
             left join liquidaciones liq on liq.id = p.id_liquidacion
             where 1=1
         `
@@ -152,13 +151,13 @@ const obtenerEnvioPorId = async (req, res) => {
               tar.precio tarifa,
               e.id id_estado
       from paquetes p
-      join transportistas t on p.id_transportista = t.id
-      join usuarios u on u.id = t.id_usuario
+      left join transportistas t on p.id_transportista = t.id
+      left join usuarios u on u.id = t.id_usuario
       join clientes c on c.id = p.id_cliente
       join direcciones d on d.id = p.id_direccion and d.id_cliente = c.id
       join localidades l on l.id = d.id_localidad
       join estados e on e.id = p.id_estado
-      join tarifas tar on tar.id = p.id_tarifa
+      left join tarifas tar on tar.id = p.id_tarifa
       left join liquidaciones liq on liq.id = p.id_liquidacion
       where p.id = $1
     `
@@ -216,7 +215,6 @@ const obtenerEnviosPorTransportistas = async (req, res) => {
             where p.fecha between $1 and $2
             group by u.nombre_apellido
             order by 7 desc
-            limit 4
         `
 
         const result = await pool.query(
@@ -311,7 +309,7 @@ const obtenerEnviosRecientes = async (req, res) => {
             join tarifas ta on ta.id = p.id_tarifa
             where p.fecha between $1 and $2
             order by p.fecha desc
-            limit 4
+            limit 10
         `
 
         const result = await pool.query(
@@ -404,16 +402,15 @@ const exportarCSV = async (req, res) => {
                     l.nombre localidad,
                     u.nombre_apellido transportista,
                     e.descripcion estado,
-                    tar.precio tarifa,
-                    case when liq.id is not null then tar.precio else 0 end as liquidacion
+                    tar.precio tarifa
             from paquetes p
-            join transportistas t on p.id_transportista = t.id
-            join usuarios u on u.id = t.id_usuario
+            left join transportistas t on p.id_transportista = t.id
+            left join usuarios u on u.id = t.id_usuario
             join clientes c on c.id = p.id_cliente
             join direcciones d on d.id = p.id_direccion and d.id_cliente = c.id
             join localidades l on l.id = d.id_localidad
             join estados e on e.id = p.id_estado
-            join tarifas tar on tar.id = p.id_tarifa
+            left join tarifas tar on tar.id = p.id_tarifa
             left join liquidaciones liq on liq.id = p.id_liquidacion
             where 1=1
         `
@@ -668,7 +665,8 @@ const modificarEnvio = async (req, res) => {
     const {
         id_transportista,
         fecha_envio,
-        id_estado
+        id_estado,
+        id_direccion
     } = req.body
 
     try {
@@ -687,7 +685,7 @@ const modificarEnvio = async (req, res) => {
         await pool.query("BEGIN")
 
         const queryTarifa = `
-        SELECT id
+        SELECT id, precio
         FROM tarifas
         WHERE id_transportista = $1
         `
@@ -713,9 +711,9 @@ const modificarEnvio = async (req, res) => {
         const paqueteResult =
             await pool.query(
                 queryUpdate,
-                [fecha_envio, id_transportista, id_estado, id_tarifa, id]
+                [fecha_envio, id_transportista, id_estado, id_tarifa, id, monto_liq]
             )
-
+        
         await pool.query("COMMIT")
 
         if (paqueteResult.rowCount === 0) {

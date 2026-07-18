@@ -94,7 +94,7 @@ export default function Dashboard() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 2
+        gap: 2,
       }}
     >
       {/* KPI Totales Envios */}
@@ -146,7 +146,7 @@ export default function Dashboard() {
         }}
       >
         <StatusCard />
-        <TableResumenCard titulo="Envíos por transportista" footer="Ver todos los transportistas" url="/transportistas" >
+        <TableResumenCard titulo="Envíos por Transportista" footer="Ver todos los transportistas" url="/transportistas" >
           <TableTransportistasResumen />
         </TableResumenCard>
       </Box>
@@ -161,7 +161,7 @@ export default function Dashboard() {
             lg: "1fr"
           }
         }}>
-        <TableResumenCard titulo="Envíos recientes" footer="Ver todos los envíos" url="/envios">
+        <TableResumenCard titulo="Envíos Recientes" footer="Ver todos los envíos" url="/envios">
           <TableEnviosResumen />
         </TableResumenCard>
       </Box>

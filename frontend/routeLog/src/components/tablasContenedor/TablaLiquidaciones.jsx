@@ -89,8 +89,8 @@ export default function TablaLiquidaciones({
                     <TableRow>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Transportista</TableCell>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Semana</TableCell>
-                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Cant. envíos</TableCell>
-                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Monto total</TableCell>
+                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Cant. Envíos</TableCell>
+                        <TableCell align="center" sx={{textWrap:'nowrap'}}>Monto Total</TableCell>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Estado</TableCell>
                         <TableCell align="center" sx={{textWrap:'nowrap'}}>Fecha Cierre</TableCell>
                     </TableRow>

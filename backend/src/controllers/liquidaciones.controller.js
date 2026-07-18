@@ -15,7 +15,7 @@ export const obtenerLiquidaciones = async (req, res) => {
     let query = `
       select  
         u.nombre_apellido || ' (' || u.usuario || ')' "transportista",
-        TO_CHAR(liq.fecha_desde,'DD/MM/YYYY') || '-' || TO_CHAR(liq.fecha_hasta,'DD/MM/YYYY')  "semana",
+        TO_CHAR(liq.fecha_desde,'DD/MM/YYYY') || ' - ' || TO_CHAR(liq.fecha_hasta,'DD/MM/YYYY')  "semana",
         liq.cantidad_paquetes "cant_envios",
         liq.monto_total "monto_total",
         CASE WHEN liq.cerrada is true
@@ -252,7 +252,7 @@ export const exportarCSV = async (req, res) => {
     let query = `
       select  
         u.nombre_apellido || ' (' || u.usuario || ')' "transportista",
-        TO_CHAR(liq.fecha_desde,'DD/MM/YYYY') || '-' || TO_CHAR(liq.fecha_hasta,'DD/MM/YYYY')  "semana",
+        TO_CHAR(liq.fecha_desde,'DD/MM/YYYY') || ' - ' || TO_CHAR(liq.fecha_hasta,'DD/MM/YYYY')  "semana",
         liq.cantidad_paquetes "cant_envios",
         liq.monto_total "monto_total",
         CASE WHEN liq.cerrada is true
